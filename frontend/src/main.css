@@ -2,13 +2,3 @@
 @tailwind components;
 @tailwind utilities;
 
-*{
-    padding: 0;
-    margin: 0;
-    overflow: hidden;
-}
-
-body{
-    background-color: #ECF8FF;
-}
-
