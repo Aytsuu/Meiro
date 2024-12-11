@@ -30,6 +30,14 @@ class Player{
 
             console.log("Current Position", this.position.x, this.position.y)
         }
+
+        else if(this.position.x >= this.updateX || this.position.y >= this.updateY){
+            console.log('entered')
+            this.position.x += (this.updateX - this.position.x)
+            this.position.y += (this.updateY - this.position.y)
+
+            console.log("Current Position", this.position.x, this.position.y)
+        }
         // else{
         //     console.log('BACKWARD',this.updateX, this.updateY)
         //     if(this.position.x > this.updateX && this.position.y >= this.updateY){
