@@ -5,7 +5,8 @@ class Sprite{
     }
 
     draw(){
-        c.fillStyle = 'red'
+        c.fillStyle = 'blue'
         c.fillRect(this.position.x, this.position.y, this.size.width, this.size.height)
     }
+
 }

@@ -1,8 +1,9 @@
+
 // Creating canvas
 const canvas = document.querySelector('canvas')
 const c = canvas.getContext('2d')
 
-// Initializing canvas and tile size 
+// Initializing canvas and tile size
 canvas.width = 64 * 25
 canvas.height = 64 * 12
 tileSize = 64
@@ -20,13 +21,21 @@ const player = new Player({
     }
 })
 
+// Enemy object initialization
+const enemy = new Enemy({
+    size: {
+        width: tileSize,
+        height: tileSize
+    }
+})
+
 // This function renders all objects and re-render them infinitely
-function animate(){
+function animate() {
     window.requestAnimationFrame(animate)
 
     // Rendering the map
-    for (let i = 0; i < canvas.height / tileSize; i++){
-        for (let j = 0; j < canvas.width / tileSize; j++){
+    for (let i = 0; i < canvas.height / tileSize; i++) {
+        for (let j = 0; j < canvas.width / tileSize; j++) {
             c.fillStyle = '#1e1e1e'
             c.strokeStyle = 'white'
             c.strokeRect(j * tileSize, i * tileSize, tileSize, tileSize)
@@ -34,19 +43,21 @@ function animate(){
         }
     }
 
-    // Rendering the player 
+    // Rendering the player
     player.draw()
     player.movementUpdate()
+
+    // Rendering the enemy
+    enemy.draw()
 
     // Updates player position
     player.velocity.x = 0
     player.velocity.y = 0
 
-    if(setMove){
+    if (setMove) {
         player.velocity.x = currentX
         player.velocity.y = currentY
     }
-
 }
 
 animate() // Function calling
