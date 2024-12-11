@@ -1,17 +1,8 @@
+// Listens click event
 canvas.addEventListener('click', (e) => {
+
+    // Takes the position x and y where mouse click occured 
     currentX = e.offsetX
     currentY = e.offsetY
-    console.log(e.offsetX)
-    console.log(e.offsetY)
-    setMove = true
+    setMove = true // Enable movement
 })
-
-// canvas.addEventListener('m', (e) => {
-//     if(isDragging){
-//         currentX = e.offsetX
-//         currentY = e.offsetY
-//         console.log(e.offsetX)
-//         console.log(e.offsetY)
-//         isDragging = false
-//     }
-// })
