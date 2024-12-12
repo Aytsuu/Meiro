@@ -7,7 +7,10 @@ canvas.addEventListener('mousedown', (e) => {
     // Convert player's current position to grid coordinates
     const playerGridX = Math.floor(player.position.x / tileSize) * tileSize;
     const playerGridY = Math.floor(player.position.y / tileSize) * tileSize;
-   
+    
+    // Check conditions for starting path drawing:
+    // 1. Mouse click is on the player's current tile
+    // 2. Player is not currently moving
     if (gridX === playerGridX && gridY === playerGridY && !setMove) {
         // Enable path drawing mode
         isDrawingPath = true;
@@ -20,7 +23,7 @@ canvas.addEventListener('mousedown', (e) => {
 
 // Event listener for mouse movement while drawing
 canvas.addEventListener('mousemove', (e) => {
-    // Only add tiles to path if in drawing mode
+    // Only add  to path if in drawing mode
     if (!isDrawingPath) return;
     addToPath(e.offsetX, e.offsetY);
 });
