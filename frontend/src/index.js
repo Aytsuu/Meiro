@@ -55,6 +55,8 @@ function animate() {
     // Rendering the enemy
     enemy.draw()
 
+     enemy.update(player.position)
+
     // Updates player position
     player.velocity.x = 0
     player.velocity.y = 0
