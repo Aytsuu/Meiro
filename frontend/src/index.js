@@ -9,9 +9,14 @@ canvas.height = 64 * 12
 tileSize = 64
 
 // Initializing global variables
+let isDragging = false
 let setMove = false
-let currentX = 0;
-let currentY = 0;
+let offsetX = 0
+let offsetY = 0
+let startX = 0
+let startY = 0
+
+
 
 // Player object initialization
 const player = new Player({
