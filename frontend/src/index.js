@@ -10,13 +10,10 @@ tileSize = 64
 
 // Initializing global variables
 let isDragging = false
+let isDragged = false
 let setMove = false
-let offsetX = 0
-let offsetY = 0
-let startX = 0
-let startY = 0
-
-
+let currentX = 0
+let currentY = 0
 
 // Player object initialization
 const player = new Player({
@@ -54,8 +51,6 @@ function animate() {
 
     // Rendering the enemy
     enemy.draw()
-
-     enemy.update(player.position)
 
     // Updates player position
     player.velocity.x = 0
