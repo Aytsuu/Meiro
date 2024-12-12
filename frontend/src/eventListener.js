@@ -9,8 +9,6 @@ canvas.addEventListener('mousedown', (e) => {
     const playerGridY = Math.floor(player.position.y / tileSize) * tileSize;
     
     // Check conditions for starting path drawing:
-    // 1. Mouse click is on the player's current tile
-    // 2. Player is not currently moving
     if (gridX === playerGridX && gridY === playerGridY && !setMove) {
         // Enable path drawing mode
         isDrawingPath = true;
