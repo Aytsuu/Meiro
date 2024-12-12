@@ -33,9 +33,29 @@ const enemy = new Enemy({
 
 // This function renders all objects and re-render them infinitely
 function animate() {
-    window.requestAnimationFrame(animate)
+    window.requestAnimationFrame(animate);
 
-    // Rendering the map
+    // Clear the canvas
+    c.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Draw the map and the path
+    drawMap();
+    drawPath();
+
+    // Update and draw the player
+    player.movementUpdate();
+    player.draw();
+
+    // Draw the enemy (remove the update method)
+    enemy.draw();
+}
+
+let path = []; // Stores the path points as an array of grid positions
+let isDrawingPath = false; // Flag to track if the user is drawing a path
+
+// Function to draw the map/grid
+function drawMap() {
+    // Loop through each row and column of tiles
     for (let i = 0; i < canvas.height / tileSize; i++) {
         for (let j = 0; j < canvas.width / tileSize; j++) {
             c.fillStyle = '#1e1e1e'
@@ -44,22 +64,30 @@ function animate() {
             c.fillRect(j * tileSize, i * tileSize, tileSize, tileSize)
         }
     }
-
-    // Rendering the player
-    player.draw()
-    player.movementUpdate()
-
-    // Rendering the enemy
-    enemy.draw()
-
-    // Updates player position
-    player.velocity.x = 0
-    player.velocity.y = 0
-
-    if (setMove) {
-        player.velocity.x = currentX
-        player.velocity.y = currentY
-    }
 }
+
+
+// Function to draw the path on the grid
+function drawPath() {
+    // Set the stroke color for the path
+    c.strokeStyle = 'cyan';
+    c.lineWidth = 2;
+    c.beginPath();
+
+    // Loop through each point in the path
+    for (let i = 0; i < path.length; i++) {
+        const point = path[i];
+        // Move to the first point, adjusting the position by half of tileSize to center the path
+        if (i == 0) {
+            c.moveTo(point.x + tileSize / 2, point.y + tileSize / 2);
+        } else {
+            // Draw a line to the tiles
+            c.lineTo(point.x + tileSize / 2, point.y + tileSize / 2);
+        }
+    }
+    // Render the path on the canvas
+    c.stroke();
+}
+
 
 animate() // Function calling
