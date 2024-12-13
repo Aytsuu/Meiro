@@ -5,6 +5,8 @@ class Crown {
             y: 64 * 3
         };         
         this.size = size;
+
+        objectsPosition.push(this.position)
     }      
 
     draw() {         

@@ -7,7 +7,11 @@ const c = canvas.getContext('2d')
 let setMove = false
 const tileSize = 64
 let path = []; // Stores the path points as an array of grid positions
+let objectsPosition = []
 let isDrawingPath = false; 
+let isEnemyTurn = false;
+let mouseX = 0;
+let mouseY = 0;
 
 // Initializing canvas and tile size
 canvas.width = tileSize * 29
@@ -37,8 +41,6 @@ const crown = new Crown({
     }
 })
 
-let isEnemyTurn = false;
-
 // This function renders all objects infinitely
 function animate() {
     window.requestAnimationFrame(animate);
@@ -50,18 +52,18 @@ function animate() {
     drawMap();
     drawPath();
 
-    // Draw the crown object
-    crown.draw();
-
-
     // Update and draw the player
     player.draw();
-    if (!isEnemyTurn) {
-        player.movementUpdate();
-    }
+    player.movementUpdate();
 
     // Draw the enemy and handle its turn
     enemy.draw();
+
+    // Draw the crown object
+    crown.draw();
+
+    // Control and customize cursor for the game
+    cursorControl();
 }
 
 function resizeCanvas() {
@@ -74,6 +76,20 @@ function resizeCanvas() {
     player.size.height = tileSize;
     enemy.size.width = tileSize;
     enemy.size.height = tileSize;
+}
+
+function cursorControl() {
+    // Confine mouse within canvas boundaries
+    if (mouseX < 0) mouseX = 0;
+    if (mouseX > canvas.width) mouseX = canvas.width;
+    if (mouseY < 0) mouseY = 0;
+    if (mouseY > canvas.height) mouseY = canvas.height;
+
+    // Draw a small circle at the mouse position
+    // c.beginPath();
+    c.arc(mouseX, mouseY, 5, 0, Math.PI * 2);
+    c.fillStyle = 'white';
+    c.fill();
 }
 
 // Function to draw the map/grid

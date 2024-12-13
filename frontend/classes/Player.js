@@ -49,42 +49,67 @@ class Player {
         }; 
 
         this.currentTargetIndex = 0; // Index of the current target in the path
+
     }
 
+
     movementUpdate() {
-        if (setMove && path.length > 0) {
+        if (setMove && path.length > this.currentTargetIndex) {
+
+            console.log(objectsPosition)
+
             const target = path[this.currentTargetIndex];
             const lerpSpeed = 0.2; // Speed for smooth movement
-    
-            // Move toward the target point
-            this.position.x += (target.x - this.position.x) * lerpSpeed;
-            this.position.y += (target.y - this.position.y) * lerpSpeed;
-            
-    
-            // Check if the player reached the target point
-            if (
-                Math.abs(this.position.x - target.x) < 1 &&
-                Math.abs(this.position.y - target.y) < 1
-            ) {
 
-                this.position.x = target.x;
-                this.position.y = target.y;
-    
-                // Move to the next target point
-                this.currentTargetIndex++;
-    
-                // If the end of the path is reached, stop moving and clear the path
-                if (this.currentTargetIndex >= path.length) {
-                    setMove = false;
-                    this.currentTargetIndex = 0;
-                    path = []; // Clear the path
+            // Target point
+            const targetPointX = (target.x - this.position.x)
+            const targePointY = (target.y - this.position.y)
+
+
+            // Object collision detection
+
+            // this.position.x + targetPointX == enemy.position.x && this.position.y + targePointY == enemy.position.y ||
+            //     this.position.x + targetPointX == crown.position.x && this.position.y + targePointY == crown.position.y
+            
+            if (objectsPosition.some(object => this.position.x + targetPointX === object.x && this.position.y + targePointY === object.y)){
+
+                console.log('object detected')
+                setMove = false;
+                this.currentTargetIndex = 0;
+                path = []; // Clear the path
+
+            }else{
+
+                // Move toward the target point
+                this.position.x += targetPointX * lerpSpeed;
+                this.position.y += targePointY * lerpSpeed;
+        
+                // Check if the player reached the target point
+                if (
+                    Math.abs(this.position.x - target.x) < 1 &&
+                    Math.abs(this.position.y - target.y) < 1
+                ) {
+
+                    this.position.x = target.x;
+                    this.position.y = target.y;
+        
+                    // Move to the next target point
+                    this.currentTargetIndex++;
+        
+                    // If the end of the path is reached, stop moving and clear the path
+                    if (this.currentTargetIndex >= path.length) {
+                        setMove = false;
+                        this.currentTargetIndex = 0;
+                        path = []; // Clear the path
+                    }
                 }
             }
+
         }
     }
 
     draw() {
-        c.fillStyle = 'blue';
+        c.fillStyle = 'green';
         c.fillRect(this.position.x, this.position.y, this.size.width, this.size.height);
     }
 }

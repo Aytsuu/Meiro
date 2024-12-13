@@ -1,6 +1,11 @@
 // Event listener to resize the canvas when the window is resized
 window.addEventListener('resize', resizeCanvas);
 
+// Event listener when mouse exits the canvas
+canvas.addEventListener('mouseout', () => {
+    console.log('Mouse has exited the canvas');
+});
+
 // Event listener for when the mouse button is first pressed down
 canvas.addEventListener('mousedown', (e) => {
     // Convert mouse click coordinates to grid-aligned coordinates
@@ -31,6 +36,9 @@ canvas.addEventListener('mousedown', (e) => {
 // Event listener for mouse movement while drawing
 canvas.addEventListener('mousemove', (e) => {
 
+    // Getting the x and y coordinates of the cursor for cursorControl function
+    mouseX = e.offsetX;
+    mouseY = e.offsetY;
     
     // Only add  to path if in drawing mode
     if (!isDrawingPath){ 
