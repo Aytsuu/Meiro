@@ -29,6 +29,16 @@ const enemy = new Enemy({
     }
 })
 
+// Enemy object initialization
+const crown = new Crown({
+    size: {
+        width: tileSize,
+        height: tileSize
+    }
+})
+
+let isEnemyTurn = false;
+
 // This function renders all objects infinitely
 function animate() {
     window.requestAnimationFrame(animate);
@@ -40,11 +50,17 @@ function animate() {
     drawMap();
     drawPath();
 
-    // Update and draw the player
-    player.movementUpdate();
-    player.draw();
+    // Draw the crown object
+    crown.draw();
 
-    // Draw the enemy (remove the update method)
+
+    // Update and draw the player
+    player.draw();
+    if (!isEnemyTurn) {
+        player.movementUpdate();
+    }
+
+    // Draw the enemy and handle its turn
     enemy.draw();
 }
 
