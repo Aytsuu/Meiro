@@ -27,6 +27,16 @@ const enemy = new Enemy({
     }
 })
 
+// Enemy object initialization
+const crown = new Crown({
+    size: {
+        width: tileSize,
+        height: tileSize
+    }
+})
+
+let isEnemyTurn = false;
+
 // This function renders all objects and re-render them infinitely
 function animate() {
     window.requestAnimationFrame(animate);
@@ -38,12 +48,26 @@ function animate() {
     drawMap();
     drawPath();
 
-    // Update and draw the player
-    player.movementUpdate();
-    player.draw();
+    // Draw the crown object
+    crown.draw();
 
-    // Draw the enemy (remove the update method)
+
+    // Update and draw the player
+    player.draw();
+    if (!isEnemyTurn) {
+        player.movementUpdate();
+    }
+
+    // Draw the enemy and handle its turn
     enemy.draw();
+    if (isEnemyTurn) {
+        enemy.move();
+        isEnemyTurn = false;
+    }
+    // Check if the player's movement has stopped to trigger enemy's turn
+    if (!setMove && path.length == 0 && !isEnemyTurn) {
+        isEnemyTurn = true;
+    }
 }
 
 let path = []; // Stores the path points as an array of grid positions
