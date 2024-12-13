@@ -24,11 +24,38 @@ canvas.addEventListener('mousedown', (e) => {
 //     currentY = e.offsetY
 //     setMove = true // Enable movement
 // })
+
 // Event listener for mouse movement while drawing
 canvas.addEventListener('mousemove', (e) => {
+
+    
     // Only add  to path if in drawing mode
-    if (!isDrawingPath) return;
-    addToPath(e.offsetX, e.offsetY);
+    if (!isDrawingPath){ 
+        return;
+    }
+    else{
+        const prev_path = path.length;
+        const value = path[prev_path-1];
+
+        // console.log(value.x, value.y)
+
+        const new_path = {
+            x: (Math.floor(e.offsetX / tileSize) * tileSize),
+            y: (Math.floor(e.offsetY / tileSize) * tileSize)
+        }
+        
+        // console.log('Horizontal', new_path.x,value.x)
+        // console.log('Vertical', new_path.y,value.y)
+
+        if(new_path.x != value.x && new_path.y != value.y) {
+            isDrawingPath = false;
+            path = [];
+            return;
+        }
+
+        addToPath(e.offsetX, e.offsetY);
+    }
+
 });
 
 // Event listener for when the mouse button is released
@@ -37,29 +64,35 @@ canvas.addEventListener('mouseup', () => {
         // Disable path drawing mode
         isDrawingPath = false;
        
-        if (path.length > 1 && path.length <= 4) {
-            // Enable player movement
-            setMove = true;
-        } else {
-            // Clear invalid path
-            path = [];
-        }
+        // Enable player movement
+        setMove = true;
     }
 });
 
 
 function addToPath(x, y) {
     // Convert mouse coordinates to grid-aligned coordinates
-    const gridX = Math.floor(x / tileSize) * tileSize;
-    const gridY = Math.floor(y / tileSize) * tileSize;
+    // const gridX = Math.floor(x / tileSize) * tileSize;
+    // const gridY = Math.floor(y / tileSize) * tileSize;
 
     // Prevent adding more than 3 tiles
-    if (path.length >= 4) return;
+    // if (path.length >= 4) return;
+
+    toPush = {
+        x: Math.floor(x / tileSize) * tileSize,
+        y: Math.floor(y / tileSize) * tileSize
+    }
+    
+    // console.log(path)
+    // console.log(path.includes(toPush))
+
 
     //checks if the tiles is null or not
     if (path.length === 0 || 
-        (path[path.length - 1].x !== gridX || 
-         path[path.length - 1].y !== gridY)) {
-        path.push({ x: gridX, y: gridY });
-    }
+        (path[path.length - 1].x !== toPush.x || 
+         path[path.length - 1].y !== toPush.y) &&
+        !path.some(step => step.x === toPush.x && step.y === toPush.y)) {
+    
+        path.push(toPush);
+    } 
 }

@@ -41,14 +41,17 @@
 class Player {
     constructor({ size }) {
         this.size = size;
-        this.position = { x: 0, y: 0 }; // Initial position
+        this.position = { 
+            x: 0, 
+            y: 0 
+        }; // Initial position
         this.currentTargetIndex = 0; // Index of the current target in the path
     }
 
     movementUpdate() {
         if (setMove && path.length > 0) {
             const target = path[this.currentTargetIndex];
-            const lerpSpeed = 0.5; // Speed for smooth movement
+            const lerpSpeed = 0.2; // Speed for smooth movement
     
             // Move toward the target point
             this.position.x += (target.x - this.position.x) * lerpSpeed;

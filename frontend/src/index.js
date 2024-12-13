@@ -4,16 +4,12 @@ const canvas = document.querySelector('canvas')
 const c = canvas.getContext('2d')
 
 // Initializing canvas and tile size
-canvas.width = 64 * 25
-canvas.height = 64 * 12
+canvas.width = 64 * 29
+canvas.height = 64 * 16
 tileSize = 64
 
 // Initializing global variables
-let isDragging = false
-let isDragged = false
 let setMove = false
-let currentX = 0
-let currentY = 0
 
 // Player object initialization
 const player = new Player({
@@ -59,8 +55,8 @@ function drawMap() {
     for (let i = 0; i < canvas.height / tileSize; i++) {
         for (let j = 0; j < canvas.width / tileSize; j++) {
             c.fillStyle = '#1e1e1e'
-            c.strokeStyle = 'white'
-            c.strokeRect(j * tileSize, i * tileSize, tileSize, tileSize)
+            // c.strokeStyle = 'white'
+            // c.strokeRect(j * tileSize, i * tileSize, tileSize, tileSize)
             c.fillRect(j * tileSize, i * tileSize, tileSize, tileSize)
         }
     }
@@ -70,20 +66,19 @@ function drawMap() {
 // Function to draw the path on the grid
 function drawPath() {
     // Set the stroke color for the path
-    c.strokeStyle = 'cyan';
-    c.lineWidth = 2;
+    c.fillStyle = '#93CBDF';
+    c.strokeStyle = '#93CBDF';
     c.beginPath();
 
     // Loop through each point in the path
+
     for (let i = 0; i < path.length; i++) {
         const point = path[i];
-        // Move to the first point, adjusting the position by half of tileSize to center the path
-        if (i == 0) {
-            c.moveTo(point.x + tileSize / 2, point.y + tileSize / 2);
-        } else {
-            // Draw a line to the tiles
-            c.lineTo(point.x + tileSize / 2, point.y + tileSize / 2);
-        }
+        
+        // c.strokeRect((point.x/tileSize) * tileSize, (point.y/tileSize) * tileSize, tileSize, tileSize)
+        c.fillRect((point.x/tileSize) * tileSize, (point.y/tileSize) * tileSize, tileSize, tileSize)
+
+
     }
     // Render the path on the canvas
     c.stroke();
