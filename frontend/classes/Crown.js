@@ -1,15 +1,18 @@
 class Crown {     
     constructor({ size }) {         
         this.position = {             
-            x: 64 * 6, // Position at the bottom-right of the canvas
-            y: 64 * 3
+            x: Math.floor(canvas.width / (tileSize * 2)) * tileSize, // Position at the center
+            y: Math.floor((canvas.height - tileSize) / (tileSize * 2)) * tileSize
         };         
+        
         this.size = size;
 
         objectsPosition.push(this.position)
     }      
 
-    draw() {         
+    draw() {  
+        
+        // Drawing the object
         c.fillStyle = 'yellow';         
         c.fillRect(this.position.x, this.position.y, this.size.width, this.size.height);     
     } 

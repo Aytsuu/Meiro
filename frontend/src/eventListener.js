@@ -1,11 +1,6 @@
 // Event listener to resize the canvas when the window is resized
 window.addEventListener('resize', resizeCanvas);
 
-// Event listener when mouse exits the canvas
-canvas.addEventListener('mouseout', () => {
-    console.log('Mouse has exited the canvas');
-});
-
 // Event listener for when the mouse button is first pressed down
 canvas.addEventListener('mousedown', (e) => {
     // Convert mouse click coordinates to grid-aligned coordinates
@@ -27,12 +22,6 @@ canvas.addEventListener('mousedown', (e) => {
     }
 });
 
-//     // Takes the position x and y where mouse click occured 
-//     currentX = e.offsetX
-//     currentY = e.offsetY
-//     setMove = true // Enable movement
-// })
-
 // Event listener for mouse movement while drawing
 canvas.addEventListener('mousemove', (e) => {
 
@@ -48,16 +37,12 @@ canvas.addEventListener('mousemove', (e) => {
         const prev_path = path.length;
         const value = path[prev_path-1];
 
-        // console.log(value.x, value.y)
-
         const new_path = {
             x: (Math.floor(e.offsetX / tileSize) * tileSize),
             y: (Math.floor(e.offsetY / tileSize) * tileSize)
         }
-        
-        // console.log('Horizontal', new_path.x,value.x)
-        // console.log('Vertical', new_path.y,value.y)
 
+        // Prevent diagonal movements
         if(new_path.x != value.x && new_path.y != value.y) {
             isDrawingPath = false;
             path = [];

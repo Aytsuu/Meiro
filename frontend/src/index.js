@@ -12,17 +12,16 @@ let isDrawingPath = false;
 let isEnemyTurn = false;
 let mouseX = 0;
 let mouseY = 0;
+let imageLoaded = false
 
 // Initializing canvas and tile size
-canvas.width = tileSize * 29
-canvas.height = tileSize * 16
+canvas.width = tileSize * 29;
+canvas.height = tileSize * 16;
 
 // Player object initialization
 const player = new Player({
-    size: {
-        width: tileSize,
-        height: tileSize
-    }
+    imgSrc: '/frontend/assets/animations/player/Front animations/spr_player_front_idle.png', 
+    frameRate: 12
 })
 
 // Enemy object initialization
@@ -67,6 +66,8 @@ function animate() {
 }
 
 function resizeCanvas() {
+
+    if (!imageLoaded) return;
     // Calculate the canvas size based on the window size
     canvas.width = Math.floor(window.innerWidth / tileSize) * tileSize; // Full-width based on tile size
     canvas.height = Math.floor(window.innerHeight / tileSize) * tileSize; // Full-height based on tile size
@@ -97,7 +98,7 @@ function drawMap() {
     // Loop through each row and column of tiles
     for (let i = 0; i < canvas.height / tileSize; i++) {
         for (let j = 0; j < canvas.width / tileSize; j++) {
-            c.fillStyle = '#1e1e1e'
+            c.fillStyle = '#ECF8FF'
             // c.strokeStyle = 'white'
             // c.strokeRect(j * tileSize, i * tileSize, tileSize, tileSize)
             c.fillRect(j * tileSize, i * tileSize, tileSize, tileSize)

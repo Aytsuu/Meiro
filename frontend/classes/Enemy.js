@@ -1,8 +1,8 @@
 class Enemy {
     constructor({ size }) {
         this.position = {
-            x: 64 * 10, // Position at the bottom-right of the canvas
-            y: 64 * 8
+            x: canvas.width - tileSize, // Position at the bottom-right of the canvas
+            y: canvas.height - tileSize
         };
         this.size = size;
 
@@ -26,6 +26,8 @@ class Enemy {
     }
 
     draw() {
+
+        // Drawing the object
         c.fillStyle = 'red';
         c.fillRect(this.position.x, this.position.y, this.size.width, this.size.height);
     }
