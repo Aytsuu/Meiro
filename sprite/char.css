@@ -1,54 +1,51 @@
-:root{
-    --pixel-size: 10;   
-}
-
-body{
-    background: white;
-}
-
-.Character {
+:root {
+    --pixel-size: 16;
+ }
+ 
+ body {
+    background: #96ffc1;
+ }
+ 
+ .Character {
     width: calc(32px * var(--pixel-size));
     height: calc(32px * var(--pixel-size));
-    /* background: wheat; */
     overflow: hidden;
     position: relative;
-    margin: 4em auto;
-}
-
-.pixelart {
-    image-rendering: pixelated;
-}
-
-.Character_spritesheet{
+    margin: auto;
+  }
+  
+  .Character_spritesheet {
     animation: moveSpritesheet 1s steps(4) infinite;
-    width: calc(32px * var(--pixel-size));
+    width: calc(360px * var(--pixel-size));
     position: absolute;
-}
-
-.Character_shadow {
-    position: absolute;
-    width: calc(32px * var(--pixel-size));
-    height: calc(32px * var(--pixel-size));
-}
-
-.face-right {
+  }
+ 
+ .pixelart {
+    image-rendering: pixelated;
+ }
+ 
+ /* .face-right {
     top: calc(-32px * var(--pixel-size));
-}
-
-.face-up {
+    display: block;
+  }
+  
+  .face-up {
     top: calc(-64px * var(--pixel-size));
-}
-
-.face-left {
+    display: none;
+  }
+  
+  .face-left {
     top: calc(-96px * var(--pixel-size));
-}
-
-
-@keyframes moveSpritesheet{
+    display: none;
+  }
+ 
+  */
+ @keyframes moveSpritesheet {
     from {
-        transform: translate3d(0px,0,0)
+       transform: translate3d(0px,0,0)
     }
-    to{
-        transform: translate3d(-100%,0,0)
+    to {
+       transform: translate3d(-100%,0,0)
     }
-}
+ }
+ 
