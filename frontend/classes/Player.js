@@ -41,10 +41,13 @@
 class Player {
     constructor({ size }) {
         this.size = size;
+        
+        // Initial position
         this.position = { 
             x: 0, 
             y: 0 
-        }; // Initial position
+        }; 
+
         this.currentTargetIndex = 0; // Index of the current target in the path
     }
 
@@ -56,12 +59,14 @@ class Player {
             // Move toward the target point
             this.position.x += (target.x - this.position.x) * lerpSpeed;
             this.position.y += (target.y - this.position.y) * lerpSpeed;
+            
     
             // Check if the player reached the target point
             if (
                 Math.abs(this.position.x - target.x) < 1 &&
                 Math.abs(this.position.y - target.y) < 1
             ) {
+
                 this.position.x = target.x;
                 this.position.y = target.y;
     

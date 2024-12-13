@@ -95,6 +95,5 @@ function addToPath(x, y) {
     
         path.push(toPush);
 
-        sendData()
     } 
 }

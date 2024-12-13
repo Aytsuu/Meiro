@@ -29,7 +29,7 @@ const enemy = new Enemy({
     }
 })
 
-// This function renders all objects and re-render them infinitely
+// This function renders all objects infinitely
 function animate() {
     window.requestAnimationFrame(animate);
 
