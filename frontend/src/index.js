@@ -3,13 +3,15 @@
 const canvas = document.querySelector('canvas')
 const c = canvas.getContext('2d')
 
-// Initializing canvas and tile size
-canvas.width = 64 * 29
-canvas.height = 64 * 16
-tileSize = 64
-
 // Initializing global variables
 let setMove = false
+const tileSize = 64
+let path = []; // Stores the path points as an array of grid positions
+let isDrawingPath = false; 
+
+// Initializing canvas and tile size
+canvas.width = tileSize * 29
+canvas.height = tileSize * 16
 
 // Player object initialization
 const player = new Player({
@@ -46,8 +48,17 @@ function animate() {
     enemy.draw();
 }
 
-let path = []; // Stores the path points as an array of grid positions
-let isDrawingPath = false; // Flag to track if the user is drawing a path
+function resizeCanvas() {
+    // Calculate the canvas size based on the window size
+    canvas.width = Math.floor(window.innerWidth / tileSize) * tileSize; // Full-width based on tile size
+    canvas.height = Math.floor(window.innerHeight / tileSize) * tileSize; // Full-height based on tile size
+
+    // Recalculate the grid size (number of tiles in rows and columns)
+    player.size.width = tileSize;
+    player.size.height = tileSize;
+    enemy.size.width = tileSize;
+    enemy.size.height = tileSize;
+}
 
 // Function to draw the map/grid
 function drawMap() {
@@ -61,7 +72,6 @@ function drawMap() {
         }
     }
 }
-
 
 // Function to draw the path on the grid
 function drawPath() {
@@ -79,10 +89,13 @@ function drawPath() {
         c.fillRect((point.x/tileSize) * tileSize, (point.y/tileSize) * tileSize, tileSize, tileSize)
 
 
+
     }
     // Render the path on the canvas
     c.stroke();
 }
 
+// Initial canvas size setup
+resizeCanvas();
 
 animate() // Function calling

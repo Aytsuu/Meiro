@@ -1,3 +1,6 @@
+// Event listener to resize the canvas when the window is resized
+window.addEventListener('resize', resizeCanvas);
+
 // Event listener for when the mouse button is first pressed down
 canvas.addEventListener('mousedown', (e) => {
     // Convert mouse click coordinates to grid-aligned coordinates
@@ -78,21 +81,20 @@ function addToPath(x, y) {
     // Prevent adding more than 3 tiles
     // if (path.length >= 4) return;
 
+    // Convert mouse coordinates to grid-aligned coordinates
     toPush = {
         x: Math.floor(x / tileSize) * tileSize,
         y: Math.floor(y / tileSize) * tileSize
     }
-    
-    // console.log(path)
-    // console.log(path.includes(toPush))
 
-
-    //checks if the tiles is null or not
+    //checks if the tiles is null or not and prevents duplicate values within the list
     if (path.length === 0 || 
         (path[path.length - 1].x !== toPush.x || 
          path[path.length - 1].y !== toPush.y) &&
         !path.some(step => step.x === toPush.x && step.y === toPush.y)) {
     
         path.push(toPush);
+
+        sendData()
     } 
 }
