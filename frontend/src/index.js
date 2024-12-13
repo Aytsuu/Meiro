@@ -89,7 +89,7 @@ function cursorControl() {
     // Draw a small circle at the mouse position
     // c.beginPath();
     c.arc(mouseX, mouseY, 5, 0, Math.PI * 2);
-    c.fillStyle = 'white';
+    c.fillStyle = 'black';
     c.fill();
 }
 
