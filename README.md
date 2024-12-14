@@ -5,6 +5,7 @@
   <li>Finite State Machine (FSM)</li>
   <li>Behavior Trees</li>
   <li>A* (A-Star) Algorithm</li>
+  <li>Genetic Algorithms</li>
 </ul>
 
 <h4>For Maps:</h4>
@@ -20,5 +21,4 @@
   <li>Frame-Based Animation (P.S Already implemented, but can be optimized for better scalability)</li>
   <li>State Machine - for toggles</li>
   <li>Field of View Algorithms</li>
-  <li>Tile Masking</li>
 </ul>
