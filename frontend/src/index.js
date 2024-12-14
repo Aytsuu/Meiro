@@ -7,7 +7,7 @@ const c = canvas.getContext('2d')
 let setMove = false
 const tileSize = 64
 let path = []; // Stores the path points as an array of grid positions
-let objectsPosition = []
+let objectsPosition = [] // Stores object positions, but excludes the player
 let isDrawingPath = false; 
 let isEnemyTurn = false;
 let mouseX = 0;
@@ -20,8 +20,8 @@ canvas.height = tileSize * 16;
 
 // Player object initialization
 const player = new Player({
-    imgSrc: '/frontend/assets/animations/player/Front animations/spr_player_front_idle.png', 
-    frameRate: 12
+    imgSrc: '/frontend/assets/animations/player/Front animations/spr_player_front_idle.png',
+    frameRate: 12 // Number of actions in the image
 })
 
 // Enemy object initialization
