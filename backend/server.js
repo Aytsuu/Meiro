@@ -17,13 +17,7 @@ function fetchData(){
 }
 
 // Function to send data from JavaScript to Flask (POST request)
-function sendData(){
-
-    // Data to be sent to flask
-    const data = 
-        {
-            name: 'John'
-        };
+function sendData(data, callback){
 
     fetch("http://127.0.0.1:5000/api/data", {
         method: 'POST',
@@ -40,7 +34,7 @@ function sendData(){
         return response.json() // Parse the body as JSON
     })
     .then(data => {
-        console.log("Data:", data); // Handle the parsed JSON data
+        callback(data); // Callback to the function was called and passing the returned data from Flask
     })
     .catch(error => {
         console.log("There was a problem with the fetch operation:", error); // Handle error when fetching data

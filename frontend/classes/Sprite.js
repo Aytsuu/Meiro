@@ -1,7 +1,7 @@
 class Sprite{
     constructor({position, imgSrc, frameRate = 1}){
         
-        this.img = new Image(); // Creates new image
+        this.img = new Image(); // Creates new image in memory
         this.img.onload = () => { // Waits till the image is loaded to the browser
             imageLoaded = true;
 

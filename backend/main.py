@@ -22,10 +22,12 @@ def api_data():
         # Get data sent from JavaScript (POST request)
         data = request.json  # expects 
 
-        # Do something with the data (e.g., process it)
-        response = {'message': f'Hello, {data["name"]}!'}
+        print(data)
 
-        return jsonify(response)
+        # Do something with the data (e.g., process it)
+        # response = {'message': f'Hello, {data["name"]}!'}
+
+        return jsonify(data)
     else:
 
         # Return a simple response to the JavaScript (GET request)
