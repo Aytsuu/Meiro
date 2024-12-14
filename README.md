@@ -16,7 +16,7 @@
 <h4>For Game Mechanics:</h4>
 <ul>
   <li>Tile Masking - control accessible tiles</li>
-  <li>Bounding box collision (P.S Already implemented object collision detection, but still subject to optimization of its scalability)</li>
+  <li>Bounding box collision (P.S Already implemented object collision detection, but still subject to optimization for better scalability)</li>
   <li>Frame-Based Animation (P.S Already implemented, but can be optimized for better scalability)</li>
   <li>State Machine - for toggles</li>
   <li>Field of View Algorithms</li>
