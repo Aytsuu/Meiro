@@ -13,21 +13,31 @@ class Enemy extends Sprite{
     }
 
     movementUpdate() {
+
+        // Enemy's turn to move
         if(isEnemyTurn){
 
+            // Initializing JSON to be sent to backend
             const data = {
                 playerPos: player.position,
                 crownPos: crown.position,
                 position: this.position
             }
 
-            sendData({data}, (returnedData) => {
+            // Handling data from callback
+            const handleReturnedDate = (returnedData) => {
+
                 this.position.x = returnedData.data.playerPos.x;
                 isEnemyTurn = false;
-            })
+
+            }
+
+            // Sends data to python with Flask api
+            sendData({data}, handleReturnedDate)
         }
     }
 
+    // Highlight turns
     isTurn(){
         const borderWidth = 3;
         c.strokeStyle = 'red';

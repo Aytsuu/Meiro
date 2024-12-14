@@ -145,6 +145,7 @@ class Player extends Sprite{
         }
     }
 
+    // Highlight turns
     isTurn(){
         
         const borderWidth = 3;
