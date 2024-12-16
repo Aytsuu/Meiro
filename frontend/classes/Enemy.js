@@ -35,11 +35,11 @@ class Enemy extends Sprite{
                 // Game state
                 state: {
                     position: this.position,
-                    crownPosition: crown.position
+                    crownPosition: crown.position,
+                    direction: direction
                 },
 
-                // TODO: program for direction, reward, gameOver, and score
-                direction: direction,
+                // TODO: program for reward, gameOver, and score
                 reward: reward,
                 gameOver: isGameOver,
                 score: score
@@ -106,6 +106,10 @@ class Enemy extends Sprite{
     }
 
     collisionDetection(position) {
-        return obstacles.some(obstacle => position.x == obstacle.x && position.y == obstacle.y)
+        return obstacles.some(obstacle => position.x == obstacle.x && position.y == obstacle.y) || 
+                position.x < 0 ||
+                position.x > canvas.width - tileSize ||
+                position.y < 0 ||
+                position.y > canvas.height - tileSize
     }
 }

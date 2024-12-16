@@ -26,19 +26,12 @@ class Agent:
 
     def get_state(self, game_data):
 
-        #Environment size per tile
         tile_size = game_data['data']['environment']['tileSize']
 
-        # NPC position and Direction
+        # NPC position and direction
         position_x = game_data['data']['state']['position']['x']
         position_y = game_data['data']['state']['position']['y']
-        direction = game_data['data']['direction']
-
-        # (TO BE MODIFIED): Danger Points
-        point_up = namedtuple(position_x, position_y - tile_size)
-        point_right = namedtuple(position_x + tile_size, position_y)
-        point_down = namedtuple(position_x, position_y + tile_size)
-        point_left = namedtuple(position_x - tile_size, position_y)
+        direction = game_data['data']['state']['direction']
 
         # Direction
         dir_l = direction == Direction.LEFT
@@ -46,7 +39,7 @@ class Agent:
         dir_u = direction == Direction.UP
         dir_d = direction == Direction.DOWN
 
-        # Crown Position 
+        # Crown position 
         crown_x = game_data['data']['crown']['position']['x']
         crown_y = game_data['data']['crown']['position']['y']
 
@@ -55,7 +48,9 @@ class Agent:
         state = [
 
             # Passable/Impassable tile
-            
+            game_data['data']['collision']['straight'], 
+            game_data['data']['collision']['right'], 
+            game_data['data']['collision']['left'], 
 
 
             # Move direction
