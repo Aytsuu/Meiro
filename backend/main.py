@@ -1,6 +1,7 @@
 # app.py
 from flask import Flask, render_template, jsonify, request
 from flask_cors import CORS
+from reinforcement_learning import DQL_agent
 
 app = Flask(__name__)
 
@@ -14,20 +15,18 @@ def home():
     return render_template('index.html')
 
 # Route to handle AJAX request from JavaScript
-@app.route('/api/data', methods=['GET', 'POST'])
+@app.route('/api/data', methods=['GET', 'POST']) 
 
 def api_data():
     if request.method == 'POST':
         
         # Get data sent from JavaScript (POST request)
-        data = request.json  # expects 
+        game_data = request.json  # expects 
 
-        print(data)
+        # Start training the AI with the GAMEDATA received
+        final_move = DQL_agent.train(game_data)
 
-        # Do something with the data (e.g., process it)
-        # response = {'message': f'Hello, {data["name"]}!'}
-
-        return jsonify(data)
+        return jsonify(final_move)
     else:
 
         # Return a simple response to the JavaScript (GET request)

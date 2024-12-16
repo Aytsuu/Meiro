@@ -19,15 +19,32 @@ class Enemy extends Sprite{
 
             // Initializing JSON to be sent to backend
             const data = {
-                playerPos: player.position,
-                crownPos: crown.position,
-                position: this.position
+                environment: {
+                    width: canvas.width,
+                    height: canvas.height
+                },
+                state: {
+                    position: this.position,
+                    crownPosition: crown.position
+                },
+
+                // TODO: program for reward, gameOver, and score
+                reward: 0,
+                gameOver: isGameOver,
+                score: 0
             }
 
             // Handling data from callback
             const handleReturnedDate = (returnedData) => {
+                
+                // Returned data could be...
+                // [1,0,0,0] - up move 
+                // [0,1,0,0] - right move
+                // [0,0,1,0] - down move
+                // [0,0,0,1] - left move
 
-                this.position.x = returnedData.data.playerPos.x;
+                // TODO: Create the logic 
+
                 isEnemyTurn = false;
 
             }

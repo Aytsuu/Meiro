@@ -13,6 +13,9 @@ let isEnemyTurn = false;
 let mouseX = 0;
 let mouseY = 0;
 let imageLoaded = false
+let isGameOver = false
+
+// Direction
 
 // Initializing canvas and tile size
 canvas.width = tileSize * 29;
