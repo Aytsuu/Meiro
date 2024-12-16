@@ -1,24 +1,16 @@
 // Function to send data from JavaScript to Flask (POST request)
+
 function sendData(data, callback){
 
-    fetch("http://127.0.0.1:5000/api/data", {
-        method: 'POST',
-        headers: {
-            'Content-Type' : 'application/json'
-        },
-        body: JSON.stringify(data)
-    })
-    .then(response => {
-        if(!response.ok){
-            throw new Error('Network response was not ok.') 
-        }
+    const socket = io.connect('http://127.0.0.1:5000')
 
-        return response.json() // Parse the body as JSON
-    })
-    .then(data => {
-        callback(data); // Callback to the function was called and passing the returned data from Flask
-    })
-    .catch(error => {
-        console.log("There was a problem with the fetch operation:", error); // Handle error when fetching data
-    })
+    // Emit an event to Flask (server) with the data
+    socket.emit('send_to_flask', data);
+    
+    // Listen for the response from Flask
+    socket.on('receive_from_flask', function(response) {
+        console.log("Received from Flask:", response);
+        callback(response); // Call the callback with the data from Flask
+    });
+
 }
