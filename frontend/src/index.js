@@ -7,13 +7,17 @@ const c = canvas.getContext('2d')
 let setMove = false
 const tileSize = 64
 let path = []; // Stores the path points as an array of grid positions
-let objectsPosition = [] // Stores object positions, but excludes the player
+let obstacles = [] // Store obstacles positions
+let passability = [] // Store the passability of next action point (straight, right, left)
 let isDrawingPath = false; 
 let isEnemyTurn = false;
 let mouseX = 0;
 let mouseY = 0;
-let imageLoaded = false
-let isGameOver = false
+let imageLoaded = false;
+let isGameOver = false;
+let direction = 1;
+let reward = 0;
+let score = 0;
 
 // Direction
 
@@ -60,6 +64,7 @@ function animate() {
 
     // Draw the enemy and handle its turn
     enemy.draw();
+    enemy.checkPassability();
     enemy.movementUpdate();
 
     // Draw the crown object

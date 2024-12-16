@@ -106,7 +106,7 @@ class Player extends Sprite{
 
             // Object collision detection
             
-            if (objectsPosition.some(object => this.position.x + targetPointX === object.x && this.position.y + targePointY === object.y)){
+            if (obstacles.some(obstacle => this.position.x + targetPointX === obstacle.x && this.position.y + targePointY === obstacle.y)){
 
                 console.log('object detected')
                 setMove = false;
