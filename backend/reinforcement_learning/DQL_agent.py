@@ -34,5 +34,4 @@ class Agent:
         pass
 
 def train(game_data):
-    print(game_data)
-    return game_data
+    pass
