@@ -10,7 +10,7 @@ class Enemy extends Sprite{
 
     }
 
-    movementUpdate() {
+    decision() {
 
         // Enemy's turn to move
         if(isEnemyTurn){
@@ -39,15 +39,11 @@ class Enemy extends Sprite{
                     direction: direction
                 },
 
-                // TODO: program for reward, gameOver, and score
-                reward: reward,
-                gameOver: isGameOver,
-                score: score
             }
 
             // Handling data from callback
             const handleReturnedDate = (returnedData) => {
-                
+
                 // Returned data could be...
                 // [1,0,0] - straight
                 // [0,1,0] - right
@@ -55,15 +51,50 @@ class Enemy extends Sprite{
 
                 // TODO: Create the logic 
 
+                const action = JSON.stringify(returnedData);
+                let new_dir = 0;
 
+                if(action == JSON.stringify([1,0,0])){
+                    new_dir = direction
+                }
+                else if(action == JSON.stringify([0,1,0])){
+                    new_dir = (direction + 1) % 4 
+                }
+                else{
+                    new_dir = (direction - 1) % 4
+                }
 
-                isEnemyTurn = false;
+                this.movementUpdate(new_dir)
 
             }
 
-            // Sends data to python with Flask api
-            sendData({data}, handleReturnedDate)
+            // Sends data to python flask with web socket
+            sendData({data}, handleReturnedDate);
         }
+
+    }
+
+    movementUpdate(new_dir) {
+
+        const dir = ['right', 'left', 'up', 'down']
+
+        
+        console.log(new_dir,dir[new_dir])
+
+        if(new_dir == 0){
+            if(this.position.x + tileSize < canvas.width - tileSize) this.position.x += tileSize
+        }
+        else if(new_dir == 1){
+            if(this.position.x - tileSize >= 0) this.position.x -= tileSize
+        }
+        else if(new_dir == 2){
+            if(this.position.y - tileSize >= 0) this.position.y -= tileSize
+        }
+        else{
+            if(this.position.y + tileSize < canvas.height - tileSize) this.position.y += tileSize
+        }
+
+        isEnemyTurn = false;
     }
 
     // Highlight turns

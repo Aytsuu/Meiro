@@ -15,7 +15,7 @@ let mouseX = 0;
 let mouseY = 0;
 let imageLoaded = false;
 let isGameOver = false;
-let direction = 1;
+let direction = 3;
 let reward = 0;
 let score = 0;
 
@@ -63,9 +63,9 @@ function animate() {
     player.movementUpdate();
 
     // Draw the enemy and handle its turn
-    enemy.draw();
     enemy.checkPassability();
-    enemy.movementUpdate();
+    enemy.decision();
+    enemy.draw();
 
     // Draw the crown object
     crown.draw();
