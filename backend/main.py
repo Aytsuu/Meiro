@@ -16,15 +16,26 @@ def home():
 @socketio.on('send_to_flask')
 def handle_send_to_flask(data):
 
+    final_move = None
+    phase = None
+
     # Get data sent from JavaScript (POST request)
     game_data = data
 
-    final_move = train.first_training(game_data)
-
-    print(final_move)
+    # Training Phases
+    if (game_data['phase']) == 1:
+        final_move, phase = train.first_training(game_data)
+    else:
+        train.second_training(game_data)
+    
+    # JSON data to be passed to javascript
+    data = {
+        'action': final_move,
+        'phase': phase
+    }
 
     # Send response to JavaScript
-    emit('receive_from_flask', final_move)
+    emit('receive_from_flask', data)
     
 if __name__ == '__main__':
     train = Train()

@@ -3,16 +3,17 @@ import random
 import numpy as np
 from collections import deque
 from DQN_model import Linear_QNet, QTrainer
+from plot_helper import plot
 
 MAX_MEMORY = 100_000
 BATCH_SIZE = 1000
 LR = 0.001
 
 class Direction:
+    RIGHT = 0
     LEFT = 1
-    RIGHT = 2
-    UP = 3
-    DOWN = 4
+    UP = 2
+    DOWN = 3
 
 class Agent:
 
@@ -29,9 +30,9 @@ class Agent:
         # tile_size = game_data['data']['environment']['tileSize']
 
         # NPC position and direction
-        position_x = game_data['data']['state']['position']['x']
-        position_y = game_data['data']['state']['position']['y']
-        direction = game_data['data']['state']['direction']
+        position_x = game_data['state']['position']['x']
+        position_y = game_data['state']['position']['y']
+        direction = game_data['state']['direction']
 
         # Direction
         dir_l = direction == Direction.LEFT
@@ -40,17 +41,17 @@ class Agent:
         dir_d = direction == Direction.DOWN
 
         # Crown position 
-        crown_x = game_data['data']['state']['crownPosition']['x']
-        crown_y = game_data['data']['state']['crownPosition']['y']
+        crown_x = game_data['state']['crownPosition']['x']
+        crown_y = game_data['state']['crownPosition']['y']
 
 
         # State
         state = [
 
             # Passable/Impassable tile
-            game_data['data']['collision']['straight'], 
-            game_data['data']['collision']['right'], 
-            game_data['data']['collision']['left'], 
+            game_data['collision']['straight'], 
+            game_data['collision']['right'], 
+            game_data['collision']['left'], 
 
 
             # Move direction
@@ -120,6 +121,7 @@ class Train:
         self.state_new = None
         self.reward = None
         self.done = False
+        self.score = 0
 
 
     def first_training(self, game_data):
@@ -130,17 +132,38 @@ class Train:
         # Get move
         self.final_move = self.agent.get_action(self.state_old)
 
-        return self.final_move
+        return self.final_move, 2
         
     def second_training(self, game_data):
 
         # Perform move and get new state
-        self.reward = game_data['data']['reward']
-        self.done = game_data['data']['gameOver']
+        self.reward = game_data['reward']
+        self.done = game_data['gameOver']
+        self.score = game_data['score']
         state_new = self.agent.get_state(game_data)
+
+        print(self.state_old, self.final_move, self.reward, state_new, self.done)
 
         # train short memory
         self.agent.train_short_memory(self.state_old, self.final_move, self.reward, state_new, self.done)
 
         # remember
         self.agent.remember(self.state_old, self.final_move, self.reward, state_new, self.done)
+
+        if self.done:
+
+            # train long memory, plot result
+            self.agent.n_games += 1
+            self.agent.train_long_memory()
+
+            if self.score > self.record:
+                self.record = self.score
+                self.agent.model.save()
+
+            print('Game', self.agent.n_games, 'Score', self.score, 'Record:', self.record)
+
+            # self.plot_scores.append(self.score)
+            # self.total_score += self.score
+            # mean_score = self.total_score / self.agent.n_games
+            # self.plot_mean_scores.append(mean_score)
+            # plot(self.plot_scores, self.plot_mean_scores)

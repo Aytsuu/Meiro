@@ -15,9 +15,11 @@ let mouseX = 0;
 let mouseY = 0;
 let imageLoaded = false;
 let isGameOver = false;
-let direction = 3;
+let direction = 0;
 let reward = 0;
 let score = 0;
+let phase = 1;
+let n_games = 0;
 
 // Direction
 

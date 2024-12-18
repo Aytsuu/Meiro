@@ -19,3 +19,10 @@ function sendData(data, callback){
     socket.emit('send_to_flask', data);
 
 }
+
+function sendResponse(data){
+
+    // Emit an event to Flask (server) with the data
+    socket.emit('send_to_flask', data);
+
+}
