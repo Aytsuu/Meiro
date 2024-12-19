@@ -8,11 +8,9 @@ class Sprite{
             // Takes the size of the image per frame
             this.size = {
                 width: this.img.width/frameRate,
-                height: this.img.height
+                height: 60
             }
         }
-
-
         this.position = position;
         this.img.src = imgSrc; // Image source
         this.frameRate = frameRate; // Number of frames in an image
@@ -20,8 +18,7 @@ class Sprite{
         // Initializing attributes for animation
         this.currentFrame = 0;
         this.elapsedFrame = 0; // A factor to determine when current frame will be incremeneted
-        this.frameBuffer = 4; // Animation speed, the greater the value, the slower it moves from one frame to another.
-
+        this.frameBuffer = 6; // Animation speed, the greater the value, the slower it moves from one frame to another.
     }
 
     draw(){
@@ -33,7 +30,7 @@ class Sprite{
         const cropbox = {
             position: {
                 x: this.size.width * this.currentFrame, // Creates the illusion of motion by moving one frame to another
-                y: 0
+                y: 5
             },
             size: {
                 width: this.size.width,
