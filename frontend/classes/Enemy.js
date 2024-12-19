@@ -183,7 +183,8 @@ class Enemy extends Sprite{
     }
 
     reset(result){
-        
+
+        // Reset game data
         if(result == -1){
             isGameOver = true;
             reward = -10;
