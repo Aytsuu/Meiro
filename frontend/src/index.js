@@ -29,8 +29,8 @@ canvas.height = tileSize * 16;
 
 // Player object initialization
 const player = new Player({
-    imgSrc: '/frontend/assets/animations/player/Front animations/spr_player_front_idle.png',
-    frameRate: 12 // Number of actions in the image
+    imgSrc: '/frontend/assets/animations/player2.png',
+    frameRate: 9// Number of actions in the image
 })
 
 const enemy = new Enemy({
@@ -38,12 +38,10 @@ const enemy = new Enemy({
     frameRate: 12 // Number of actions in the image
 })
 
-// Enemy object initialization
+// Crownobject initialization
 const crown = new Crown({
-    size: {
-        width: tileSize,
-        height: tileSize
-    }
+    imgSrc: '/frontend/assets/animations/Crown_Gold.png',
+    frameRate: 1// Number of actions in the image
 })
 
 // This function renders all objects infinitely
