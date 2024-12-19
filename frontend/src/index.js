@@ -7,12 +7,21 @@ const c = canvas.getContext('2d')
 let setMove = false
 const tileSize = 64
 let path = []; // Stores the path points as an array of grid positions
-let objectsPosition = [] // Stores object positions, but excludes the player
+let obstacles = [] // Store obstacles positions
+let passability = [] // Store the passability of next action point (straight, right, left)
 let isDrawingPath = false; 
 let isEnemyTurn = false;
 let mouseX = 0;
 let mouseY = 0;
-let imageLoaded = false
+let imageLoaded = false;
+let isGameOver = false;
+let direction = 0;
+let reward = 0;
+let score = 0;
+let phase = 1;
+let n_games = 0;
+
+// Direction
 
 // Initializing canvas and tile size
 canvas.width = tileSize * 29;
@@ -24,10 +33,9 @@ const player = new Player({
     frameRate: 9// Number of actions in the image
 })
 
-// Enemy object initialization
 const enemy = new Enemy({
-    imgSrc: '/frontend/assets/animations/player1.png',
-    frameRate: 9// Number of actions in the image
+    imgSrc: '/frontend/assets/animations/player/Front animations/spr_player_front_idle.png',
+    frameRate: 12 // Number of actions in the image
 })
 
 // Crownobject initialization
@@ -47,11 +55,16 @@ function animate() {
     drawMap();
     drawPath();
 
+    // Take turns
+    !isEnemyTurn ? player.isTurn() : enemy.isTurn()
+
     // Update and draw the player
     player.draw();
     player.movementUpdate();
 
     // Draw the enemy and handle its turn
+    enemy.checkPassability();
+    enemy.decision();
     enemy.draw();
 
     // Draw the crown object
@@ -83,7 +96,7 @@ function cursorControl() {
     if (mouseY > canvas.height) mouseY = canvas.height;
 
     // Draw a small circle at the mouse position
-    // c.beginPath();
+    c.beginPath();
     c.arc(mouseX, mouseY, 5, 0, Math.PI * 2);
     c.fillStyle = 'black';
     c.fill();
@@ -104,24 +117,23 @@ function drawMap() {
 
 // Function to draw the path on the grid
 function drawPath() {
-    // Set the stroke color for the path
-    c.fillStyle = '#93CBDF';
-    c.strokeStyle = '#93CBDF';
-    c.beginPath();
 
-    // Loop through each point in the path
+    if(!isEnemyTurn){
+        // Set the stroke color for the path
+        c.fillStyle = '#93CBDF';
+        c.strokeStyle = '#93CBDF';
+        c.beginPath();
 
-    for (let i = 0; i < path.length; i++) {
-        const point = path[i];
-        
-        // c.strokeRect((point.x/tileSize) * tileSize, (point.y/tileSize) * tileSize, tileSize, tileSize)
-        c.fillRect((point.x/tileSize) * tileSize, (point.y/tileSize) * tileSize, tileSize, tileSize)
+        // Loop through each point in the path
 
+        for (let i = 0; i < path.length; i++) {
+            const point = path[i];
+            
+            // Render the path on the canvas
+            c.fillRect((point.x/tileSize) * tileSize, (point.y/tileSize) * tileSize, tileSize, tileSize)
 
-
+        }
     }
-    // Render the path on the canvas
-    c.stroke();
 }
 
 // Initial canvas size setup

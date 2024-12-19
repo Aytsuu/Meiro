@@ -1,35 +1,45 @@
 # app.py
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, render_template
+from flask_socketio import SocketIO, emit
 from flask_cors import CORS
+from DQN_agent import Train
 
 app = Flask(__name__)
-
-# Enable cross origin resource sharing for all routes
-CORS(app)
+CORS(app) # Enable CORS for all origins
+socketio = SocketIO(app, cors_allowed_origins="*") # Allow all origins
 
 # Route to serve the HTML page with JavaScript
 @app.route('/')
-
 def home():
     return render_template('index.html')
 
-# Route to handle AJAX request from JavaScript
-@app.route('/api/data', methods=['GET', 'POST'])
+@socketio.on('send_to_flask')
+def handle_send_to_flask(data):
 
-def api_data():
-    if request.method == 'POST':
-        
-        # Get data sent from JavaScript (POST request)
-        data = request.json  # expects 
+    final_move = None
+    phase = None
 
-        # Do something with the data (e.g., process it)
-        response = {'message': f'Hello, {data["name"]}!'}
+    # Get data sent from JavaScript (POST request)
+    game_data = data
 
-        return jsonify(response)
+    # Training Phases
+    if (game_data['phase']) == 1:
+        final_move, phase = train.first_training(game_data)
     else:
+        train.second_training(game_data)
+    
+    # JSON data to be passed to javascript
+    data = {
+        'action': final_move,
+        'phase': phase
+    }
 
-        # Return a simple response to the JavaScript (GET request)
-        return jsonify({'message': 'Hello from Flask!'})
-
+    # Send response to JavaScript
+    emit('receive_from_flask', data)
+    
 if __name__ == '__main__':
-    app.run(debug=True)
+    train = Train()
+    socketio.run(app, debug=True, host='0.0.0.0', port=5000, allow_unsafe_werkzeug=True)
+   
+
+

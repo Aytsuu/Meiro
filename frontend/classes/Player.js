@@ -94,7 +94,7 @@ class Player extends Sprite{
 
     movementUpdate() {
 
-        if (setMove && path.length > this.currentTargetIndex) {
+        if (setMove && !isEnemyTurn && path.length > this.currentTargetIndex) {
 
             const target = path[this.currentTargetIndex];
             const lerpSpeed = 0.2; // Speed for smooth movement
@@ -106,12 +106,13 @@ class Player extends Sprite{
 
             // Object collision detection
             
-            if (objectsPosition.some(object => this.position.x + targetPointX === object.x && this.position.y + targePointY === object.y)){
+            if (obstacles.some(obstacle => this.position.x + targetPointX === obstacle.x && this.position.y + targePointY === obstacle.y)){
 
                 console.log('object detected')
                 setMove = false;
                 this.currentTargetIndex = 0;
                 path = []; // Clear the path
+                isEnemyTurn = true
 
             }else{
 
@@ -136,10 +137,20 @@ class Player extends Sprite{
                         setMove = false;
                         this.currentTargetIndex = 0;
                         path = []; // Clear the path
+                        isEnemyTurn = true
                     }
                 }
             }
 
         }
+    }
+
+    // Highlight turns
+    isTurn(){
+        
+        const borderWidth = 3;
+        c.strokeStyle = 'green';
+        c.lineWidth = borderWidth;
+        c.strokeRect(this.position.x + borderWidth / 2,this.position.y + borderWidth / 2, tileSize - borderWidth, tileSize - borderWidth);
     }
 }
