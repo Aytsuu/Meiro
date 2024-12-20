@@ -1,8 +1,11 @@
-import torch
+import torch as th
 import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
+import numpy as np
 import os
+
+th.autograd.set_detect_anomaly(True)
 
 class Linear_QNet(nn.Module):
     def __init__(self, input_size, hidden_size, output_size):
@@ -19,9 +22,12 @@ class Linear_QNet(nn.Module):
         model_folder_path = './model'
         if not os.path.exists(model_folder_path):
             os.makedirs(model_folder_path)
+        # else:
+        #     # self.model.load_state_dict(th.load('/model/model.pth'))
+        #     # self.model.eval()
 
         file_name = os.path.join(model_folder_path, file_name)
-        torch.save(self.state_dict(), file_name)
+        th.save(self.state_dict(), file_name)
 
 
 class QTrainer:
@@ -33,36 +39,59 @@ class QTrainer:
         self.criterion = nn.MSELoss()
 
     def train_step(self, state, action, reward, next_state, done):
-        state = torch.tensor(state, dtype=torch.float)
-        next_state = torch.tensor(next_state, dtype=torch.float)
-        action = torch.tensor(action, dtype=torch.long)
-        reward = torch.tensor(reward, dtype=torch.float)
+        state = th.tensor(np.array(state), dtype=th.float)
+        next_state = th.tensor(np.array(next_state), dtype=th.float)
+        action = th.tensor(np.array(action), dtype=th.long)
+        reward = th.tensor(np.array(reward), dtype=th.float)
+
+        print("STATE FROM TRAIN STEP (TENSOR):", state)
+        print("NEXT STATE FROM TRAIN STEP (TENSOR):", next_state)
+        print("ACTION FROM TRAIN STEP (TENSOR):", action)
+        print("REWARD FROM TRAIN STEP (TENSOR):", reward)
+
+        print("STATE SHAPE:", state.shape, "LENGTH:", len(state.shape))
+
         # (n, x)
 
         if len(state.shape) == 1:
             # (1, x)
-            state = torch.unsqueeze(state, 0)
-            next_state = torch.unsqueeze(next_state, 0)
-            action = torch.unsqueeze(action, 0)
-            reward = torch.unsqueeze(reward, 0)
+            state = th.unsqueeze(state, 0)
+            next_state = th.unsqueeze(next_state, 0)
+            action = th.unsqueeze(action, 0)
+            reward = th.unsqueeze(reward, 0)
             done = (done, )
+
+        print("UNSQUEEZED")
+        print(state)
+        print(next_state)
+        print(action)
+        print(reward)
+        print(done)
 
         # 1: predicted Q values with current state
         pred = self.model(state)
+        
+        print("PREDICTED Q VALUES WITH CURRENT STATE:", pred)
 
-        target = pred.clone()
+        # Compute target Q values
+        target_Q = pred.clone().detach()
         for idx in range(len(done)):
-            Q_new = reward[idx]
             if not done[idx]:
-                Q_new = reward[idx] + self.gamma * torch.max(self.model(next_state[idx]))
+                # If not done, include the discounted future reward
+                next_Q = self.model(next_state[idx])
+                max_next_Q = th.max(next_Q)
+                target_Q[idx][th.argmax(action[idx])] = reward[idx] + self.gamma * max_next_Q
 
-            target[idx][torch.argmax(action[idx]).item()] = Q_new
+                print("TARGET Q VALUES WITH THE DISCOUNTED REWARD:", target_Q)
+            else:
+                # If done, only include the immediate reward
+                target_Q[idx][th.argmax(action[idx])] = reward[idx]
     
         # 2: Q_new = r + y * max(next_predicted Q value) -> only do this if not done
         # pred.clone()
         # preds[argmax(action)] = Q_new
         self.optimizer.zero_grad()
-        loss = self.criterion(target, pred)
+        loss = self.criterion(target_Q, pred)
         loss.backward()
 
         self.optimizer.step()

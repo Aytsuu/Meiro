@@ -7,6 +7,5 @@ class Crown extends Sprite{
             y: Math.floor((canvas.height - tileSize) / (tileSize * 2)) * tileSize
         };         
         
-        this.size = size;
     }      
 }
