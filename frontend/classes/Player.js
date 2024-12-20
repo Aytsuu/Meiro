@@ -82,13 +82,24 @@ class Player extends Sprite {
         super({ imgSrc, frameRate });
 
         // Initial position
-        this.position = { x: 0, y: 0 };
+        this.position = { x: 0, y: 0};
         this.currentState = new IdleState(this); // Start with the idle state
-        this.speed = 5; // Movement speed
+        this.speed = 4; // Movement speed
 
         // Velocity to track movement direction
         this.velocity = { x: 0, y: 0 };
+
+        // Hitbox
+        this.hitbox = {
+            w: tileSize - (tileSize - 34),
+            h: tileSize - (tileSize - 50)
+        }
     }
+
+    // border(){
+    //     c.strokeStyle = "#00000";
+    //     c.strokeRect(this.position.x, this.position.y, tileSize, tileSize);
+    // }
 
     setState(newState) {
         this.currentState.exit();  // Exit the current state
@@ -143,13 +154,18 @@ class MoveLeftState extends State {
     }
 
     update() {
-        this.player.position.x += this.player.velocity.x;
+
+        if(this.player.position.x + ((tileSize - this.player.hitbox.w) / 2) + this.player.velocity.x > 0){
+            this.player.position.x += this.player.velocity.x;
+        }
     }
 }
 
 // Moving Right State
 class MoveRightState extends State {
     enter() {
+
+
         this.player.velocity = { x: this.player.speed, y: 0 };
     }
 
@@ -158,7 +174,10 @@ class MoveRightState extends State {
     }
 
     update() {
-        this.player.position.x += this.player.velocity.x;
+
+        if(this.player.position.x - ((tileSize - this.player.hitbox.w) / 2) + this.player.velocity.x < canvas.width - tileSize){
+            this.player.position.x += this.player.velocity.x;
+        }
     }
 }
 
@@ -173,7 +192,10 @@ class MoveUpState extends State {
     }
 
     update() {
-        this.player.position.y += this.player.velocity.y;
+        
+        if(this.player.position.y + ((tileSize - this.player.hitbox.h) / 2) + this.player.velocity.y > 0){
+            this.player.position.y += this.player.velocity.y;
+        }
     }
 }
 
@@ -188,6 +210,9 @@ class MoveDownState extends State {
     }
 
     update() {
-        this.player.position.y += this.player.velocity.y;
+
+        if(this.player.position.y - ((tileSize - this.player.hitbox.h) / 2) + this.player.velocity.y < canvas.height - tileSize){
+            this.player.position.y += this.player.velocity.y;
+        }
     }
 }

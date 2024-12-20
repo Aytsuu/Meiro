@@ -1,19 +1,35 @@
 // Function to send data from JavaScript to Flask (POST request)
 
-const socket = io.connect('http://127.0.0.1:5000')
+const socket = io.connect('http://127.0.0.1:5000', {
+    reconnection: true, // Ensure it will reconnect on failure
+    reconnectionAttempts: 3, // Reduce the number of reconnection attempts
+    reconnectionDelay: 1000, // Increase the delay between reconnections
+    timeout: 5000 // Increase connection timeout
+});
+
+// Handle connection errors
+socket.on('connect_error', (error) => {
+    console.error('Connection error:', error);
+    alert('Unable to connect to the server. Please try again later.');
+});
+
+// Handle WebSocket disconnection
+socket.on('disconnect', () => {
+    console.log('Disconnected from WebSocket server.');
+    alert('Disconnected from the server. Reconnecting...');
+});
 
 // Listen for the response from Flask
-socket.on('receive_from_flask', function(response) {
+socket.on('receive_from_flask', (response) => {
 
-    if(window.callback){ // Call the callback with the data from Flask
-        window.callback(response);
-        window.callback = null;
+    if(response){
+        action = response.action
+        phase = response.phase
     }
+
 });
 
 function sendData(data, callback){
-
-    window.callback = callback;
 
     // Emit an event to Flask (server) with the data
     socket.emit('send_to_flask', data);

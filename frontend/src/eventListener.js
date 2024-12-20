@@ -92,15 +92,8 @@ canvas.addEventListener('mousemove', (e) => {
 // }
 
 // Remove unnecessary mouse events related to path drawing
-// Remove mousedown, mousemove, and mouseup listeners
+// Remove mousedown and mouseup listeners
 
-// Keyboard input handling for player movement
-const keys = {
-    w: { pressed: false },
-    a: { pressed: false },
-    s: { pressed: false },
-    d: { pressed: false },
-};
 
 window.addEventListener('keydown', (e) => {
     switch (e.key.toLowerCase()) {
@@ -137,16 +130,16 @@ window.addEventListener('keyup', (e) => {
 });
 
 
-// function cursorControl() {
-//     // Confine mouse within canvas boundaries
-//     if (mouseX < 0) mouseX = 0;
-//     if (mouseX > canvas.width) mouseX = canvas.width;
-//     if (mouseY < 0) mouseY = 0;
-//     if (mouseY > canvas.height) mouseY = canvas.height;
+function cursorControl() {
+    // Confine mouse within canvas boundaries
+    if (mouseX < 0) mouseX = 0;
+    if (mouseX > canvas.width) mouseX = canvas.width;
+    if (mouseY < 0) mouseY = 0;
+    if (mouseY > canvas.height) mouseY = canvas.height;
 
-//     // Draw a small circle at the mouse position
-//     c.beginPath();
-//     c.arc(mouseX, mouseY, 5, 0, Math.PI * 2);
-//     c.fillStyle = 'black';
-//     c.fill();
-// }
+    // Draw a small circle at the mouse position
+    c.beginPath();
+    c.arc(mouseX, mouseY, 5, 0, Math.PI * 2);
+    c.fillStyle = 'black';
+    c.fill();
+}

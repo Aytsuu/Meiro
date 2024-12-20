@@ -3,14 +3,17 @@
 const canvas = document.querySelector('canvas')
 const c = canvas.getContext('2d')
 
+const tileSize = 64
+
+// Initializing canvas and tile size
+canvas.width = tileSize * 29;
+canvas.height = tileSize * 16;
+
 // Initializing global variables
 let setMove = false
-const tileSize = 64
 let path = []; // Stores the path points as an array of grid positions
 let obstacles = [] // Store obstacles positions
 let passability = [] // Store the passability of next action point (straight, right, left)
-let isDrawingPath = false; 
-let isEnemyTurn = false;
 let mouseX = 0;
 let mouseY = 0;
 let imageLoaded = false;
@@ -18,14 +21,17 @@ let isGameOver = false;
 let direction = 0;
 let reward = 0;
 let score = 0;
-let phase = 1;
+let steps = 0;
+let phase = 1; // Training Phase
 let n_games = 0;
+let action=[0,0,0,0]; // NPC Action
 
-// Direction
+// Fps tracking
+let lastTime = 0;
+let frameCount = 0;
+let fps = 0;
 
-// Initializing canvas and tile size
-canvas.width = tileSize * 29;
-canvas.height = tileSize * 16;
+
 
 // Player object initialization
 const player = new Player({
@@ -34,8 +40,8 @@ const player = new Player({
 })
  
 const enemy = new Enemy({
-    imgSrc: '/frontend/assets/animations/player/player1.png',
-    frameRate: 9 // Number of actions in the image
+    imgSrc: '/frontend/assets/animations/player/idle_front_64x.png',
+    frameRate: 4 // Number of actions in the image
 })
 
 // Crownobject initialization
@@ -44,8 +50,16 @@ const crown = new Crown({
     frameRate: 1// Number of actions in the image
 })
 
+// Keyboard input handling for player movement
+const keys = {
+    w: { pressed: false },
+    a: { pressed: false },
+    s: { pressed: false },
+    d: { pressed: false },
+};
+
 // This function renders all objects infinitely
-function animate() {
+function animate(timestamp) {
     window.requestAnimationFrame(animate);
 
     // Clear the canvas
@@ -57,11 +71,14 @@ function animate() {
 
     // Update and draw the player
     player.draw();
+    // player.border();
     player.movementUpdate();
 
     // Draw the enemy and handle its turn
     enemy.checkPassability();
     enemy.decision();
+    enemy.action();
+    enemy.train();
     enemy.draw();
 
     // Draw the crown object
@@ -69,6 +86,18 @@ function animate() {
 
     // Control and customize cursor for the game
     cursorControl();
+    calculateFps(timestamp);
+}
+
+function calculateFps(timestamp){
+    frameCount++;
+    const deltaTime = timestamp - lastTime;
+    
+    if (deltaTime >= 1000) {
+        fps = frameCount;
+        frameCount = 0;
+        lastTime = timestamp;
+    }
 }
 
 function resizeCanvas() {
@@ -112,6 +141,10 @@ function drawMap() {
     }
 }
 
+function displayFPS() {
+    console.log('FPS:', fps);  // Display the FPS every second
+}
+
 // Function to draw the path on the grid
 // function drawPath() {
 
@@ -133,7 +166,9 @@ function drawMap() {
 //     }
 // }
 
-// Initial canvas size setup
-resizeCanvas();
+
+setInterval(displayFPS, 1000);  // Update FPS display every second
+
+resizeCanvas(); // Initial canvas size setup
 
 animate() // Function calling

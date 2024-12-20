@@ -8,7 +8,14 @@ class Enemy extends Sprite{
             y: canvas.height - tileSize
         }; 
 
+        this.speed = 4
         this.data = {}
+
+        // Hitbox
+        this.hitbox = {
+            w: tileSize - (tileSize - 34),
+            h: tileSize - (tileSize - 50)
+        }
 
     }
 
@@ -27,24 +34,15 @@ class Enemy extends Sprite{
                 down: passability[3]
             },
 
-            // Game environment 
-            environment: {
-                width: canvas.width,
-                height: canvas.height,
-                tileSize: tileSize
-            },
-
             // Game state
             state: {
                 position: this.position,
-                crownPosition: crown.position,
-                playerPostion: player.position,
+                playerPosition: player.position,
                 direction: direction
             },
             
             reward: reward,
             score: score,
-            n_games: n_games,
             gameOver: isGameOver
         }
 
@@ -52,99 +50,71 @@ class Enemy extends Sprite{
 
     decision() {
 
-        // Enemy's turn to move
-        if(isEnemyTurn){
+        // Get data
+        this.getData()
 
-            // Get data
-            this.getData()
-
-            // Handling data from callback
-            const handleReturnedDate = (returnedData) => {
-
-                // Returned data could be...
-                // [1,0,0,0] - right
-                // [0,1,0,0] - left
-                // [0,0,1,0] - up
-                // [0,0,0,1] - down
-
-                // [Right, DOWN, LEFT, UP]
-                const action = JSON.stringify(returnedData.action);
-                let new_dir = 0;
-                phase = returnedData.phase
-
-                if(action == JSON.stringify([1,0,0,0])){ // If right
-                    new_dir = 0
-                }
-                else if(action == JSON.stringify([0,1,0,0])){ // If left
-                    new_dir = 1
-                }
-                else if(action == JSON.stringify([0,0,1,0])){ // If up
-                    new_dir = 2
-                }
-                else{ // If down
-                    new_dir = 3
-                }
-
-                this.movementUpdate(new_dir)
-
-            }
-
-            // Sends data to python flask with web socket
-            sendData(this.data, handleReturnedDate);
-        }
+        // Sends data to python flask with web socket
+        sendData(this.data);
 
     }
 
-    movementUpdate(new_dir) {     
+    action(){
+        // Returned data could be...
+        // [1,0,0,0] - right
+        // [0,1,0,0] - left
+        // [0,0,1,0] - up
+        // [0,0,0,1] - down
 
-        // Set new direction
-        direction = new_dir
+        if(JSON.stringify(action) == JSON.stringify([1,0,0,0])){ // If right
 
-        // Move right left up down
-        if(new_dir == 0){
+            // Update direction, position and reward
+            direction = 0
             if(this.position.x + tileSize > canvas.width - tileSize) reward = -10;
-            else this.position.x += tileSize;
+            else this.position.x += this.speed;
+
         }
-        else if(new_dir == 1){
+        else if(JSON.stringify(action)  == JSON.stringify([0,1,0,0])){ // If left
+            
+            // Update direction, position and reward
+            direction = 1
             if(this.position.x - tileSize < 0) reward = -10;
             else {
-                this.position.x -= tileSize;
-                reward = 1
+                this.position.x -= this.speed;
             }
+            
         }
-        else if(new_dir == 2){
+        else if(JSON.stringify(action)  == JSON.stringify([0,0,1,0])){ // If up
+
+            // Update direction, position and reward
+            direction = 2
             if(this.position.y - tileSize < 0) reward = -10;
             else {
-                this.position.y -= tileSize;
-                reward = 1
+                this.position.y -= this.speed;
             }
+
         }
-        else{
+        else{ // If down
+
+            // Update direction, position and reward
+            direction = 3
             if(this.position.y + tileSize > canvas.height - tileSize) reward = -10;
             else{
-                this.position.y += tileSize;
-                reward = 1
+                this.position.y += this.speed;
+
             }
+
         }
 
-        // Exceeds the tile boundary
-        // this.isOutbound();
-
-        this.isKilled();
-
-        // Takes the crown
-        this.isTheKing();
+        steps++
 
         // 2nd training phase
-        this.moveTrainingPhase();
-
+        // this.moveTrainingPhase();
     }
 
-    moveTrainingPhase(){
-
-        console.log(this.position.x, this.position.y)
-
-        isEnemyTurn = false; // Change turn
+    train(){
+        
+        // Kill player
+        this.slayPlayer();
 
         //Re-evaluate tile passability and collisions
         this.checkPassability();
@@ -169,43 +139,29 @@ class Enemy extends Sprite{
 
     }
 
-    // Highlight turns
-    isTurn(){
+    slayPlayer(){
 
-        const borderWidth = 3;
-        c.strokeStyle = 'red';
-        c.lineWidth = borderWidth;
-        c.strokeRect(this.position.x + borderWidth / 2,this.position.y + borderWidth / 2, tileSize - borderWidth, tileSize - borderWidth);
-    
-    }
+        const isNearPlayer = [
 
-    isTheKing(){
+            // Player is at the right of the NPC
+            player.position.x > this.position.x && 
+            (this.position.x + (tileSize - this.hitbox.w) / 2),
+            
+            //
 
-        if(this.position.x == crown.position.x && this.position.y == crown.position.y) {
-            score++;
-            reward = 5;
-            console.log(score)
-        }
+        ]
 
-    }
+        if(isNearPlayer.some(coords => coords == 50)) {
 
-    isKilled(){
-
-        if(this.position.x == player.position.x && this.position.y == player.position.y) {
+            // Reset and give reward
             isGameOver = true;
-            reward = -10;
+            reward = 5;
+            this.position.x = 0;
+            this.position.y = canvas.height - tileSize;
+            score = Math.floor(steps / 5);
+            steps = 0; 
         }
     }
-
-    // isOutbound(){
-
-    //     if(this.position.x < 0 || this.position.x > canvas.width - tileSize ||
-    //         this.position.y < 0 || this.position.y > canvas.height - tileSize
-    //     ){
-    //         reward = -10
-    //     }
-        
-    // }
 
     checkPassability() {
 

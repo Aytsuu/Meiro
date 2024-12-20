@@ -1,41 +1,56 @@
+import eventlet
+eventlet.monkey_patch()  # Monkey-patch to make the standard library compatible with async
+
 from flask import Flask, render_template
 from flask_socketio import SocketIO, emit
 from flask_cors import CORS
 from DQN_agent import Train
-from threading import Lock
+import logging
+from concurrent.futures import ThreadPoolExecutor
+from time import time
+
+# Setup logging
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all origins
-socketio = SocketIO(app, cors_allowed_origins="*")  # Allow all origins
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode='eventlet')
 
-train_lock = Lock()
 train = None
+
+# Set up a thread pool executor with a maximum of 4 threads
+executor = ThreadPoolExecutor(max_workers=4)
 
 # Route to serve the HTML page with JavaScript
 @app.route('/')
 def home():
-    return render_template('index.html')
+    return 'Hello World!'
+
+def train_in_background(game_data): 
+
+    try:
+        if game_data['phase'] == 1:
+            final_move, phase = train.first_training(game_data)
+
+            data = {
+                'action': final_move,
+                'phase': phase
+            }
+
+            socketio.emit('receive_from_flask', data)
+        else:
+            train.second_training(game_data)
+
+    except Exception as e:
+        print(f"Error during training: {e}")
+        final_move = None
+        phase = "Error"
 
 @socketio.on('send_to_flask')
 def handle_send_to_flask(data):
-    
-    final_move = None
-    phase = None
 
-    # Handle the training phases
-    game_data = data
-    if game_data['phase'] == 1:
-        final_move, phase = train.first_training(game_data)
-    else:
-        print('MOVED TO 2ND PHASE')
-        train.second_training(game_data)
-    
-    # Send the response back to JavaScript
-    data = {
-        'action': final_move,
-        'phase': phase
-    }
-    emit('receive_from_flask', data)
+    # Use the thread pool to manage background tasks
+    executor.submit(train_in_background, data)
 
 if __name__ == '__main__':
     train = Train()
