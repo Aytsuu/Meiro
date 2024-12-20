@@ -29,10 +29,10 @@ canvas.height = tileSize * 16;
 
 // Player object initialization
 const player = new Player({
-    imgSrc: '/frontend/assets/animations/player/player2.png',
-    frameRate: 9// Number of actions in the image
+    imgSrc: '/frontend/assets/animations/player/idle_front_64x.png',
+    frameRate: 4// Number of actions in the image
 })
-
+ 
 const enemy = new Enemy({
     imgSrc: '/frontend/assets/animations/player/player1.png',
     frameRate: 9 // Number of actions in the image

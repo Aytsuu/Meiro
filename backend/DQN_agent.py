@@ -19,10 +19,10 @@ class Agent:
 
     def __init__(self):
         self.n_games = 0
-        self.epsilon = 0
+        self.epsilon = 0 # randomness
         self.gamma = 0.9
         self.memory = deque(maxlen=MAX_MEMORY)
-        self.model = Linear_QNet(11, 256, 3)
+        self.model = Linear_QNet(12, 256, 4)
         self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
 
     def get_state(self, game_data):
@@ -43,27 +43,28 @@ class Agent:
         # Crown position 
         crown_x = game_data['state']['crownPosition']['x']
         crown_y = game_data['state']['crownPosition']['y']
-
+    
 
         # State
         state = [
 
             # Passable/Impassable tile
-            game_data['collision']['straight'], 
             game_data['collision']['right'], 
             game_data['collision']['left'], 
+            game_data['collision']['up'], 
+            game_data['collision']['down'], 
 
 
             # Move direction
-            dir_l,
             dir_r,
+            dir_l,
             dir_u,
             dir_d,
 
 
             # Crown Position (Primary Objective)
-            crown_x < position_x, # Left
             crown_x > position_x, # right
+            crown_x < position_x, # left
             crown_y < position_y, # up
             crown_y > position_y  # down
 
@@ -92,15 +93,22 @@ class Agent:
     def get_action(self, state):
 
         # random moves: tradeoff exploration / exploitation
+        # self.epsilon = max(0.1, 80 - self.n_games)
         self.epsilon = 80 - self.n_games
-        final_move = [0,0,0]
-        if random.randint(0, 200) < self.epsilon:
-            move = random.randint(0, 2)
+        final_move = [0,0,0,0]
+        rand = random.randint(0,200)
+
+        print('EPSILON', self.epsilon)
+        print('RANDOM', rand)
+
+        if rand < self.epsilon:
+            move = random.randint(0, 3)
             final_move[move] = 1
         else:
             state0 = th.tensor(state, dtype=th.float)
             prediction = self.model(state0)
             move = th.argmax(prediction).item()
+            print('PREDICTION', prediction, 'MOVE', move)
             final_move[move] = 1
         
         return final_move
@@ -123,9 +131,8 @@ class Train:
         self.done = False
         self.score = 0
 
-
     def first_training(self, game_data):
-            
+    
         # Get old state
         self.state_old = self.agent.get_state(game_data)
 
@@ -137,10 +144,11 @@ class Train:
     def second_training(self, game_data):
 
         # Perform move and get new state
+        state_new = self.agent.get_state(game_data)
+
         self.reward = game_data['reward']
         self.done = game_data['gameOver']
         self.score = game_data['score']
-        state_new = self.agent.get_state(game_data)
 
         print(self.state_old, self.final_move, self.reward, state_new, self.done)
 
