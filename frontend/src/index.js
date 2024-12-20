@@ -53,10 +53,7 @@ function animate() {
 
     // Draw the map and the path
     drawMap();
-    drawPath();
-
-    // Take turns
-    !isEnemyTurn ? player.isTurn() : enemy.isTurn()
+    // drawPath();
 
     // Update and draw the player
     player.draw();
@@ -116,25 +113,25 @@ function drawMap() {
 }
 
 // Function to draw the path on the grid
-function drawPath() {
+// function drawPath() {
 
-    if(!isEnemyTurn){
-        // Set the stroke color for the path
-        c.fillStyle = '#93CBDF';
-        c.strokeStyle = '#93CBDF';
-        c.beginPath();
+//     if(!isEnemyTurn){
+//         // Set the stroke color for the path
+//         c.fillStyle = '#93CBDF';
+//         c.strokeStyle = '#93CBDF';
+//         c.beginPath();
 
-        // Loop through each point in the path
+//         // Loop through each point in the path
 
-        for (let i = 0; i < path.length; i++) {
-            const point = path[i];
+//         for (let i = 0; i < path.length; i++) {
+//             const point = path[i];
             
-            // Render the path on the canvas
-            c.fillRect((point.x/tileSize) * tileSize, (point.y/tileSize) * tileSize, tileSize, tileSize)
+//             // Render the path on the canvas
+//             c.fillRect((point.x/tileSize) * tileSize, (point.y/tileSize) * tileSize, tileSize, tileSize)
 
-        }
-    }
-}
+//         }
+//     }
+// }
 
 // Initial canvas size setup
 resizeCanvas();
