@@ -1,5 +1,5 @@
 // // Event listener to resize the canvas when the window is resized
-// window.addEventListener('resize', resizeCanvas);
+window.addEventListener('resize', resizeCanvas);
 
 // // Event listener for when the mouse button is first pressed down
 // canvas.addEventListener('mousedown', (e) => {
@@ -23,11 +23,11 @@
 // });
 
 // // Event listener for mouse movement while drawing
-// canvas.addEventListener('mousemove', (e) => {
+canvas.addEventListener('mousemove', (e) => {
 
-//     // Getting the x and y coordinates of the cursor for cursorControl function
-//     mouseX = e.offsetX;
-//     mouseY = e.offsetY;
+    // Getting the x and y coordinates of the cursor for cursorControl function
+    mouseX = e.offsetX;
+    mouseY = e.offsetY;
     
 //     // Only add  to path if in drawing mode
 //     if (!isDrawingPath){ 
@@ -52,7 +52,7 @@
 //         addToPath(e.offsetX, e.offsetY);
 //     }
 
-// });
+});
 
 // // Event listener for when the mouse button is released
 // canvas.addEventListener('mouseup', () => {
