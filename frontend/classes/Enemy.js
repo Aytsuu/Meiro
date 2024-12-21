@@ -4,7 +4,7 @@ class Enemy extends Sprite{
         
         // Initial position
         this.position = { 
-            x: 0, 
+            x: canvas.width - (tileSize * 2), 
             y: canvas.height - (tileSize * 2)
         }; 
 
@@ -13,10 +13,10 @@ class Enemy extends Sprite{
         this.data = {}
         this.currentState = new EnemyIdleState(this);
 
-        // Hitbox
+        //Initialize Hitbox
         this.hitbox = {
             w: (tileSize * 2) - ((tileSize * 2) - 100),
-            h: (tileSize * 2) - ((tileSize * 2) - 129)
+            h: (tileSize * 2) - ((tileSize * 2) - 120)
         }
     }
 
@@ -84,6 +84,7 @@ class Enemy extends Sprite{
             isGameOver = !isGameOver;
             score = 0
             direction = 0;
+            lastPlayerDirection = 3
         }
 
     }
@@ -115,15 +116,18 @@ class Enemy extends Sprite{
             // Reset and give reward
             isGameOver = true;
             reward = 10;
-            this.position.x = 0;
+            this.position.x = canvas.width - (tileSize * 2);
             this.position.y = canvas.height - (tileSize * 2);
             player.position.x = player.position.y = 0;
 
-            if(steps > 1000) score = 100;
-            if(steps > 5000) score = 50;
-            if(steps > 10000) score = 30;
-            if(steps > 15000) score = 20;
-            if(steps > 20000) score = 10;
+            if(steps > 100) score = 250;
+            if(steps > 1000) score = 200;
+            if(steps > 2000) score = 150;
+            if(steps > 3000) score = 100;
+            if(steps > 7000) score = 50;
+            if(steps > 13000) score = 30;
+            if(steps > 17000) score = 20;
+            if(steps > 20000) score = 5;
 
             steps = 0; 
         }
@@ -134,10 +138,10 @@ class Enemy extends Sprite{
         passability = [];
 
         // Movement points 
-        const point_right = {x: this.position.x + tileSize, y: this.position.y};
-        const point_left = {x: this.position.x - tileSize, u: this.position.y};
-        const point_up = {x: this.position.x, y: this.position.y - tileSize};
-        const point_down = {x: this.position.x, y: this.position.y + tileSize};
+        const point_right = {x: this.position.x + (tileSize * 2), y: this.position.y};
+        const point_left = {x: this.position.x - (tileSize * 2), u: this.position.y};
+        const point_up = {x: this.position.x, y: this.position.y - (tileSize * 2)};
+        const point_down = {x: this.position.x, y: this.position.y + (tileSize * 2)};
     
         // right
         passability.push(this.collisionDetection(point_right));
@@ -157,9 +161,9 @@ class Enemy extends Sprite{
 
         return (obstacles.some(obstacle => position.x == obstacle.x && position.y == obstacle.y) || 
                 position.x < 0 ||
-                position.x > canvas.width - tileSize ||
+                position.x > canvas.width - (tileSize * 2)||
                 position.y < 0 ||
-                position.y > canvas.height - tileSize)
+                position.y > canvas.height - (tileSize * 2))
 
     }
 
@@ -169,11 +173,19 @@ class Enemy extends Sprite{
         this.currentState.enter(); // Enter the new state
     }
 
+    getStateFromAction(action){
+        if (JSON.stringify(action) == JSON.stringify([1,0,0,0])) return new EnemyMoveRightState(this);
+        if (JSON.stringify(action)  == JSON.stringify([0,1,0,0])) return new EnemyMoveLeftState(this);
+        if (JSON.stringify(action)  == JSON.stringify([0,0,1,0])) return new EnemyMoveUpState(this);
+        if (JSON.stringify(action)  == JSON.stringify([0,0,0,1])) return new EnemyMoveDownState(this);
+        return new EnemyIdleState()
+    }
+
     action(){
-        this.currentState.handleInput();
+        // this.currentState.handleInput();
         this.currentState.update();
         steps++
-        console.log(action)
+        console.log(steps)
     }
 }
 
@@ -186,15 +198,6 @@ class EnemyIdleState extends State {
         const idle = ['moveRight', 'moveLeft', 'moveUp', 'moveDown']
         this.entity.spriteAnimation(idle[direction])
         this.entity.velocity = { x: 0, y: 0 }; // Stop movement
-    }
-
-    handleInput() {
-
-        if (JSON.stringify(action) == JSON.stringify([1,0,0,0])) this.entity.setState(new EnemyMoveRightState(this.entity));
-        else if (JSON.stringify(action)  == JSON.stringify([0,1,0,0])) this.entity.setState(new EnemyMoveLeftState(this.entity));
-        else if (JSON.stringify(action)  == JSON.stringify([0,0,1,0])) this.entity.setState(new EnemyMoveUpState(this.entity));
-        else if (JSON.stringify(action)  == JSON.stringify([0,0,0,1])) this.entity.setState(new EnemyMoveDownState(this.entity));
-
     }
 
     update() {
@@ -211,12 +214,6 @@ class EnemyMoveRightState extends State {
         this.entity.velocity = { x: -this.entity.speed, y: 0 };
     }
 
-    handleInput() {
-
-        if (!(JSON.stringify(action) == JSON.stringify([1,0,0,0]))) this.entity.setState(new EnemyIdleState(this.entity));
-
-    }
-
     update() {
         
         if(this.entity.position.x - ((tileSize * 2 - this.entity.hitbox.w) / 2) + this.entity.speed > canvas.width - (tileSize * 2)) reward = -10;
@@ -231,12 +228,6 @@ class EnemyMoveLeftState extends State {
         direction = 1
         this.entity.spriteAnimation('moveLeft');
         this.entity.velocity = { x: this.entity.speed, y: 0 };
-    }
-
-    handleInput() {
-    
-        if (!(JSON.stringify(action) == JSON.stringify([0,1,0,0]))) this.entity.setState(new EnemyIdleState(this.entity));
-
     }
 
     update() {
@@ -257,15 +248,9 @@ class EnemyMoveUpState extends State {
         this.entity.velocity = { x: 0, y: -this.entity.speed };
     }
 
-    handleInput() {
-
-        if (!(JSON.stringify(action) == JSON.stringify([0,0,1,0]))) this.entity.setState(new EnemyIdleState(this.entity));
-       
-    }
-
     update() {
         
-        if(this.entity.position.y + ((tileSize * 2 - this.entity.hitbox.h) / 2) - this.entity.speed < 0) reward = -10;
+        if(this.entity.position.y + ((tileSize * 2 - this.entity.hitbox.h) / 2) - this.entity.speed < 5) reward = -10;
         else {
             this.entity.position.y -= this.entity.speed;
         }
@@ -281,15 +266,9 @@ class EnemyMoveDownState extends State {
         this.entity.velocity = { x: 0, y: this.entity.speed };
     }
 
-    handleInput() {
-
-        if (!(JSON.stringify(action) == JSON.stringify([0,0,0,1]))) this.entity.setState(new EnemyIdleState(this.entity));
-
-    }
-
     update() {
 
-        if(this.entity.position.y - ((tileSize * 2 - this.entity.hitbox.h) / 2) + this.entity.speed > canvas.height - (tileSize * 2) - 15) reward = -10;
+        if(this.entity.position.y - ((tileSize * 2 - this.entity.hitbox.h) / 2) + this.entity.speed > canvas.height - (tileSize * 2) - 30) reward = -10;
         else{
             this.entity.position.y += this.entity.speed;
 

@@ -25,6 +25,8 @@ socket.on('receive_from_flask', (response) => {
     if(response){
         action = response.action
         phase = response.phase
+
+        enemy.setState(enemy.getStateFromAction(action))
     }
 
 });

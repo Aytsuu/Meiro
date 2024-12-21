@@ -124,6 +124,7 @@ class Train:
         self.reward = None
         self.done = False
         self.score = 0
+        self.total_score = 0
 
         # Initialize target model (a copy of the Q-network)
         self.target_model = Linear_QNet(12, 64, 4)
@@ -155,7 +156,7 @@ class Train:
         # remember
         self.agent.remember(self.state_old, self.final_move, self.reward, state_new, self.done)
 
-        if self.done:
+        if self.done:       
 
             # train long memory, plot result
             self.agent.n_games += 1

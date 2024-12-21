@@ -89,7 +89,7 @@ class Player extends Sprite {
         // Velocity to track movement direction
         this.velocity = { x: 0, y: 0 };
 
-        // Hitbox
+        // Initialize Hitbox
         this.hitbox = {
             w: tileSize - (tileSize - 27),
             h: tileSize - (tileSize - 50)
@@ -173,6 +173,7 @@ class MoveRightState extends State {
         lastPlayerDirection = 0
         this.entity.spriteAnimation('moveRight');
         this.entity.velocity = { x: this.entity.speed, y: 0 };
+        
     }
 
     handleInput() {

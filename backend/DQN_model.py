@@ -20,12 +20,21 @@ class Linear_QNet(nn.Module):
         model_folder_path = './model'
         if not os.path.exists(model_folder_path):
             os.makedirs(model_folder_path)
-        else:
-            self.model.load_state_dict(th.load('/model/model.pth'))
-            self.model.eval()
-
+            
         file_name = os.path.join(model_folder_path, file_name)
         th.save(self.state_dict(), file_name)
+
+    # def load(self, file_name='model.pth'):
+    #     model_folder_path = './model'
+    #     file_name = os.path.join(model_folder_path, file_name)
+
+    #     # Load the model state_dict from the file
+    #     if os.path.exists(file_name):
+    #         self.model.load_state_dict(th.load(file_name))
+    #         self.model.eval()
+    #         print(f"Model loaded from {file_name}")
+    #     else:
+    #         print(f"No model found at {file_name}")
 
 
 class QTrainer:
