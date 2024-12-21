@@ -29,7 +29,7 @@ socket.on('receive_from_flask', (response) => {
 
 });
 
-function sendData(data, callback){
+function sendData(data){
 
     // Emit an event to Flask (server) with the data
     socket.emit('send_to_flask', data);

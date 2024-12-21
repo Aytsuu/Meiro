@@ -3,11 +3,11 @@
 const canvas = document.querySelector('canvas')
 const c = canvas.getContext('2d')
 
-const tileSize = 64
+const tileSize = 128
 
 // Initializing canvas and tile size
-canvas.width = tileSize * 29;
-canvas.height = tileSize * 16;
+canvas.width = tileSize * 12;
+canvas.height = tileSize * 6;
 
 // Initializing global variables
 let setMove = false
@@ -25,26 +25,94 @@ let steps = 0;
 let phase = 1; // Training Phase
 let n_games = 0;
 let action=[0,0,0,0]; // NPC Action
+let isNearPlayer = false
+let lastPlayerDirection = 3 // Default facing front
 
 // Fps tracking
 let lastTime = 0;
 let frameCount = 0;
 let fps = 0;
 
-
-
 // Player object initialization
 const player = new Player({
-    imgSrc: '/frontend/assets/animations/player/idle_front_64x.png',
-    frameRate: 4// Number of actions in the image
-})
- 
-const enemy = new Enemy({
-    imgSrc: '/frontend/assets/animations/player/idle_front_64x.png',
-    frameRate: 4 // Number of actions in the image
+    imgSrc: '/frontend/assets/animations/player/idle_down.png',
+    frameRate: 11, // Number of actions in the image
+    role: 'player',
+    animations: {
+        idleRight: {
+            imgSrc: '/frontend/assets/animations/player/idle_right.png',
+            frameRate: 11,
+            frameBuffer: 4,
+        },
+        idleLeft: {
+            imgSrc: '/frontend/assets/animations/player/idle_left.png',
+            frameRate: 11,
+            frameBuffer: 4,
+        },
+        idleUp: {
+            imgSrc: '/frontend/assets/animations/player/idle_up.png',
+            frameRate: 11,
+            frameBuffer: 4,
+        },
+        idleDown: {
+            imgSrc: '/frontend/assets/animations/player/idle_down.png',
+            frameRate: 11,
+            frameBuffer: 4,
+        },
+        moveRight: {
+            imgSrc: '/frontend/assets/animations/player/move_right.png',
+            frameRate: 11,
+            frameBuffer: 4,
+        },
+        moveLeft: {
+            imgSrc: '/frontend/assets/animations/player/move_left.png',
+            frameRate: 11,
+            frameBuffer: 4,
+        },
+        moveUp: {
+            imgSrc: '/frontend/assets/animations/player/move_up.png',
+            frameRate: 11,
+            frameBuffer: 4,
+        },
+        moveDown: {
+            imgSrc: '/frontend/assets/animations/player/move_down.png',
+            frameRate: 11,
+            frameBuffer: 4,
+        }
+    }
 })
 
-// Crownobject initialization
+
+// Enemy object initialization 
+const enemy = new Enemy({
+    imgSrc: '/frontend/assets/animations/enemy/Enemy-Melee-Idle-S.png',
+    frameRate: 12, // Number of actions in the image
+    role: 'enemy',
+    animations: {
+        moveRight: {
+            imgSrc: '/frontend/assets/animations/enemy/Enemy-Melee-Idle-E.png',
+            frameRate: 12,
+            frameBuffer: 4,
+        },
+        moveLeft: {
+            imgSrc: '/frontend/assets/animations/enemy/Enemy-Melee-Idle-W.png',
+            frameRate: 12,
+            frameBuffer: 4,
+        },
+        moveUp: {
+            imgSrc: '/frontend/assets/animations/enemy/Enemy-Melee-Idle-N.png',
+            frameRate: 12,
+            frameBuffer: 4,
+        },
+        moveDown: {
+            imgSrc: '/frontend/assets/animations/enemy/Enemy-Melee-Idle-S.png',
+            frameRate: 12,
+            frameBuffer: 4,
+        },
+    }
+})
+
+// Crown object initialization
 const crown = new Crown({
     imgSrc: '/frontend/assets/animations/Crown_Gold.png',
     frameRate: 1// Number of actions in the image
@@ -83,6 +151,9 @@ function animate(timestamp) {
 
     // Draw the crown object
     crown.draw();
+
+    // Kill the player
+    enemy.slayPlayer();
 
     // Control and customize cursor for the game
     cursorControl();
@@ -133,7 +204,7 @@ function drawMap() {
     // Loop through each row and column of tiles
     for (let i = 0; i < canvas.height / tileSize; i++) {
         for (let j = 0; j < canvas.width / tileSize; j++) {
-            c.fillStyle = '#ECF8FF'
+            c.fillStyle = '#1B1B1B'
             // c.strokeStyle = 'white'
             // c.strokeRect(j * tileSize, i * tileSize, tileSize, tileSize)
             c.fillRect(j * tileSize, i * tileSize, tileSize, tileSize)

@@ -1,13 +1,13 @@
 import eventlet
 eventlet.monkey_patch()  # Monkey-patch to make the standard library compatible with async
 
-from flask import Flask, render_template
-from flask_socketio import SocketIO, emit
+from flask import Flask
+from flask_socketio import SocketIO
 from flask_cors import CORS
 from DQN_agent import Train
 import logging
 from concurrent.futures import ThreadPoolExecutor
-from time import time
+from engineio.payload import Payload
 
 # Setup logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -15,6 +15,7 @@ logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all origins
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode='eventlet')
+Payload.max_decode_packets = 500
 
 train = None
 
