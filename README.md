@@ -19,6 +19,6 @@
   <li>Tile Masking - control accessible tiles</li>
   <li>Bounding box collision (P.S Already implemented object collision detection, but still subject to optimization for better scalability)</li>
   <li>Frame-Based Animation (P.S Already implemented, but can be optimized for better scalability)</li>
-  <li>State Machine - for toggles</li>
+  <li>State Machine - for toggles (P.S Implemented)</li>
   <li>Field of View Algorithms</li>
 </ul>
