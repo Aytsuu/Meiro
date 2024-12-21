@@ -1,8 +1,8 @@
 <h1>Algorithms to be considered</h1>
 <h4>For AI:</h4>
 <ul>
-  <li>Reinforcement Learning (RL) (Implemented, but still lacking training)</li>
-  <li>Finite State Machine (FSM) (Implemented)</li>
+  <li>Reinforcement Learning (RL) (P.S Implemented, but still lacking training)</li>
+  <li>Finite State Machine (FSM) (P.S Implemented)</li>
   <li>Behavior Trees</li>
   <li>A* (A-Star) Algorithm</li>
   <li>Genetic Algorithms</li>
