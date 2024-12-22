@@ -42,7 +42,7 @@
 //                 this.position.x += targetPointX * lerpSpeed;
 //                 this.position.y += targePointY * lerpSpeed;
         
-//                 // Check if the player reached the target point
+//                 // Check if the entity reached the target point
 //                 if (
 //                     Math.abs(this.position.x - target.x) < 1 &&
 //                     Math.abs(this.position.y - target.y) < 1
@@ -78,17 +78,28 @@
 // }
 
 class Player extends Sprite {
-    constructor({ imgSrc, frameRate }) {
-        super({ imgSrc, frameRate });
+    constructor({ imgSrc, frameRate, role, animations}) {
+        super({ imgSrc, frameRate, role, animations });
 
         // Initial position
-        this.position = { x: 0, y: 0 };
+        this.position = { x: 0, y: 0};
         this.currentState = new IdleState(this); // Start with the idle state
-        this.speed = 5; // Movement speed
+        this.speed = 3.5; // Movement speed
 
         // Velocity to track movement direction
         this.velocity = { x: 0, y: 0 };
+
+        // Initialize Hitbox
+        this.hitbox = {
+            w: tileSize - (tileSize - 27),
+            h: tileSize - (tileSize - 50)
+        }
     }
+
+    // border(){
+    //     c.strokeStyle = "#00000";
+    //     c.strokeRect(this.position.x, this.position.y, tileSize, tileSize);
+    // }
 
     setState(newState) {
         this.currentState.exit();  // Exit the current state
@@ -100,31 +111,30 @@ class Player extends Sprite {
         this.currentState.handleInput();
         this.currentState.update();
     }
-}
 
-// Base State Class
-class State {
-    constructor(player) {
-        this.player = player;
-    }
-
-    enter() {}  // Called when entering the state
-    exit() {}   // Called when exiting the state
-    handleInput() {} // Handle user input in this state
-    update() {}  // Update logic for the state
+    spriteAnimation(name){
+        this.currentFrame = 0
+        this.img = this.animations[name].img
+        this.frameRate = this.animations[name].frameRate
+        this.frameBuffer = this.animations[name].frameBuffer
+    } 
 }
 
 // Idle State
 class IdleState extends State {
     enter() {
-        this.player.velocity = { x: 0, y: 0 }; // Stop movement
+
+        const idle = ['idleRight', 'idleLeft', 'idleUp', 'idleDown']
+
+        this.entity.spriteAnimation(idle[lastPlayerDirection])
+        this.entity.velocity = { x: 0, y: 0 }; // Stop movement
     }
 
     handleInput() {
-        if (keys.w.pressed) this.player.setState(new MoveUpState(this.player));
-        else if (keys.a.pressed) this.player.setState(new MoveLeftState(this.player));
-        else if (keys.s.pressed) this.player.setState(new MoveDownState(this.player));
-        else if (keys.d.pressed) this.player.setState(new MoveRightState(this.player));
+        if (keys.w.pressed) this.entity.setState(new MoveUpState(this.entity));
+        else if (keys.a.pressed) this.entity.setState(new MoveLeftState(this.entity));
+        else if (keys.s.pressed) this.entity.setState(new MoveDownState(this.entity));
+        else if (keys.d.pressed) this.entity.setState(new MoveRightState(this.entity));
     }
 
     update() {
@@ -132,62 +142,90 @@ class IdleState extends State {
     }
 }
 
+
+// FINITE STATE MACHINE (FSM) IMPLEMENTATION
+
 // Moving Left State
 class MoveLeftState extends State {
     enter() {
-        this.player.velocity = { x: -this.player.speed, y: 0 };
+
+        lastPlayerDirection = 1
+        this.entity.spriteAnimation('moveLeft');
+        this.entity.velocity = { x: -this.entity.speed, y: 0 };
     }
 
     handleInput() {
-        if (!keys.a.pressed) this.player.setState(new IdleState(this.player));
+        if (!keys.a.pressed) this.entity.setState(new IdleState(this.entity));
     }
 
     update() {
-        this.player.position.x += this.player.velocity.x;
+        
+        if(this.entity.position.x + ((tileSize - this.entity.hitbox.w) / 2) + this.entity.velocity.x > 5){
+            this.entity.position.x += this.entity.velocity.x;
+        }
     }
 }
 
 // Moving Right State
 class MoveRightState extends State {
     enter() {
-        this.player.velocity = { x: this.player.speed, y: 0 };
+
+        lastPlayerDirection = 0
+        this.entity.spriteAnimation('moveRight');
+        this.entity.velocity = { x: this.entity.speed, y: 0 };
+        
     }
 
     handleInput() {
-        if (!keys.d.pressed) this.player.setState(new IdleState(this.player));
+        if (!keys.d.pressed) this.entity.setState(new IdleState(this.entity));
     }
 
     update() {
-        this.player.position.x += this.player.velocity.x;
+
+        if(this.entity.position.x - ((tileSize - this.entity.hitbox.w) / 2) + this.entity.velocity.x < canvas.width - tileSize - 5){
+            this.entity.position.x += this.entity.velocity.x;
+        }
     }
 }
 
 // Moving Up State
 class MoveUpState extends State {
     enter() {
-        this.player.velocity = { x: 0, y: -this.player.speed };
+
+        lastPlayerDirection = 2
+        this.entity.spriteAnimation('moveUp');
+        this.entity.velocity = { x: 0, y: -this.entity.speed };
     }
 
     handleInput() {
-        if (!keys.w.pressed) this.player.setState(new IdleState(this.player));
+        if (!keys.w.pressed) this.entity.setState(new IdleState(this.entity));
     }
 
     update() {
-        this.player.position.y += this.player.velocity.y;
+        
+        if(this.entity.position.y + ((tileSize - this.entity.hitbox.h) / 2) + this.entity.velocity.y > 0){
+            this.entity.position.y += this.entity.velocity.y;
+        }
     }
 }
 
 // Moving Down State
 class MoveDownState extends State {
     enter() {
-        this.player.velocity = { x: 0, y: this.player.speed };
+        
+        lastPlayerDirection = 3
+        this.entity.spriteAnimation('moveDown');
+        this.entity.velocity = { x: 0, y: this.entity.speed };
     }
 
     handleInput() {
-        if (!keys.s.pressed) this.player.setState(new IdleState(this.player));
+        if (!keys.s.pressed) this.entity.setState(new IdleState(this.entity));
     }
 
     update() {
-        this.player.position.y += this.player.velocity.y;
+
+        if(this.entity.position.y - ((tileSize - this.entity.hitbox.h) / 2) + this.entity.velocity.y < canvas.height - tileSize - 20){
+            this.entity.position.y += this.entity.velocity.y;
+        }
     }
 }

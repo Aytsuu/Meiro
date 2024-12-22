@@ -1,16 +1,31 @@
 class Enemy extends Sprite{
-    constructor({ imgSrc, frameRate }) {
-        super({imgSrc, frameRate})
+    constructor({ imgSrc, frameRate, role, animations }) {
+        super({imgSrc, frameRate, role, animations})
         
         // Initial position
         this.position = { 
-            x: 0, 
-            y: canvas.height - tileSize
+            x: canvas.width - (tileSize * 2), 
+            y: canvas.height - (tileSize * 2)
         }; 
 
+        this.speed = 6
+        this.velocity = {x: 0, y: 0}
         this.data = {}
+        this.currentState = new EnemyIdleState(this);
 
+        //Initialize Hitbox
+        this.hitbox = {
+            w: (tileSize * 2) - ((tileSize * 2) - 100),
+            h: (tileSize * 2) - ((tileSize * 2) - 120)
+        }
     }
+
+    spriteAnimation(name){
+        this.currentFrame = 0
+        this.img = this.animations[name].img
+        this.frameRate = this.animations[name].frameRate
+        this.frameBuffer = this.animations[name].frameBuffer
+    } 
 
     getData(){
 
@@ -27,24 +42,15 @@ class Enemy extends Sprite{
                 down: passability[3]
             },
 
-            // Game environment 
-            environment: {
-                width: canvas.width,
-                height: canvas.height,
-                tileSize: tileSize
-            },
-
             // Game state
             state: {
                 position: this.position,
-                crownPosition: crown.position,
-                playerPostion: player.position,
+                playerPosition: player.position,
                 direction: direction
             },
             
             reward: reward,
             score: score,
-            n_games: n_games,
             gameOver: isGameOver
         }
 
@@ -52,99 +58,15 @@ class Enemy extends Sprite{
 
     decision() {
 
-        // Enemy's turn to move
-        if(isEnemyTurn){
+        // Get data
+        this.getData()
 
-            // Get data
-            this.getData()
-
-            // Handling data from callback
-            const handleReturnedDate = (returnedData) => {
-
-                // Returned data could be...
-                // [1,0,0,0] - right
-                // [0,1,0,0] - left
-                // [0,0,1,0] - up
-                // [0,0,0,1] - down
-
-                // [Right, DOWN, LEFT, UP]
-                const action = JSON.stringify(returnedData.action);
-                let new_dir = 0;
-                phase = returnedData.phase
-
-                if(action == JSON.stringify([1,0,0,0])){ // If right
-                    new_dir = 0
-                }
-                else if(action == JSON.stringify([0,1,0,0])){ // If left
-                    new_dir = 1
-                }
-                else if(action == JSON.stringify([0,0,1,0])){ // If up
-                    new_dir = 2
-                }
-                else{ // If down
-                    new_dir = 3
-                }
-
-                this.movementUpdate(new_dir)
-
-            }
-
-            // Sends data to python flask with web socket
-            sendData(this.data, handleReturnedDate);
-        }
+        // Sends data to python flask with web socket
+        sendData(this.data);
 
     }
 
-    movementUpdate(new_dir) {     
-
-        // Set new direction
-        direction = new_dir
-
-        // Move right left up down
-        if(new_dir == 0){
-            if(this.position.x + tileSize > canvas.width - tileSize) reward = -10;
-            else this.position.x += tileSize;
-        }
-        else if(new_dir == 1){
-            if(this.position.x - tileSize < 0) reward = -10;
-            else {
-                this.position.x -= tileSize;
-                reward = 1
-            }
-        }
-        else if(new_dir == 2){
-            if(this.position.y - tileSize < 0) reward = -10;
-            else {
-                this.position.y -= tileSize;
-                reward = 1
-            }
-        }
-        else{
-            if(this.position.y + tileSize > canvas.height - tileSize) reward = -10;
-            else{
-                this.position.y += tileSize;
-                reward = 1
-            }
-        }
-
-        // Exceeds the tile boundary
-        // this.isOutbound();
-
-        this.isKilled();
-
-        // Takes the crown
-        this.isTheKing();
-
-        // 2nd training phase
-        this.moveTrainingPhase();
-
-    }
-
-    moveTrainingPhase(){
-
-        console.log(this.position.x, this.position.y)
-
-        isEnemyTurn = false; // Change turn
+    train(){
 
         //Re-evaluate tile passability and collisions
         this.checkPassability();
@@ -162,60 +84,64 @@ class Enemy extends Sprite{
             isGameOver = !isGameOver;
             score = 0
             direction = 0;
-            player.position.x = player.position.y = 0;
-            this.position.x = 0;
-            this.position.y = canvas.height - tileSize;
+            lastPlayerDirection = 3
         }
 
     }
 
-    // Highlight turns
-    isTurn(){
+    slayPlayer(){
 
-        const borderWidth = 3;
-        c.strokeStyle = 'red';
-        c.lineWidth = borderWidth;
-        c.strokeRect(this.position.x + borderWidth / 2,this.position.y + borderWidth / 2, tileSize - borderWidth, tileSize - borderWidth);
-    
-    }
+        const newEnemyPosX = this.position.x + ((tileSize * 2) - this.hitbox.w) / 2
+        const newEnemyPosY = this.position.y + ((tileSize * 2) - this.hitbox.h) / 2
+        const newPlayerPosX = player.position.x + (tileSize - player.hitbox.w) / 2
+        const newPlayerPosY = player.position.y + (tileSize - player.hitbox.h) / 2
 
-    isTheKing(){
+        if(
+            // If enemey position x is greater than player position x
+            // Check if enemy hit box collides with player hitbox
+            (newEnemyPosX + this.hitbox.w >= newPlayerPosX && newEnemyPosX + this.hitbox.w <= newPlayerPosX + player.hitbox.w &&
+            (newEnemyPosY + this.hitbox.h >= newPlayerPosY && newEnemyPosY + this.hitbox.h <= newPlayerPosY + player.hitbox.h ||
+            newEnemyPosY >=  newPlayerPosY && newEnemyPosY <= newPlayerPosY + player.hitbox.h))
 
-        if(this.position.x == crown.position.x && this.position.y == crown.position.y) {
-            score++;
-            reward = 5;
-            console.log(score)
-        }
+            ||
 
-    }
+            // If player position x is greater than enemy position x
+            // Check if player hit box collides with enemy hitbox
+            (newPlayerPosX + player.hitbox.w >= newEnemyPosX && newPlayerPosX + player.hitbox.w <= newEnemyPosX + this.hitbox.w &&
+            (newPlayerPosY + player.hitbox.h >= newEnemyPosY && newPlayerPosY + player.hitbox.h <= newEnemyPosY + this.hitbox.h ||
+            newPlayerPosY >= newEnemyPosY && newPlayerPosY <= newEnemyPosY + this.hitbox.h))
 
-    isKilled(){
+        ) {
 
-        if(this.position.x == player.position.x && this.position.y == player.position.y) {
+            // Reset and give reward
             isGameOver = true;
-            reward = -10;
+            reward = 10;
+            this.position.x = canvas.width - (tileSize * 2);
+            this.position.y = canvas.height - (tileSize * 2);
+            player.position.x = player.position.y = 0;
+
+            if(steps > 100) score = 250;
+            if(steps > 1000) score = 200;
+            if(steps > 2000) score = 150;
+            if(steps > 3000) score = 100;
+            if(steps > 7000) score = 50;
+            if(steps > 13000) score = 30;
+            if(steps > 17000) score = 20;
+            if(steps > 20000) score = 5;
+
+            steps = 0; 
         }
     }
-
-    // isOutbound(){
-
-    //     if(this.position.x < 0 || this.position.x > canvas.width - tileSize ||
-    //         this.position.y < 0 || this.position.y > canvas.height - tileSize
-    //     ){
-    //         reward = -10
-    //     }
-        
-    // }
 
     checkPassability() {
 
         passability = [];
 
         // Movement points 
-        const point_right = {x: this.position.x + tileSize, y: this.position.y};
-        const point_left = {x: this.position.x - tileSize, u: this.position.y};
-        const point_up = {x: this.position.x, y: this.position.y - tileSize};
-        const point_down = {x: this.position.x, y: this.position.y + tileSize};
+        const point_right = {x: this.position.x + (tileSize * 2), y: this.position.y};
+        const point_left = {x: this.position.x - (tileSize * 2), u: this.position.y};
+        const point_up = {x: this.position.x, y: this.position.y - (tileSize * 2)};
+        const point_down = {x: this.position.x, y: this.position.y + (tileSize * 2)};
     
         // right
         passability.push(this.collisionDetection(point_right));
@@ -235,9 +161,118 @@ class Enemy extends Sprite{
 
         return (obstacles.some(obstacle => position.x == obstacle.x && position.y == obstacle.y) || 
                 position.x < 0 ||
-                position.x > canvas.width - tileSize ||
+                position.x > canvas.width - (tileSize * 2)||
                 position.y < 0 ||
-                position.y > canvas.height - tileSize)
+                position.y > canvas.height - (tileSize * 2))
 
     }
+
+    setState(newState) {
+        this.currentState.exit();  // Exit the current state
+        this.currentState = newState;
+        this.currentState.enter(); // Enter the new state
+    }
+
+    getStateFromAction(action){
+        if (JSON.stringify(action) == JSON.stringify([1,0,0,0])) return new EnemyMoveRightState(this);
+        if (JSON.stringify(action)  == JSON.stringify([0,1,0,0])) return new EnemyMoveLeftState(this);
+        if (JSON.stringify(action)  == JSON.stringify([0,0,1,0])) return new EnemyMoveUpState(this);
+        if (JSON.stringify(action)  == JSON.stringify([0,0,0,1])) return new EnemyMoveDownState(this);
+        return new EnemyIdleState()
+    }
+
+    action(){
+        // this.currentState.handleInput();
+        this.currentState.update();
+        steps++
+        console.log(steps)
+    }
 }
+
+
+// FINITE STATE MACHINE (FSM) IMPLEMENTATION
+
+class EnemyIdleState extends State {
+    enter() {
+
+        const idle = ['moveRight', 'moveLeft', 'moveUp', 'moveDown']
+        this.entity.spriteAnimation(idle[direction])
+        this.entity.velocity = { x: 0, y: 0 }; // Stop movement
+    }
+
+    update() {
+        // No movement in idle state
+    }
+}
+
+// Moving Left State
+class EnemyMoveRightState extends State {
+    enter() {
+
+        direction = 0
+        this.entity.spriteAnimation('moveRight');
+        this.entity.velocity = { x: -this.entity.speed, y: 0 };
+    }
+
+    update() {
+        
+        if(this.entity.position.x - ((tileSize * 2 - this.entity.hitbox.w) / 2) + this.entity.speed > canvas.width - (tileSize * 2)) reward = -10;
+        else this.entity.position.x += this.entity.speed;
+    }
+}
+
+// Moving Right State
+class EnemyMoveLeftState extends State {
+    enter() {
+
+        direction = 1
+        this.entity.spriteAnimation('moveLeft');
+        this.entity.velocity = { x: this.entity.speed, y: 0 };
+    }
+
+    update() {
+
+        if(this.entity.position.x + ((tileSize * 2 - this.entity.hitbox.w) / 2) - this.entity.speed < 0) reward = -10;
+        else {
+            this.entity.position.x -= this.entity.speed;
+        }
+    }
+}
+
+// Moving Up State
+class EnemyMoveUpState extends State {
+    enter() {
+
+        direction = 2
+        this.entity.spriteAnimation('moveUp');
+        this.entity.velocity = { x: 0, y: -this.entity.speed };
+    }
+
+    update() {
+        
+        if(this.entity.position.y + ((tileSize * 2 - this.entity.hitbox.h) / 2) - this.entity.speed < 5) reward = -10;
+        else {
+            this.entity.position.y -= this.entity.speed;
+        }
+    }
+}
+
+// Moving Down State
+class EnemyMoveDownState extends State {
+    enter() {
+        
+        direction = 3
+        this.entity.spriteAnimation('moveDown');
+        this.entity.velocity = { x: 0, y: this.entity.speed };
+    }
+
+    update() {
+
+        if(this.entity.position.y - ((tileSize * 2 - this.entity.hitbox.h) / 2) + this.entity.speed > canvas.height - (tileSize * 2) - 30) reward = -10;
+        else{
+            this.entity.position.y += this.entity.speed;
+
+        }
+    }
+}
+

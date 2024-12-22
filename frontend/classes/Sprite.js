@@ -1,5 +1,5 @@
 class Sprite{
-    constructor({position, imgSrc, frameRate = 1}){
+    constructor({position, imgSrc, frameRate = 1, role, animations}){
         
         this.img = new Image(); // Creates new image in memory
         this.img.onload = () => { // Waits till the image is loaded to the browser
@@ -8,7 +8,7 @@ class Sprite{
             // Takes the size of the image per frame
             this.size = {
                 width: this.img.width/frameRate,
-                height: 60
+                height: role == 'player' ? 128 : 256
             }
         }
         this.position = position;
@@ -18,7 +18,17 @@ class Sprite{
         // Initializing attributes for animation
         this.currentFrame = 0;
         this.elapsedFrame = 0; // A factor to determine when current frame will be incremeneted
-        this.frameBuffer = 6; // Animation speed, the greater the value, the slower it moves from one frame to another.
+        this.frameBuffer = 4; // Animation speed, the greater the value, the slower it moves from one frame to another.
+
+        this.animations = animations
+
+        if(this.animations){
+            for(let key in this.animations){
+                const img = new Image()
+                img.src = this.animations[key].imgSrc
+                this.animations[key].img = img
+            }
+        }
     }
 
     draw(){
@@ -27,16 +37,18 @@ class Sprite{
         if(!imageLoaded) return
 
         // Crop position and size, to display only one frame on the screen
+        
         const cropbox = {
             position: {
                 x: this.size.width * this.currentFrame, // Creates the illusion of motion by moving one frame to another
-                y: 5
+                y: 0
             },
             size: {
                 width: this.size.width,
                 height: this.size.height
             }
         }
+        
 
         // Drawing the image
         c.drawImage(this.img, cropbox.position.x, cropbox.position.y, cropbox.size.width, cropbox.size.height, this.position.x, this.position.y, this.size.width, this.size.height);
