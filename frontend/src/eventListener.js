@@ -1,5 +1,5 @@
 // // Event listener to resize the canvas when the window is resized
-window.addEventListener('resize', resizeCanvas);
+// window.addEventListener('resize', resizeCanvas);
 
 // // Event listener for when the mouse button is first pressed down
 // canvas.addEventListener('mousedown', (e) => {
@@ -109,6 +109,9 @@ window.addEventListener('keydown', (e) => {
         case 'd':
             keys.d.pressed = true;
             break;
+        case ' ':
+            keys.sp.pressed = true;
+            break;
     }
 });
 
@@ -126,20 +129,8 @@ window.addEventListener('keyup', (e) => {
         case 'd':
             keys.d.pressed = false;
             break;
+        case ' ':
+            keys.sp.pressed = false;
+            break;
     }
 });
-
-
-function cursorControl() {
-    // Confine mouse within canvas boundaries
-    if (mouseX < 0) mouseX = 0;
-    if (mouseX > canvas.width) mouseX = canvas.width;
-    if (mouseY < 0) mouseY = 0;
-    if (mouseY > canvas.height) mouseY = canvas.height;
-
-    // Draw a small circle at the mouse position
-    c.beginPath();
-    c.arc(mouseX, mouseY, 5, 0, Math.PI * 2);
-    c.fillStyle = 'black';
-    c.fill();
-}

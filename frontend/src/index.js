@@ -25,13 +25,18 @@ let steps = 0;
 let phase = 1; // Training Phase
 let n_games = 0;
 let action=[0,0,0,0]; // NPC Action
-let isNearPlayer = false
+let isNearPlayer = false;
 let lastPlayerDirection = 3 // Default facing front
 
 // Fps tracking
 let lastTime = 0;
 let frameCount = 0;
 let fps = 0;
+
+// Attacking
+let enemyAttackFlag = 0;
+let isEnemyAttack = false;
+let isParried = false
 
 // Player object initialization
 const player = new Player({
@@ -78,7 +83,27 @@ const player = new Player({
             imgSrc: '/frontend/assets/animations/player/move_down.png',
             frameRate: 11,
             frameBuffer: 4,
-        }
+        },
+        attackRight: {
+            imgSrc: '/frontend/assets/animations/player/attack_right.png',
+            frameRate: 11,
+            frameBuffer: 2,
+        },
+        attackLeft: {
+            imgSrc: '/frontend/assets/animations/player/attack_left.png',
+            frameRate: 11,
+            frameBuffer: 2,
+        },
+        attackUp: {
+            imgSrc: '/frontend/assets/animations/player/attack_up.png',
+            frameRate: 11,
+            frameBuffer: 2,
+        },
+        attackDown: {
+            imgSrc: '/frontend/assets/animations/player/attack_down.png',
+            frameRate: 11,
+            frameBuffer: 2,
+        },
     }
 })
 
@@ -109,6 +134,27 @@ const enemy = new Enemy({
             frameRate: 12,
             frameBuffer: 4,
         },
+        attackRight: {
+            imgSrc: '/frontend/assets/animations/enemy/Enemy-Melee-Attack-E.png',
+            frameRate: 24,
+            frameBuffer: 2,
+        },
+        attackLeft: {
+            imgSrc: '/frontend/assets/animations/enemy/Enemy-Melee-Attack-W.png',
+            frameRate: 24,
+            frameBuffer: 2,
+        },
+        attackUp: {
+            imgSrc: '/frontend/assets/animations/enemy/Enemy-Melee-Attack-N.png',
+            frameRate: 24,
+            frameBuffer: 2,
+        },
+        attackDown: {
+            imgSrc: '/frontend/assets/animations/enemy/Enemy-Melee-Attack-S.png',
+            frameRate: 24,
+            frameBuffer: 2,
+        },
+
     }
 })
 
@@ -124,6 +170,7 @@ const keys = {
     a: { pressed: false },
     s: { pressed: false },
     d: { pressed: false },
+    sp: { pressed: false },
 };
 
 // This function renders all objects infinitely
@@ -138,16 +185,17 @@ function animate(timestamp) {
     // drawPath();
 
     // Update and draw the player
-    player.draw();
-    // player.border();
     player.movementUpdate();
+    player.draw();
+    // player.drawHitbox();
 
     // Draw the enemy and handle its turn
     enemy.checkPassability();
     enemy.decision();
-    enemy.action();
+    enemy.movementUpdate();
     enemy.train();
     enemy.draw();
+    // enemy.drawHitbox();
 
     // Draw the crown object
     crown.draw();
@@ -171,19 +219,19 @@ function calculateFps(timestamp){
     }
 }
 
-function resizeCanvas() {
+// function resizeCanvas() {
 
-    if (!imageLoaded) return;
-    // Calculate the canvas size based on the window size
-    canvas.width = Math.floor(window.innerWidth / tileSize) * tileSize; // Full-width based on tile size
-    canvas.height = Math.floor(window.innerHeight / tileSize) * tileSize; // Full-height based on tile size
+//     if (!imageLoaded) return;
+//     // Calculate the canvas size based on the window size
+//     canvas.width = Math.floor(window.innerWidth / tileSize) * tileSize; // Full-width based on tile size
+//     canvas.height = Math.floor(window.innerHeight / tileSize) * tileSize; // Full-height based on tile size
 
-    // Recalculate the grid size (number of tiles in rows and columns)
-    player.size.width = tileSize;
-    player.size.height = tileSize;
-    enemy.size.width = tileSize;
-    enemy.size.height = tileSize;
-}
+//     // Recalculate the grid size (number of tiles in rows and columns)
+//     player.size.width = tileSize;
+//     player.size.height = tileSize;
+//     enemy.size.width = tileSize;
+//     enemy.size.height = tileSize;
+// }
 
 function cursorControl() {
     // Confine mouse within canvas boundaries
@@ -204,7 +252,7 @@ function drawMap() {
     // Loop through each row and column of tiles
     for (let i = 0; i < canvas.height / tileSize; i++) {
         for (let j = 0; j < canvas.width / tileSize; j++) {
-            c.fillStyle = '#1B1B1B'
+            c.fillStyle = '#4A4A4A'
             // c.strokeStyle = 'white'
             // c.strokeRect(j * tileSize, i * tileSize, tileSize, tileSize)
             c.fillRect(j * tileSize, i * tileSize, tileSize, tileSize)
@@ -240,6 +288,6 @@ function displayFPS() {
 
 setInterval(displayFPS, 1000);  // Update FPS display every second
 
-resizeCanvas(); // Initial canvas size setup
+// resizeCanvas(); // Initial canvas size setup
 
 animate() // Function calling

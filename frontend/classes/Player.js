@@ -84,7 +84,7 @@ class Player extends Sprite {
         // Initial position
         this.position = { x: 0, y: 0};
         this.currentState = new IdleState(this); // Start with the idle state
-        this.speed = 3.5; // Movement speed
+        this.speed = 15; // Movement speed
 
         // Velocity to track movement direction
         this.velocity = { x: 0, y: 0 };
@@ -96,10 +96,13 @@ class Player extends Sprite {
         }
     }
 
-    // border(){
-    //     c.strokeStyle = "#00000";
-    //     c.strokeRect(this.position.x, this.position.y, tileSize, tileSize);
-    // }
+    drawHitbox(){
+        const newPlayerPosX = this.position.x + (tileSize - this.hitbox.w) / 2
+        const newPlayerPosY = this.position.y + (tileSize - this.hitbox.h) / 2
+        
+        c.fillStyle = 'red';
+        c.fillRect(newPlayerPosX, newPlayerPosY, this.hitbox.w, this.hitbox.h);
+    }
 
     setState(newState) {
         this.currentState.exit();  // Exit the current state
@@ -120,14 +123,33 @@ class Player extends Sprite {
     } 
 }
 
+class AttackState extends State {
+    enter() {
+
+        const attack = ['attackRight', 'attackLeft', 'attackUp', 'attackDown']
+        this.entity.spriteAnimation(attack[lastPlayerDirection])
+        this.velocity = {x: 0, y: 0}
+
+    }
+
+    update() {
+
+        if(isEnemyAttack && this.entity.currentFrame == 4 && enemy.currentFrame == 14) isParried = true;
+
+        if(this.entity.currentFrame >= this.entity.frameRate - 1) this.entity.setState(new IdleState(this.entity));
+    
+
+    }
+}
+
 // Idle State
 class IdleState extends State {
     enter() {
 
         const idle = ['idleRight', 'idleLeft', 'idleUp', 'idleDown']
-
         this.entity.spriteAnimation(idle[lastPlayerDirection])
         this.entity.velocity = { x: 0, y: 0 }; // Stop movement
+
     }
 
     handleInput() {
@@ -135,6 +157,7 @@ class IdleState extends State {
         else if (keys.a.pressed) this.entity.setState(new MoveLeftState(this.entity));
         else if (keys.s.pressed) this.entity.setState(new MoveDownState(this.entity));
         else if (keys.d.pressed) this.entity.setState(new MoveRightState(this.entity));
+        else if (keys.sp.pressed) this.entity.setState(new AttackState(this.entity));
     }
 
     update() {
@@ -160,7 +183,7 @@ class MoveLeftState extends State {
 
     update() {
         
-        if(this.entity.position.x + ((tileSize - this.entity.hitbox.w) / 2) + this.entity.velocity.x > 5){
+        if(this.entity.position.x + ((tileSize - this.entity.hitbox.w) / 2) + this.entity.velocity.x > 8){
             this.entity.position.x += this.entity.velocity.x;
         }
     }
@@ -224,7 +247,7 @@ class MoveDownState extends State {
 
     update() {
 
-        if(this.entity.position.y - ((tileSize - this.entity.hitbox.h) / 2) + this.entity.velocity.y < canvas.height - tileSize - 20){
+        if(this.entity.position.y - ((tileSize - this.entity.hitbox.h) / 2) + this.entity.velocity.y < canvas.height - tileSize - 15){
             this.entity.position.y += this.entity.velocity.y;
         }
     }

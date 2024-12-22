@@ -8,10 +8,10 @@ const socket = io.connect('http://127.0.0.1:5000', {
 });
 
 // Handle connection errors
-socket.on('connect_error', (error) => {
-    console.error('Connection error:', error);
-    alert('Unable to connect to the server. Please try again later.');
-});
+// socket.on('connect_error', (error) => {
+//     console.error('Connection error:', error);
+//     alert('Unable to connect to the server. Please try again later.');
+// });
 
 // Handle WebSocket disconnection
 socket.on('disconnect', () => {
@@ -20,13 +20,14 @@ socket.on('disconnect', () => {
 });
 
 // Listen for the response from Flask
+
 socket.on('receive_from_flask', (response) => {
 
     if(response){
         action = response.action
         phase = response.phase
 
-        enemy.setState(enemy.getStateFromAction(action))
+        if(!isEnemyAttack)  enemy.setState(enemy.getStateFromAction(action))
     }
 
 });
@@ -34,13 +35,13 @@ socket.on('receive_from_flask', (response) => {
 function sendData(data){
 
     // Emit an event to Flask (server) with the data
-    socket.emit('send_to_flask', data);
+    if(!isEnemyAttack) socket.emit('send_to_flask', data);
 
 }
 
 function sendResponse(data){
 
     // Emit an event to Flask (server) with the data
-    socket.emit('send_to_flask', data);
+    if(!isEnemyAttack) socket.emit('send_to_flask', data);
 
 }

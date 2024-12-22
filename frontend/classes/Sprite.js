@@ -34,7 +34,7 @@ class Sprite{
     draw(){
 
         // Checks If image has been loaded to the browser
-        if(!imageLoaded) return
+        if(!imageLoaded) return;
 
         // Crop position and size, to display only one frame on the screen
         
