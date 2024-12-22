@@ -1,220 +1,205 @@
 
-// Initialize the canvas
-let maze = document.querySelector(".maze");
-let ctx = maze.getContext("2d");
-let generationComplete = false;
-
-let current;
-let goal;
-
-class Maze {
-  constructor(size, rows, columns) {
-    this.size = size;
-    this.columns = columns;
-    this.rows = rows;
-    this.grid = [];
-    this.stack = [];
-  }
-
-  // Set the grid: Create new this.grid array based on number of instance rows and columns
-  setup() {
-    for (let r = 0; r < this.rows; r++) {
-      let row = [];
-      for (let c = 0; c < this.columns; c++) {
-        // Create a new instance of the Cell class for each element in the 2D array and push to the maze grid array
-        let cell = new Cell(r, c, this.grid, this.size);
-        row.push(cell);
-      }
-      this.grid.push(row);
+const style = document.createElement('style');
+style.textContent = `
+    * { margin: 0; padding: 0; }
+    body, html { 
+        width: 100%; 
+        height: 100%; 
+        overflow: hidden;
+        background: black;
     }
-    // Set the starting grid
-    current = this.grid[0][0];
-    this.grid[this.rows - 1][this.columns - 1].goal = true;
-  }
-
-  // Draw the canvas by setting the size and placing the cells in the grid array on the canvas.
-  draw() {
-    maze.width = this.size;
-    maze.height = this.size;
-    maze.style.background = "black";
-    // Set the first cell as visited
-    current.visited = true;
-    // Loop through the 2d grid array and call the show method for each cell instance
-    for (let r = 0; r < this.rows; r++) {
-      for (let c = 0; c < this.columns; c++) {
-        let grid = this.grid;
-        grid[r][c].show(this.size, this.rows, this.columns);
-      }
+    canvas {
+        display: block;
+        position: fixed;
+        top: 0;
+        left: 0;
     }
-    // This function will assign the variable 'next' to random cell out of the current cells available neighbouting cells
-    let next = current.checkNeighbours();
-    // If there is a non visited neighbour cell
-    if (next) {
-      next.visited = true;
-      // Add the current cell to the stack for backtracking
-      this.stack.push(current);
-      // this function will highlight the current cell on the grid. The parameter columns is passed
-      // in order to set the size of the cell
-      current.highlight(this.columns);
-      // This function compares the current cell to the next cell and removes the relevant walls for each cell
-      current.removeWalls(current, next);
-      // Set the nect cell to the current cell
-      current = next;
+`;
+document.head.appendChild(style);
 
-      // Else if there are no available neighbours start backtracking using the stack
-    } else if (this.stack.length > 0) {
-      let cell = this.stack.pop();
-      current = cell;
-      current.highlight(this.columns);
-    }
-    // If no more items in the stack then all cells have been visted and the function can be exited
-    if (this.stack.length === 0) {
-      generationComplete = true;
-      return;
-    }
+// Set up canvas
+const canvas = document.getElementById("mazeCanvas");
+const ctx = canvas.getContext("2d");
 
-    // Recursively call the draw function. This will be called up until the stack is empty
-    window.requestAnimationFrame(() => {
-      this.draw();
+// Tile size for maze
+const tileSize = 128;
+
+// Resize canvas to fit the window
+function resizeCanvas() {
+    // Adjust canvas size based on the window size and tile size
+    canvas.width = Math.ceil(window.innerWidth / 32) * 32 + 32;
+    canvas.height = Math.ceil(window.innerHeight / 32) * 32 + 32;
+    
+    // Calculate the number of columns and rows
+    const cols = Math.ceil(canvas.width / 32);
+    const rows = Math.ceil(canvas.height / 32);
+    
+    return { cols, rows };
+}
+
+// Initialize maze grid
+let { cols, rows } = resizeCanvas();
+let maze = Array.from({ length: rows }, () => Array(cols).fill(1));
+
+// Directions for maze generation (up, right, down, left)
+const directions = [
+    [0, -1],  // Up
+    [1, 0],   // Right
+    [0, 1],   // Down
+    [-1, 0]   // Left
+];
+
+// Initialize maze to all walls
+function initializeMaze() {
+    maze = Array.from({ length: rows }, () => Array(cols).fill(1));
+}
+
+// Generate maze using recursive backtracking
+function generateMaze(x, y) {
+    maze[y][x] = 0;  // Mark current cell as part of the maze
+    
+    // Shuffle directions to ensure random path generation
+    shuffle([...directions]).forEach(([dx, dy]) => {
+        const nx = x + dx * 2;  // New x-coordinate
+        const ny = y + dy * 2;  // New y-coordinate
+        
+        // If the new cell is within bounds and is a wall, generate a path
+        if (isInBounds(nx, ny) && maze[ny][nx] === 1 &&
+            nx > 1 && ny > 1 && nx < cols - 2 && ny < rows - 2) {
+            maze[y + dy][x + dx] = 0;  // Remove wall between current and new cell
+            generateMaze(nx, ny);  // Recursively generate the maze
+        }
     });
-    //     setTimeout(() => {rd
-    //       this.draw();
-    //     }, 10);
-  }
 }
 
-class Cell {
-  // Constructor takes in the rowNum and colNum which will be used as coordinates to draw on the canvas.
-  constructor(rowNum, colNum, parentGrid, parentSize) {
-    this.rowNum = rowNum;
-    this.colNum = colNum;
-    this.visited = false;
-    this.walls = {
-      topWall: true,
-      rightWall: true,
-      bottomWall: true,
-      leftWall: true,
-    };
-    this.goal = false;
-    // parentGrid is passed in to enable the checkneighbours method.
-    // parentSize is passed in to set the size of each cell on the grid
-    this.parentGrid = parentGrid;
-    this.parentSize = parentSize;
-  }
-
-  checkNeighbours() {
-    let grid = this.parentGrid;
-    let row = this.rowNum;
-    let col = this.colNum;
-    let neighbours = [];
-
-    // The following lines push all available neighbours to the neighbours array
-    // undefined is returned where the index is out of bounds (edge cases)
-    let top = row !== 0 ? grid[row - 1][col] : undefined;
-    let right = col !== grid.length - 1 ? grid[row][col + 1] : undefined;
-    let bottom = row !== grid.length - 1 ? grid[row + 1][col] : undefined;
-    let left = col !== 0 ? grid[row][col - 1] : undefined;
-
-    // if the following are not 'undefined' then push them to the neighbours array
-    if (top && !top.visited) neighbours.push(top);
-    if (right && !right.visited) neighbours.push(right);
-    if (bottom && !bottom.visited) neighbours.push(bottom);
-    if (left && !left.visited) neighbours.push(left);
-
-    // Choose a random neighbour from the neighbours array
-    if (neighbours.length !== 0) {
-      let random = Math.floor(Math.random() * neighbours.length);
-      return neighbours[random];
-    } else {
-      return undefined;
+// Find a random position for special areas with some constraints
+function findRandomAreaPosition() {
+    const minDistance = Math.min(cols, rows) / 3;  // Minimum distance between areas
+    let attempts = 0;
+    const maxAttempts = 1000;  // Maximum attempts to find a valid position
+    
+    while (attempts < maxAttempts) {
+        const x = Math.floor(Math.random() * (cols - 6)) + 3;
+        const y = Math.floor(Math.random() * (rows - 6)) + 3;
+        
+        // Check if the position is valid and sufficiently far from other areas
+        if (isValidAreaPosition(x, y) && isFarFromOtherAreas(x, y, minDistance)) {
+            return [x, y];
+        }
+        attempts++;
     }
-  }
+    return null;  // Return null if no valid position is found after max attempts
+}
 
-  // Wall drawing functions for each cell. Will be called if relevent wall is set to true in cell constructor
-  drawTopWall(x, y, size, columns, rows) {
-    ctx.beginPath();
-    ctx.moveTo(x, y);
-    ctx.lineTo(x + size / columns, y);
-    ctx.stroke();
-  }
-
-  drawRightWall(x, y, size, columns, rows) {
-    ctx.beginPath();
-    ctx.moveTo(x + size / columns, y);
-    ctx.lineTo(x + size / columns, y + size / rows);
-    ctx.stroke();
-  }
-
-  drawBottomWall(x, y, size, columns, rows) {
-    ctx.beginPath();
-    ctx.moveTo(x, y + size / rows);
-    ctx.lineTo(x + size / columns, y + size / rows);
-    ctx.stroke();
-  }
-
-  drawLeftWall(x, y, size, columns, rows) {
-    ctx.beginPath();
-    ctx.moveTo(x, y);
-    ctx.lineTo(x, y + size / rows);
-    ctx.stroke();
-  }
-
-  // Highlights the current cell on the grid. Columns is once again passed in to set the size of the grid.
-  highlight(columns) {
-    // Additions and subtractions added so the highlighted cell does cover the walls
-    let x = (this.colNum * this.parentSize) / columns + 1;
-    let y = (this.rowNum * this.parentSize) / columns + 1;
-    ctx.fillStyle = "purple";
-    ctx.fillRect(
-      x,
-      y,
-      this.parentSize / columns - 3,
-      this.parentSize / columns - 3
-    );
-  }
-
-  removeWalls(cell1, cell2) {
-    // compares to two cells on x axis
-    let x = cell1.colNum - cell2.colNum;
-    // Removes the relevant walls if there is a different on x axis
-    if (x === 1) {
-      cell1.walls.leftWall = false;
-      cell2.walls.rightWall = false;
-    } else if (x === -1) {
-      cell1.walls.rightWall = false;
-      cell2.walls.leftWall = false;
+// Check if the area is sufficiently far from other special areas
+function isFarFromOtherAreas(x, y, minDistance) {
+    for (let area of areas) {
+        const dx = x - area[0];
+        const dy = y - area[1];
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        if (distance < minDistance) return false;  // If too close, return false
     }
-    // compares to two cells on x axis
-    let y = cell1.rowNum - cell2.rowNum;
-    // Removes the relevant walls if there is a different on x axis
-    if (y === 1) {
-      cell1.walls.topWall = false;
-      cell2.walls.bottomWall = false;
-    } else if (y === -1) {
-      cell1.walls.bottomWall = false;
-      cell2.walls.topWall = false;
-    }
-  }
+    return true;
+}
 
-  // Draws each of the cells on the maze canvas
-  show(size, rows, columns) {
-    let x = (this.colNum * size) / columns;
-    let y = (this.rowNum * size) / rows;
-    // console.log(`x =${x}`);
-    // console.log(`y =${y}`);
-    ctx.strokeStyle = "#ffffff";
+// Check if a position is valid for placing a special area
+function isValidAreaPosition(x, y) {
+    for (let dy = -2; dy <= 4; dy++) {
+        for (let dx = -2; dx <= 4; dx++) {
+            const nx = x + dx;
+            const ny = y + dy;
+            if (!isInBounds(nx, ny)) return false;  // Position out of bounds
+            if (maze[ny][nx] === 2) return false;  // Area already occupied
+        }
+    }
+    return true;  // Position is valid
+}
+
+// Create a special area (a 3x3 block) and connect it to the maze
+function createSpecialArea(centerX, centerY) {
+    // Create a 3x3 open area
+    for (let y = centerY - 1; y <= centerY + 1; y++) {
+        for (let x = centerX - 1; x <= centerX + 1; x++) {
+            maze[y][x] = 0;
+        }
+    }
+    
+    let connected = false;
+    // Try to connect the special area to the maze by opening one neighboring wall
+    shuffle(directions).forEach(([dx, dy]) => {
+        if (!connected) {
+            let x = centerX + dx * 2;
+            let y = centerY + dy * 2;
+            if (isInBounds(x, y) && maze[y][x] === 0) {
+                maze[centerY + dy][centerX + dx] = 0;
+                connected = true;  // Mark as connected
+            }
+        }
+    });
+}
+
+// Check if coordinates are within maze bounds
+function isInBounds(x, y) {
+    return x >= 0 && y >= 0 && x < cols && y < rows;
+}
+
+// Shuffle array randomly (used for randomizing directions)
+function shuffle(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
+// Draw the maze on the canvas
+function drawMaze() {
+    // Fill entire canvas with black first
     ctx.fillStyle = "black";
-    ctx.lineWidth = 2;
-    if (this.walls.topWall) this.drawTopWall(x, y, size, columns, rows);
-    if (this.walls.rightWall) this.drawRightWall(x, y, size, columns, rows);
-    if (this.walls.bottomWall) this.drawBottomWall(x, y, size, columns, rows);
-    if (this.walls.leftWall) this.drawLeftWall(x, y, size, columns, rows);
-    if (this.visited) {
-      ctx.fillRect(x + 1, y + 1, size / columns - 2, size / rows - 2);
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Draw maze paths in white
+    ctx.fillStyle = "#ECF8FF";
+    for (let y = 0; y < rows; y++) {
+        for (let x = 0; x < cols; x++) {
+            if (maze[y][x] === 0) {
+                ctx.fillRect(x * 32, y * 32, 32, 32);
+            }
+        }
     }
-  }
 }
 
-// let newMaze = new Maze(600, 50, 50);
-// newMaze.setup();
-// newMaze.draw();
+// Array to store positions of special areas
+const areas = [];
+
+// Generate a new maze
+function generateNewMaze() {
+    areas.length = 0;  // Clear previous areas
+    initializeMaze();  // Initialize maze with walls
+    
+    // Start generation from the center of the maze for better distribution
+    const startX = Math.floor(cols / 2);
+    const startY = Math.floor(rows / 2);
+    generateMaze(startX, startY);
+    
+    // Create 3 special areas
+    for (let i = 0; i < 3; i++) {
+        const position = findRandomAreaPosition();
+        if (position) {
+            const [x, y] = position;
+            createSpecialArea(x, y);
+            areas.push([x, y]);  // Add the area to the list
+        }
+    }
+    
+    drawMaze();  // Draw the maze on the canvas
+}
+
+// Handle window resizing
+window.addEventListener('resize', () => {
+    ({ cols, rows } = resizeCanvas());  // Resize the canvas
+    generateNewMaze();  // Regenerate the maze after resizing
+});
+
+// Initial maze generation
+generateNewMaze();
