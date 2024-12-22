@@ -1,36 +1,18 @@
 
-const style = document.createElement('style');
-style.textContent = `
-    * { margin: 0; padding: 0; }
-    body, html { 
-        width: 100%; 
-        height: 100%; 
-        overflow: hidden;
-        background: black;
-    }
-    canvas {
-        display: block;
-        position: fixed;
-        top: 0;
-        left: 0;
-    }
-`;
-document.head.appendChild(style);
 
 // Set up canvas
 const canvas = document.getElementById("mazeCanvas");
 const ctx = canvas.getContext("2d");
 
 // Tile size for maze
-const tileSize = 128;
+const tileSize = 32;
+const pathDensity = 0.35; // Controls how many walls are removed to create additional paths
 
 // Resize canvas to fit the window
 function resizeCanvas() {
-    // Adjust canvas size based on the window size and tile size
     canvas.width = Math.ceil(window.innerWidth / 32) * 32 + 32;
     canvas.height = Math.ceil(window.innerHeight / 32) * 32 + 32;
     
-    // Calculate the number of columns and rows
     const cols = Math.ceil(canvas.width / 32);
     const rows = Math.ceil(canvas.height / 32);
     
@@ -41,7 +23,7 @@ function resizeCanvas() {
 let { cols, rows } = resizeCanvas();
 let maze = Array.from({ length: rows }, () => Array(cols).fill(1));
 
-// Directions for maze generation (up, right, down, left)
+// Directions for maze generation
 const directions = [
     [0, -1],  // Up
     [1, 0],   // Right
@@ -49,101 +31,102 @@ const directions = [
     [-1, 0]   // Left
 ];
 
-// Initialize maze to all walls
+// Initialize maze
 function initializeMaze() {
     maze = Array.from({ length: rows }, () => Array(cols).fill(1));
 }
 
-// Generate maze using recursive backtracking
+// Generate primary maze path using recursive backtracking
 function generateMaze(x, y) {
-    maze[y][x] = 0;  // Mark current cell as part of the maze
+    maze[y][x] = 0;
     
-    // Shuffle directions to ensure random path generation
-    shuffle([...directions]).forEach(([dx, dy]) => {
-        const nx = x + dx * 2;  // New x-coordinate
-        const ny = y + dy * 2;  // New y-coordinate
+    // Use a modified shuffle that favors horizontal movement slightly
+    const shuffledDirs = shuffleWithBias([...directions]);
+    
+    shuffledDirs.forEach(([dx, dy]) => {
+        const nx = x + dx * 2;
+        const ny = y + dy * 2;
         
-        // If the new cell is within bounds and is a wall, generate a path
         if (isInBounds(nx, ny) && maze[ny][nx] === 1 &&
             nx > 1 && ny > 1 && nx < cols - 2 && ny < rows - 2) {
-            maze[y + dy][x + dx] = 0;  // Remove wall between current and new cell
-            generateMaze(nx, ny);  // Recursively generate the maze
+            maze[y + dy][x + dx] = 0;
+            generateMaze(nx, ny);
         }
     });
 }
 
-// Find a random position for special areas with some constraints
-function findRandomAreaPosition() {
-    const minDistance = Math.min(cols, rows) / 3;  // Minimum distance between areas
-    let attempts = 0;
-    const maxAttempts = 1000;  // Maximum attempts to find a valid position
+// Shuffle with slight bias towards horizontal movement
+function shuffleWithBias(array) {
+    // Duplicate horizontal directions to increase their probability
+    const biasedArray = [...array];
+    for (let i = array.length - 1; i >= 0; i--) {
+        if (array[i][0] !== 0) { // If it's a horizontal direction
+            biasedArray.push(array[i]);
+        }
+    }
+    return shuffle(biasedArray);
+}
+
+// Create additional paths through the maze
+function createAdditionalPaths() {
+    const totalCells = (rows - 2) * (cols - 2);
+    const pathsToAdd = Math.floor(totalCells * pathDensity);
     
-    while (attempts < maxAttempts) {
-        const x = Math.floor(Math.random() * (cols - 6)) + 3;
-        const y = Math.floor(Math.random() * (rows - 6)) + 3;
+    for (let i = 0; i < pathsToAdd; i++) {
+        const x = 2 + Math.floor(Math.random() * (cols - 4));
+        const y = 2 + Math.floor(Math.random() * (rows - 4));
         
-        // Check if the position is valid and sufficiently far from other areas
-        if (isValidAreaPosition(x, y) && isFarFromOtherAreas(x, y, minDistance)) {
-            return [x, y];
-        }
-        attempts++;
-    }
-    return null;  // Return null if no valid position is found after max attempts
-}
-
-// Check if the area is sufficiently far from other special areas
-function isFarFromOtherAreas(x, y, minDistance) {
-    for (let area of areas) {
-        const dx = x - area[0];
-        const dy = y - area[1];
-        const distance = Math.sqrt(dx * dx + dy * dy);
-        if (distance < minDistance) return false;  // If too close, return false
-    }
-    return true;
-}
-
-// Check if a position is valid for placing a special area
-function isValidAreaPosition(x, y) {
-    for (let dy = -2; dy <= 4; dy++) {
-        for (let dx = -2; dx <= 4; dx++) {
-            const nx = x + dx;
-            const ny = y + dy;
-            if (!isInBounds(nx, ny)) return false;  // Position out of bounds
-            if (maze[ny][nx] === 2) return false;  // Area already occupied
+        if (maze[y][x] === 1) {
+            // Check if creating a path here would connect two existing paths
+            let adjacentPaths = 0;
+            directions.forEach(([dx, dy]) => {
+                if (isInBounds(x + dx, y + dy) && maze[y + dy][x + dx] === 0) {
+                    adjacentPaths++;
+                }
+            });
+            
+            // Only create new path if it connects existing paths
+            if (adjacentPaths >= 2) {
+                maze[y][x] = 0;
+            }
         }
     }
-    return true;  // Position is valid
 }
 
-// Create a special area (a 3x3 block) and connect it to the maze
+// Create a special area and connect it to the maze
 function createSpecialArea(centerX, centerY) {
-    // Create a 3x3 open area
+    // Create the area
     for (let y = centerY - 1; y <= centerY + 1; y++) {
         for (let x = centerX - 1; x <= centerX + 1; x++) {
-            maze[y][x] = 0;
+            if (isInBounds(x, y)) {
+                maze[y][x] = 0;
+            }
         }
     }
     
-    let connected = false;
-    // Try to connect the special area to the maze by opening one neighboring wall
+    // Ensure multiple connections to the maze
+    let connections = 0;
+    const requiredConnections = 2; // Minimum number of connections
+    
     shuffle(directions).forEach(([dx, dy]) => {
-        if (!connected) {
+        if (connections < requiredConnections) {
             let x = centerX + dx * 2;
             let y = centerY + dy * 2;
-            if (isInBounds(x, y) && maze[y][x] === 0) {
+            if (isInBounds(x, y)) {
                 maze[centerY + dy][centerX + dx] = 0;
-                connected = true;  // Mark as connected
+                maze[y][x] = 0;
+                connections++;
             }
         }
     });
 }
 
-// Check if coordinates are within maze bounds
+// Check if coordinates are within bounds
 function isInBounds(x, y) {
     return x >= 0 && y >= 0 && x < cols && y < rows;
 }
 
-// Shuffle array randomly (used for randomizing directions)
+// Shuffle array
 function shuffle(array) {
     for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -152,13 +135,11 @@ function shuffle(array) {
     return array;
 }
 
-// Draw the maze on the canvas
+// Draw the maze
 function drawMaze() {
-    // Fill entire canvas with black first
     ctx.fillStyle = "black";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
-    // Draw maze paths in white
     ctx.fillStyle = "#ECF8FF";
     for (let y = 0; y < rows; y++) {
         for (let x = 0; x < cols; x++) {
@@ -169,37 +150,48 @@ function drawMaze() {
     }
 }
 
-// Array to store positions of special areas
+// Array to store special area positions
 const areas = [];
 
-// Generate a new maze
+// Generate new maze
 function generateNewMaze() {
-    areas.length = 0;  // Clear previous areas
-    initializeMaze();  // Initialize maze with walls
+    areas.length = 0;
+    initializeMaze();
     
-    // Start generation from the center of the maze for better distribution
+    // Generate primary maze structure
     const startX = Math.floor(cols / 2);
     const startY = Math.floor(rows / 2);
     generateMaze(startX, startY);
     
-    // Create 3 special areas
-    for (let i = 0; i < 3; i++) {
-        const position = findRandomAreaPosition();
-        if (position) {
-            const [x, y] = position;
-            createSpecialArea(x, y);
-            areas.push([x, y]);  // Add the area to the list
-        }
-    }
+    // Create additional paths for better navigation
+    createAdditionalPaths();
     
-    drawMaze();  // Draw the maze on the canvas
+    // Create ally spawn area in top-left corner
+    const allyX = 3;
+    const allyY = 3;
+    createSpecialArea(allyX, allyY);
+    areas.push([allyX, allyY]);
+    
+    // Create enemy spawn area in bottom-right corner (modified)
+    const enemyX = cols - 4;
+    const enemyY = rows - 4;
+    createSpecialArea(enemyX, enemyY);
+    areas.push([enemyX, enemyY]);
+    
+    // Create crown area in the center-right
+    const crownX = Math.floor(cols * 0.75);
+    const crownY = Math.floor(rows * 0.5);
+    createSpecialArea(crownX, crownY);
+    areas.push([crownX, crownY]);
+    
+    drawMaze();
 }
 
 // Handle window resizing
 window.addEventListener('resize', () => {
-    ({ cols, rows } = resizeCanvas());  // Resize the canvas
-    generateNewMaze();  // Regenerate the maze after resizing
+    ({ cols, rows } = resizeCanvas());
+    generateNewMaze();
 });
 
-// Initial maze generation
+// Initial generation
 generateNewMaze();
