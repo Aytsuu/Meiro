@@ -213,21 +213,21 @@ function animate(timestamp) {
     // Draw the map and the path
     drawMap();
     // drawPath();
-
-    // Draw the enemy and handle its turn
-    enemy.checkPassability();
-    enemy.decision();
-    enemy.movementUpdate();
-    enemy.train();
     
     // enemy.drawHitbox();
 
     // Update and draw the player
     player.movementUpdate();
     player.focus();
-    enemy.draw();
     player.draw();
     // player.drawHitbox();
+
+    // Draw the enemy and handle its turn
+    enemy.checkPassability();
+    enemy.decision();
+    enemy.movementUpdate();
+    enemy.train();
+    enemy.draw();
 
     // Draw the crown object
     crown.draw();
