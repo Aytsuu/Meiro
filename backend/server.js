@@ -27,7 +27,10 @@ socket.on('receive_from_flask', (response) => {
         action = response.action
         phase = response.phase
 
-        if(!isEnemyAttack)  enemy.setState(enemy.getStateFromAction(action))
+        if((!isEnemyAttack) && JSON.stringify(action) != JSON.stringify(prev_action))  {
+            enemy.setState(enemy.getStateFromAction(action));
+            prev_action = action;
+        }
     }
 
 });

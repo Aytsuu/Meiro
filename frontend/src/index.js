@@ -24,7 +24,6 @@ let score = 0;
 let steps = 0;
 let phase = 1; // Training Phase
 let n_games = 0;
-let action=[0,0,0,0]; // NPC Action
 let isNearPlayer = false;
 let lastPlayerDirection = 3 // Default facing front
 
@@ -38,71 +37,88 @@ let enemyAttackFlag = 0;
 let isEnemyAttack = false;
 let isParried = false
 
+// NPC Action
+let action=[0,0,0,0];
+let prev_action = [];
+
+
 // Player object initialization
 const player = new Player({
     imgSrc: '/frontend/assets/animations/player/idle_down.png',
     frameRate: 11, // Number of actions in the image
-    role: 'player',
+    imgSize: 128,
     animations: {
         idleRight: {
             imgSrc: '/frontend/assets/animations/player/idle_right.png',
             frameRate: 11,
             frameBuffer: 4,
+            imgSize: 128,
         },
         idleLeft: {
             imgSrc: '/frontend/assets/animations/player/idle_left.png',
             frameRate: 11,
             frameBuffer: 4,
+            imgSize: 128,
         },
         idleUp: {
             imgSrc: '/frontend/assets/animations/player/idle_up.png',
             frameRate: 11,
             frameBuffer: 4,
+            imgSize: 128,
         },
         idleDown: {
             imgSrc: '/frontend/assets/animations/player/idle_down.png',
             frameRate: 11,
             frameBuffer: 4,
+            imgSize: 128,
         },
         moveRight: {
             imgSrc: '/frontend/assets/animations/player/move_right.png',
             frameRate: 11,
             frameBuffer: 4,
+            imgSize: 128,
         },
         moveLeft: {
             imgSrc: '/frontend/assets/animations/player/move_left.png',
             frameRate: 11,
             frameBuffer: 4,
+            imgSize: 128,
         },
         moveUp: {
             imgSrc: '/frontend/assets/animations/player/move_up.png',
             frameRate: 11,
             frameBuffer: 4,
+            imgSize: 128,
         },
         moveDown: {
             imgSrc: '/frontend/assets/animations/player/move_down.png',
             frameRate: 11,
             frameBuffer: 4,
+            imgSize: 128,
         },
         attackRight: {
             imgSrc: '/frontend/assets/animations/player/attack_right.png',
             frameRate: 11,
             frameBuffer: 2,
+            imgSize: 128,
         },
         attackLeft: {
             imgSrc: '/frontend/assets/animations/player/attack_left.png',
             frameRate: 11,
             frameBuffer: 2,
+            imgSize: 128,
         },
         attackUp: {
             imgSrc: '/frontend/assets/animations/player/attack_up.png',
             frameRate: 11,
             frameBuffer: 2,
+            imgSize: 128,
         },
         attackDown: {
             imgSrc: '/frontend/assets/animations/player/attack_down.png',
             frameRate: 11,
             frameBuffer: 2,
+            imgSize: 128,
         },
     }
 })
@@ -112,48 +128,62 @@ const player = new Player({
 const enemy = new Enemy({
     imgSrc: '/frontend/assets/animations/enemy/Enemy-Melee-Idle-S.png',
     frameRate: 12, // Number of actions in the image
-    role: 'enemy',
+    imgSize: 256,
     animations: {
         moveRight: {
             imgSrc: '/frontend/assets/animations/enemy/Enemy-Melee-Idle-E.png',
             frameRate: 12,
             frameBuffer: 4,
+            imgSize: 256,
         },
         moveLeft: {
             imgSrc: '/frontend/assets/animations/enemy/Enemy-Melee-Idle-W.png',
             frameRate: 12,
             frameBuffer: 4,
+            imgSize: 256,
         },
         moveUp: {
             imgSrc: '/frontend/assets/animations/enemy/Enemy-Melee-Idle-N.png',
             frameRate: 12,
             frameBuffer: 4,
+            imgSize: 256,
         },
         moveDown: {
             imgSrc: '/frontend/assets/animations/enemy/Enemy-Melee-Idle-S.png',
             frameRate: 12,
             frameBuffer: 4,
+            imgSize: 256,
         },
         attackRight: {
             imgSrc: '/frontend/assets/animations/enemy/Enemy-Melee-Attack-E.png',
             frameRate: 24,
             frameBuffer: 2,
+            imgSize: 256,
         },
         attackLeft: {
             imgSrc: '/frontend/assets/animations/enemy/Enemy-Melee-Attack-W.png',
             frameRate: 24,
             frameBuffer: 2,
+            imgSize: 256,
         },
         attackUp: {
             imgSrc: '/frontend/assets/animations/enemy/Enemy-Melee-Attack-N.png',
             frameRate: 24,
             frameBuffer: 2,
+            imgSize: 256,
         },
         attackDown: {
             imgSrc: '/frontend/assets/animations/enemy/Enemy-Melee-Attack-S.png',
             frameRate: 24,
             frameBuffer: 2,
+            imgSize: 256,
         },
+        fazed: {
+            imgSrc: '/frontend/assets/animations/enemy/Enemy-Melee-Fazed.png',
+            frameRate: 48,
+            frameBuffer: 3,
+            imgSize: 256,
+        }
 
     }
 })
@@ -187,7 +217,7 @@ function animate(timestamp) {
     // Update and draw the player
     player.movementUpdate();
     player.draw();
-    // player.drawHitbox();
+    player.drawHitbox();
 
     // Draw the enemy and handle its turn
     enemy.checkPassability();
@@ -195,7 +225,7 @@ function animate(timestamp) {
     enemy.movementUpdate();
     enemy.train();
     enemy.draw();
-    // enemy.drawHitbox();
+    enemy.drawHitbox();
 
     // Draw the crown object
     crown.draw();

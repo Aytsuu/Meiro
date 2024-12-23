@@ -1,13 +1,13 @@
 class Enemy extends Sprite{
-    constructor({ imgSrc, frameRate, role, animations }) {
-        super({imgSrc, frameRate, role, animations})
+    constructor({ imgSrc, frameRate, imgSize, animations }) {
+        super({imgSrc, frameRate, animations})
         
+        this.imgSize = imgSize;
         // Initial position
         this.position = { 
-            x: canvas.width - (tileSize * 2), 
-            y: canvas.height - (tileSize * 2)
+            x: canvas.width - (this.imgSize), 
+            y: canvas.height - (this.imgSize)
         }; 
-
         this.speed = 6
         this.velocity = {x: 0, y: 0}
         this.data = {}
@@ -15,17 +15,17 @@ class Enemy extends Sprite{
 
         //Initialize Hitbox
         this.hitbox = {
-            w: (tileSize * 2) - ((tileSize * 2) - 100),
-            h: (tileSize * 2) - ((tileSize * 2) - 120)
+            w: (this.imgSize) - ((this.imgSize) - 100),
+            h: (this.imgSize) - ((this.imgSize) - 120)
         }
     }
 
     drawHitbox(){
 
-        const newEnemyPosX = this.position.x + ((tileSize * 2) - this.hitbox.w) / 2
-        const newEnemyPosY = this.position.y + ((tileSize * 2) - this.hitbox.h) / 2
+        const newEnemyPosX = this.position.x + ((this.imgSize) - this.hitbox.w) / 2
+        const newEnemyPosY = this.position.y + ((this.imgSize) - this.hitbox.h) / 2
         
-        c.fillStyle = 'red';
+        c.fillStyle = 'rgba(255,0,0,30%)';
         c.fillRect(newEnemyPosX, newEnemyPosY, this.hitbox.w, this.hitbox.h);
     }
 
@@ -114,11 +114,13 @@ class Enemy extends Sprite{
 
     playerInRange(){
 
-        const newEnemyPosX = this.position.x + ((tileSize * 2) - this.hitbox.w) / 2
-        const newEnemyPosY = this.position.y + ((tileSize * 2) - this.hitbox.h) / 2
+        // New position x and y axis with consideration to the hitbox
+        const newEnemyPosX = this.position.x + ((this.imgSize) - this.hitbox.w) / 2
+        const newEnemyPosY = this.position.y + ((this.imgSize) - this.hitbox.h) / 2
         const newPlayerPosX = player.position.x + (tileSize - player.hitbox.w) / 2
         const newPlayerPosY = player.position.y + (tileSize - player.hitbox.h) / 2
 
+        // Attack at the direction of the player
         if(newPlayerPosX >= newEnemyPosX + (this.hitbox.w / 2) && newPlayerPosX <= newEnemyPosX + this.hitbox.w) direction = 0;
         if(newPlayerPosX + player.hitbox.w >= newEnemyPosX && newPlayerPosX + player.hitbox.w <= newEnemyPosX + (this.hitbox.w / 2)) direction = 1;
         if(newPlayerPosY + player.hitbox.h >= newEnemyPosY && newPlayerPosY + player.hitbox.h <= newEnemyPosY + (this.hitbox.h / 2)) direction = 2;
@@ -145,11 +147,11 @@ class Enemy extends Sprite{
     reset(){
         
         // Reset and give reward
-        // isGameOver = true;
-        // reward = 10;
-        // this.position.x = canvas.width - (tileSize * 2);
-        // this.position.y = canvas.height - (tileSize * 2);
-        // player.position.x = player.position.y = 0;
+        isGameOver = true;
+        reward = 10;
+        this.position.x = canvas.width - (this.imgSize);
+        this.position.y = canvas.height - (this.imgSize);
+        player.position.x = player.position.y = 0;
 
         if(steps > 100) score = 250;
         if(steps > 1000) score = 200;
@@ -168,13 +170,13 @@ class Enemy extends Sprite{
         passability = [];
 
         // Movement points 
-        const point_right = {x: this.position.x - ((tileSize * 2 - this.hitbox.w) / 2) + this.speed, y: this.position.y};
-        const point_left = {x: this.position.x + ((tileSize * 2 - this.hitbox.w) / 2) - this.speed, u: this.position.y};
-        const point_up = {x: this.position.x, y: this.position.y + ((tileSize * 2 - this.hitbox.h) / 2) - this.speed};
-        const point_down = {x: this.position.x, y: this.position.y - ((tileSize * 2 - this.hitbox.h) / 2) + this.speed};
+        const point_right = {x: this.position.x - ((this.imgSize - this.hitbox.w) / 2) + this.speed, y: this.position.y};
+        const point_left = {x: this.position.x + ((this.imgSize - this.hitbox.w) / 2) - this.speed, u: this.position.y};
+        const point_up = {x: this.position.x, y: this.position.y + ((this.imgSize - this.hitbox.h) / 2) - this.speed};
+        const point_down = {x: this.position.x, y: this.position.y - ((this.imgSize - this.hitbox.h) / 2) + this.speed};
     
         // right
-        passability.push(point_right.x > canvas.width - (tileSize * 2));
+        passability.push(point_right.x > canvas.width - (this.imgSize));
         
         // left
         passability.push(point_left.x < 0);
@@ -183,7 +185,7 @@ class Enemy extends Sprite{
         passability.push(point_up.y < 5) ;    
 
         //down
-        passability.push(point_down.y > canvas.height - (tileSize * 2) - 30);
+        passability.push(point_down.y > canvas.height - (this.imgSize) - 30);
 
     }
 
@@ -210,6 +212,25 @@ class Enemy extends Sprite{
 
 // FINITE STATE MACHINE (FSM) IMPLEMENTATION
 
+class EnemyFazedState extends State{
+    enter(){
+        
+        this.entity.spriteAnimation('fazed')
+
+    }
+    
+    update(){
+
+        if( this.entity.currentFrame >= this.entity.frameRate - 1){
+            isParried = false
+
+            isEnemyAttack = false;
+            enemyAttackFlag = 0     
+            this.entity.setState(this.entity.getStateFromAction(action));
+        }
+    }
+}
+
 class EnemyAttackState extends State{
     enter(){
 
@@ -219,7 +240,11 @@ class EnemyAttackState extends State{
     }
     update(){
 
-        isParried && console.log('Parried')
+        isParried && console.log('Parried Successfully')
+
+        if(isParried){
+            this.entity.setState(new EnemyFazedState(this.entity))
+        }
 
         // Check if the attack animation is completed
         if (this.entity.currentFrame >= this.entity.frameRate - 1) {
@@ -229,7 +254,6 @@ class EnemyAttackState extends State{
 
             isEnemyAttack = false;
             enemyAttackFlag = 0     
-            isParried = false
             this.entity.setState(this.entity.getStateFromAction(action));
         }
     }
@@ -241,7 +265,7 @@ class EnemyIdleState extends State {
 
         const idle = ['moveRight', 'moveLeft', 'moveUp', 'moveDown']
         this.entity.spriteAnimation(idle[direction])
-        this.entity.velocity = { x: 0, y: 0 }; // Stop movement
+        
     }
 
     update() {
@@ -260,7 +284,7 @@ class EnemyMoveRightState extends State {
 
     update() {
         
-        if(this.entity.position.x - ((tileSize * 2 - this.entity.hitbox.w) / 2) + this.entity.speed > canvas.width - (tileSize * 2)) reward = -10;
+        if(this.entity.position.x - ((this.entity.imgSize - this.entity.hitbox.w) / 2) + this.entity.speed > canvas.width - (this.entity.imgSize)) reward = -10;
         else this.entity.position.x += this.entity.speed;
     }
 }
@@ -276,7 +300,7 @@ class EnemyMoveLeftState extends State {
 
     update() {
 
-        if(this.entity.position.x + ((tileSize * 2 - this.entity.hitbox.w) / 2) - this.entity.speed < 0) reward = -10;
+        if(this.entity.position.x + ((this.entity.imgSize - this.entity.hitbox.w) / 2) - this.entity.speed < 0) reward = -10;
         else {
             this.entity.position.x -= this.entity.speed;
         }
@@ -294,7 +318,7 @@ class EnemyMoveUpState extends State {
 
     update() {
         
-        if(this.entity.position.y + ((tileSize * 2 - this.entity.hitbox.h) / 2) - this.entity.speed < 5) reward = -10;
+        if(this.entity.position.y + ((this.entity.imgSize - this.entity.hitbox.h) / 2) - this.entity.speed < 5) reward = -10;
         else {
             this.entity.position.y -= this.entity.speed;
         }
@@ -312,7 +336,7 @@ class EnemyMoveDownState extends State {
 
     update() {
 
-        if(this.entity.position.y - ((tileSize * 2 - this.entity.hitbox.h) / 2) + this.entity.speed > canvas.height - (tileSize * 2) - 30) reward = -10;
+        if(this.entity.position.y - ((this.entity.imgSize - this.entity.hitbox.h) / 2) + this.entity.speed > canvas.height - (this.entity.imgSize) - 30) reward = -10;
         else{
             this.entity.position.y += this.entity.speed;
 

@@ -73,14 +73,15 @@
 //         const borderWidth = 3;
 //         c.strokeStyle = 'green';
 //         c.lineWidth = borderWidth;
-//         c.strokeRect(this.position.x + borderWidth / 2,this.position.y + borderWidth / 2, tileSize - borderWidth, tileSize - borderWidth);
+//         c.strokeRect(this.position.x + borderWidth / 2,this.position.y + borderWidth / 2, this.imgSize - borderWidth, this.imgSize - borderWidth);
 //     }
 // }
 
 class Player extends Sprite {
-    constructor({ imgSrc, frameRate, role, animations}) {
-        super({ imgSrc, frameRate, role, animations });
+    constructor({ imgSrc, frameRate, imgSize, animations}) {
+        super({ imgSrc, frameRate, imgSize, animations });
 
+        this.imgSize = imgSize
         // Initial position
         this.position = { x: 0, y: 0};
         this.currentState = new IdleState(this); // Start with the idle state
@@ -91,16 +92,16 @@ class Player extends Sprite {
 
         // Initialize Hitbox
         this.hitbox = {
-            w: tileSize - (tileSize - 27),
-            h: tileSize - (tileSize - 50)
+            w: this.imgSize - (this.imgSize - 27),
+            h: this.imgSize - (this.imgSize - 50)
         }
     }
 
     drawHitbox(){
-        const newPlayerPosX = this.position.x + (tileSize - this.hitbox.w) / 2
-        const newPlayerPosY = this.position.y + (tileSize - this.hitbox.h) / 2
+        const newPlayerPosX = this.position.x + (this.imgSize - this.hitbox.w) / 2
+        const newPlayerPosY = this.position.y + (this.imgSize - this.hitbox.h) / 2
         
-        c.fillStyle = 'red';
+        c.fillStyle = 'rgba(255,0,0,30%)';
         c.fillRect(newPlayerPosX, newPlayerPosY, this.hitbox.w, this.hitbox.h);
     }
 
@@ -128,7 +129,6 @@ class AttackState extends State {
 
         const attack = ['attackRight', 'attackLeft', 'attackUp', 'attackDown']
         this.entity.spriteAnimation(attack[lastPlayerDirection])
-        this.velocity = {x: 0, y: 0}
 
     }
 
@@ -137,7 +137,6 @@ class AttackState extends State {
         if(isEnemyAttack && this.entity.currentFrame == 4 && enemy.currentFrame == 14) isParried = true;
 
         if(this.entity.currentFrame >= this.entity.frameRate - 1) this.entity.setState(new IdleState(this.entity));
-    
 
     }
 }
@@ -148,7 +147,6 @@ class IdleState extends State {
 
         const idle = ['idleRight', 'idleLeft', 'idleUp', 'idleDown']
         this.entity.spriteAnimation(idle[lastPlayerDirection])
-        this.entity.velocity = { x: 0, y: 0 }; // Stop movement
 
     }
 
@@ -183,7 +181,7 @@ class MoveLeftState extends State {
 
     update() {
         
-        if(this.entity.position.x + ((tileSize - this.entity.hitbox.w) / 2) + this.entity.velocity.x > 8){
+        if(this.entity.position.x + ((this.entity.imgSize - this.entity.hitbox.w) / 2) + this.entity.velocity.x > 8){
             this.entity.position.x += this.entity.velocity.x;
         }
     }
@@ -205,7 +203,7 @@ class MoveRightState extends State {
 
     update() {
 
-        if(this.entity.position.x - ((tileSize - this.entity.hitbox.w) / 2) + this.entity.velocity.x < canvas.width - tileSize - 5){
+        if(this.entity.position.x - ((this.entity.imgSize - this.entity.hitbox.w) / 2) + this.entity.velocity.x < canvas.width - this.entity.imgSize - 5){
             this.entity.position.x += this.entity.velocity.x;
         }
     }
@@ -226,7 +224,7 @@ class MoveUpState extends State {
 
     update() {
         
-        if(this.entity.position.y + ((tileSize - this.entity.hitbox.h) / 2) + this.entity.velocity.y > 0){
+        if(this.entity.position.y + ((this.entity.imgSize - this.entity.hitbox.h) / 2) + this.entity.velocity.y > 0){
             this.entity.position.y += this.entity.velocity.y;
         }
     }
@@ -247,7 +245,7 @@ class MoveDownState extends State {
 
     update() {
 
-        if(this.entity.position.y - ((tileSize - this.entity.hitbox.h) / 2) + this.entity.velocity.y < canvas.height - tileSize - 15){
+        if(this.entity.position.y - ((this.entity.imgSize - this.entity.hitbox.h) / 2) + this.entity.velocity.y < canvas.height - this.entity.imgSize - 15){
             this.entity.position.y += this.entity.velocity.y;
         }
     }
