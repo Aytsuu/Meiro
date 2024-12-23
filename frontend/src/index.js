@@ -6,8 +6,8 @@ const c = canvas.getContext('2d')
 const tileSize = 128
 
 // Initializing canvas and tile size
-canvas.width = tileSize * 12;
-canvas.height = tileSize * 6;
+canvas.width = tileSize * 14;
+canvas.height = tileSize * 7;
 
 // Initializing global variables
 let setMove = false
@@ -51,49 +51,49 @@ const player = new Player({
         idleRight: {
             imgSrc: '/frontend/assets/animations/player/idle_right.png',
             frameRate: 11,
-            frameBuffer: 4,
+            frameBuffer: 3,
             imgSize: 128,
         },
         idleLeft: {
             imgSrc: '/frontend/assets/animations/player/idle_left.png',
             frameRate: 11,
-            frameBuffer: 4,
+            frameBuffer: 3,
             imgSize: 128,
         },
         idleUp: {
             imgSrc: '/frontend/assets/animations/player/idle_up.png',
             frameRate: 11,
-            frameBuffer: 4,
+            frameBuffer: 3,
             imgSize: 128,
         },
         idleDown: {
             imgSrc: '/frontend/assets/animations/player/idle_down.png',
             frameRate: 11,
-            frameBuffer: 4,
+            frameBuffer: 3,
             imgSize: 128,
         },
         moveRight: {
             imgSrc: '/frontend/assets/animations/player/move_right.png',
             frameRate: 11,
-            frameBuffer: 4,
+            frameBuffer: 3,
             imgSize: 128,
         },
         moveLeft: {
             imgSrc: '/frontend/assets/animations/player/move_left.png',
             frameRate: 11,
-            frameBuffer: 4,
+            frameBuffer: 3,
             imgSize: 128,
         },
         moveUp: {
             imgSrc: '/frontend/assets/animations/player/move_up.png',
             frameRate: 11,
-            frameBuffer: 4,
+            frameBuffer: 3,
             imgSize: 128,
         },
         moveDown: {
             imgSrc: '/frontend/assets/animations/player/move_down.png',
             frameRate: 11,
-            frameBuffer: 4,
+            frameBuffer: 3,
             imgSize: 128,
         },
         attackRight: {
@@ -214,18 +214,20 @@ function animate(timestamp) {
     drawMap();
     // drawPath();
 
-    // Update and draw the player
-    player.movementUpdate();
-    player.draw();
-    player.drawHitbox();
-
     // Draw the enemy and handle its turn
     enemy.checkPassability();
     enemy.decision();
     enemy.movementUpdate();
     enemy.train();
+    
+    // enemy.drawHitbox();
+
+    // Update and draw the player
+    player.movementUpdate();
+    player.focus();
     enemy.draw();
-    enemy.drawHitbox();
+    player.draw();
+    // player.drawHitbox();
 
     // Draw the crown object
     crown.draw();
@@ -282,7 +284,7 @@ function drawMap() {
     // Loop through each row and column of tiles
     for (let i = 0; i < canvas.height / tileSize; i++) {
         for (let j = 0; j < canvas.width / tileSize; j++) {
-            c.fillStyle = '#4A4A4A'
+            c.fillStyle = 'rgb(1,1,1)'
             // c.strokeStyle = 'white'
             // c.strokeRect(j * tileSize, i * tileSize, tileSize, tileSize)
             c.fillRect(j * tileSize, i * tileSize, tileSize, tileSize)

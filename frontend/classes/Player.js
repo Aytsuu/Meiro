@@ -95,6 +95,31 @@ class Player extends Sprite {
             w: this.imgSize - (this.imgSize - 27),
             h: this.imgSize - (this.imgSize - 50)
         }
+
+    }
+
+    focus(){ // Shadow casting
+
+        const rect = canvas.getBoundingClientRect();
+        let lightX = this.position.x + (this.imgSize / 2);
+        let lightY = this.position.y + (this.imgSize / 2);
+
+        // Create radial gradient for light
+        const gradient = c.createRadialGradient(
+            lightX, lightY, 0,
+            lightX, lightY, 200
+        );
+        gradient.addColorStop(0, 'rgba(255, 255, 200, 0.6)');
+        gradient.addColorStop(1, 'rgba(255, 255, 200, 0)');
+        
+        // Draw light
+        c.save();
+        c.globalCompositeOperation = 'lighter';
+        c.fillStyle = gradient;
+        c.beginPath();
+        c.arc(lightX, lightY, 200, 0, Math.PI * 2);
+        c.fill();
+        c.restore();
     }
 
     drawHitbox(){
