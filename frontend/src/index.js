@@ -4,11 +4,12 @@ const canvas = document.querySelector('canvas');
 const c = canvas.getContext('2d');
 
 // Constants
-const tileSize = 32;
-const pathDensity = 0.35;
+const tileSize = 62;  // Reduced from 64 to make cells smaller
+const pathDensity = 0.32;  // Slightly reduced to make fewer open spaces
 
 // Resize canvas and initialize maze dimensions
 function resizeCanvas() {
+    // Modified to fit window more precisely
     canvas.width = Math.ceil(window.innerWidth / tileSize) * tileSize;
     canvas.height = Math.ceil(window.innerHeight / tileSize) * tileSize;
     
@@ -41,7 +42,7 @@ function generateMaze(x, y) {
         const ny = y + dy * 2;
         
         if (isInBounds(nx, ny) && maze[ny][nx] === 1 &&
-            nx > 1 && ny > 1 && nx < cols - 2 && ny < rows - 2) {
+            nx > 0 && ny > 0 && nx < cols - 1 && ny < rows - 1) {
             maze[y + dy][x + dx] = 0;
             generateMaze(nx, ny);
         }
@@ -65,9 +66,9 @@ function createAdditionalPaths() {
     const pathsToAdd = Math.floor(totalCells * pathDensity);
     
     for (let i = 0; i < pathsToAdd; i++) {
-        const x = 2 + Math.floor(Math.random() * (cols - 4));
-        const y = 2 + Math.floor(Math.random() * (rows - 4));
-        
+        const x = 1 + Math.floor(Math.random() * (cols - 1));
+        const y = 1 + Math.floor(Math.random() * (rows - 1));
+
         if (maze[y][x] === 1) {
             let adjacentPaths = 0;
             directions.forEach(([dx, dy]) => {
@@ -84,18 +85,18 @@ function createAdditionalPaths() {
 }
 
 // Create a special area and connect it to the maze
-function createSpecialArea(centerX, centerY) {
-    for (let y = centerY - 1; y <= centerY + 1; y++) {
-        for (let x = centerX - 1; x <= centerX + 1; x++) {
+function createSpecialArea(centerX, centerY, size = 1) {
+    for (let y = centerY - size; y <= centerY + size; y++) {
+        for (let x = centerX - size; x <= centerX + size; x++) {
             if (isInBounds(x, y)) {
                 maze[y][x] = 0;
             }
         }
     }
-    
+
     let connections = 0;
     const requiredConnections = 2;
-    
+
     shuffle(directions).forEach(([dx, dy]) => {
         if (connections < requiredConnections) {
             let x = centerX + dx * 2;
@@ -265,26 +266,26 @@ function generateNewMaze() {
     
     // Create spawn areas and set positions
     const allyX = 3;
-    const allyY = 3;
+    const allyY = 4;
     createSpecialArea(allyX, allyY);
     
-    const enemyX = cols - 4;
+    const enemyX = cols - 5;
     const enemyY = rows - 4;
     createSpecialArea(enemyX, enemyY);
     
-    const crownX = Math.floor(cols * 0.75);
-    const crownY = Math.floor(rows * 0.5);
+    const crownX = Math.floor(cols * 0.7);
+    const crownY = Math.floor(rows * 0.45);
     createSpecialArea(crownX, crownY);
     
     // Set initial positions
     player.position = {
-        x: allyX * tileSize,
-        y: allyY * tileSize
+        x: allyX * 35,
+        y: allyY * 40
     };
     
     enemy.position = {
-        x: enemyX * tileSize,
-        y: enemyY * tileSize
+        x: enemyX * 60,
+        y: enemyY * 60
     };
     
     crown.position = {
