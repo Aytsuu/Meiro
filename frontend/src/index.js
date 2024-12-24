@@ -1,19 +1,149 @@
 
 // Creating canvas
-const canvas = document.querySelector('canvas')
-const c = canvas.getContext('2d')
+const canvas = document.querySelector('canvas');
+const c = canvas.getContext('2d');
 
-const tileSize = 128
+// Constants
+const tileSize = 62;  // Reduced from 64 to make cells smaller
+const pathDensity = 0.32;  // Slightly reduced to make fewer open spaces
 
-// Initializing canvas and tile size
-canvas.width = tileSize * 14;
-canvas.height = tileSize * 7;
+// Resize canvas and initialize maze dimensions
+function resizeCanvas() {
+    // Modified to fit window more precisely
+    canvas.width = Math.ceil(window.innerWidth / tileSize) * tileSize;
+    canvas.height = Math.ceil(window.innerHeight / tileSize) * tileSize;
+    
+    const cols = Math.floor(canvas.width / tileSize);
+    const rows = Math.floor(canvas.height / tileSize);
+    
+    return { cols, rows };
+}
+
+// Initialize maze grid
+let { cols, rows } = resizeCanvas();
+let maze = Array.from({ length: rows }, () => Array(cols).fill(1));
+
+// Directions for maze generation
+const directions = [
+    [0, -1],  // Up
+    [1, 0],   // Right
+    [0, 1],   // Down
+    [-1, 0]   // Left
+];
+
+// Generate primary maze path using recursive backtracking
+function generateMaze(x, y) {
+    maze[y][x] = 0;
+    
+    const shuffledDirs = shuffleWithBias([...directions]);
+    
+    shuffledDirs.forEach(([dx, dy]) => {
+        const nx = x + dx * 2;
+        const ny = y + dy * 2;
+        
+        if (isInBounds(nx, ny) && maze[ny][nx] === 1 &&
+            nx > 0 && ny > 0 && nx < cols - 1 && ny < rows - 1) {
+            maze[y + dy][x + dx] = 0;
+            generateMaze(nx, ny);
+        }
+    });
+}
+
+// Shuffle with slight bias towards horizontal movement
+function shuffleWithBias(array) {
+    const biasedArray = [...array];
+    for (let i = array.length - 1; i >= 0; i--) {
+        if (array[i][0] !== 0) {
+            biasedArray.push(array[i]);
+        }
+    }
+    return shuffle(biasedArray);
+}
+
+// Create additional paths through the maze
+function createAdditionalPaths() {
+    const totalCells = (rows - 2) * (cols - 2);
+    const pathsToAdd = Math.floor(totalCells * pathDensity);
+    
+    for (let i = 0; i < pathsToAdd; i++) {
+        const x = 1 + Math.floor(Math.random() * (cols - 1));
+        const y = 1 + Math.floor(Math.random() * (rows - 1));
+
+        if (maze[y][x] === 1) {
+            let adjacentPaths = 0;
+            directions.forEach(([dx, dy]) => {
+                if (isInBounds(x + dx, y + dy) && maze[y + dy][x + dx] === 0) {
+                    adjacentPaths++;
+                }
+            });
+            
+            if (adjacentPaths >= 2) {
+                maze[y][x] = 0;
+            }
+        }
+    }
+}
+
+// Create a special area and connect it to the maze
+function createSpecialArea(centerX, centerY, size = 1) {
+    for (let y = centerY - size; y <= centerY + size; y++) {
+        for (let x = centerX - size; x <= centerX + size; x++) {
+            if (isInBounds(x, y)) {
+                maze[y][x] = 0;
+            }
+        }
+    }
+
+    let connections = 0;
+    const requiredConnections = 2;
+
+    shuffle(directions).forEach(([dx, dy]) => {
+        if (connections < requiredConnections) {
+            let x = centerX + dx * 2;
+            let y = centerY + dy * 2;
+            if (isInBounds(x, y)) {
+                maze[centerY + dy][centerX + dx] = 0;
+                maze[y][x] = 0;
+                connections++;
+            }
+        }
+    });
+}
+
+// Check if coordinates are within bounds
+function isInBounds(x, y) {
+    return x >= 0 && y >= 0 && x < cols && y < rows;
+}
+
+// Shuffle array
+function shuffle(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
+// Draw the maze
+function drawMaze() {
+    c.fillStyle = "#1B1B1B";
+    c.fillRect(0, 0, canvas.width, canvas.height);
+    
+    c.fillStyle = "#ECF8FF";
+    for (let y = 0; y < rows; y++) {
+        for (let x = 0; x < cols; x++) {
+            if (maze[y][x] === 0) {
+                c.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
+            }
+        }
+    }
+}
 
 // Initializing global variables
-let setMove = false
-let path = []; // Stores the path points as an array of grid positions
-let obstacles = [] // Store obstacles positions
-let passability = [] // Store the passability of next action point (straight, right, left)
+let setMove = false;
+let path = [];
+let obstacles = [];
+let passability = [];
 let mouseX = 0;
 let mouseY = 0;
 let imageLoaded = false;
@@ -22,7 +152,7 @@ let direction = 0;
 let reward = 0;
 let score = 0;
 let steps = 0;
-let phase = 1; // Training Phase
+let phase = 1;
 let n_games = 0;
 let isNearPlayer = false;
 let lastPlayerDirection = 3 // Default facing front
@@ -93,42 +223,16 @@ const player = new Player({
         moveDown: {
             imgSrc: '/frontend/assets/animations/player/move_down.png',
             frameRate: 11,
-            frameBuffer: 3,
-            imgSize: 128,
-        },
-        attackRight: {
-            imgSrc: '/frontend/assets/animations/player/attack_right.png',
-            frameRate: 11,
-            frameBuffer: 2,
-            imgSize: 128,
-        },
-        attackLeft: {
-            imgSrc: '/frontend/assets/animations/player/attack_left.png',
-            frameRate: 11,
-            frameBuffer: 2,
-            imgSize: 128,
-        },
-        attackUp: {
-            imgSrc: '/frontend/assets/animations/player/attack_up.png',
-            frameRate: 11,
-            frameBuffer: 2,
-            imgSize: 128,
-        },
-        attackDown: {
-            imgSrc: '/frontend/assets/animations/player/attack_down.png',
-            frameRate: 11,
-            frameBuffer: 2,
-            imgSize: 128,
-        },
+            frameBuffer: 4,
+        }
     }
-})
-
+});
 
 // Enemy object initialization 
 const enemy = new Enemy({
     imgSrc: '/frontend/assets/animations/enemy/Enemy-Melee-Idle-S.png',
     frameRate: 12, // Number of actions in the image
-    imgSize: 256,
+    role: 'enemy',
     animations: {
         moveRight: {
             imgSrc: '/frontend/assets/animations/enemy/Enemy-Melee-Idle-E.png',
@@ -186,15 +290,15 @@ const enemy = new Enemy({
         }
 
     }
-})
+});
 
 // Crown object initialization
 const crown = new Crown({
     imgSrc: '/frontend/assets/animations/Crown_Gold.png',
-    frameRate: 1// Number of actions in the image
-})
+    frameRate: 1
+});
 
-// Keyboard input handling for player movement
+// Keyboard input handling
 const keys = {
     w: { pressed: false },
     a: { pressed: false },
@@ -203,20 +307,52 @@ const keys = {
     sp: { pressed: false },
 };
 
-// This function renders all objects infinitely
+// Generate new maze and set initial positions
+function generateNewMaze() {
+    // Clear existing maze
+    maze = Array.from({ length: rows }, () => Array(cols).fill(1));
+    
+    // Generate primary maze structure
+    generateMaze(Math.floor(cols / 2), Math.floor(rows / 2));
+    createAdditionalPaths();
+    
+    // Create spawn areas and set positions
+    const allyX = 3;
+    const allyY = 4;
+    createSpecialArea(allyX, allyY);
+    
+    const enemyX = cols - 5;
+    const enemyY = rows - 4;
+    createSpecialArea(enemyX, enemyY);
+    
+    const crownX = Math.floor(cols * 0.7);
+    const crownY = Math.floor(rows * 0.45);
+    createSpecialArea(crownX, crownY);
+    
+    // Set initial positions
+    player.position = {
+        x: allyX * 35,
+        y: allyY * 40
+    };
+    
+    enemy.position = {
+        x: enemyX * 60,
+        y: enemyY * 60
+    };
+    
+    crown.position = {
+        x: crownX * tileSize,
+        y: crownY * tileSize
+    };
+}
+
 function animate(timestamp) {
     window.requestAnimationFrame(animate);
-
-    // Clear the canvas
-    c.clearRect(0, 0, canvas.width, canvas.height);
-
-    // Draw the map and the path
-    drawMap();
-    // drawPath();
     
-    // enemy.drawHitbox();
-
-    // Update and draw the player
+    // Draw the maze
+    drawMaze();
+    
+    // Update and draw game objects
     player.movementUpdate();
     player.focus();
     player.draw();
@@ -228,19 +364,15 @@ function animate(timestamp) {
     enemy.movementUpdate();
     enemy.train();
     enemy.draw();
-
-    // Draw the crown object
+    
     crown.draw();
-
-    // Kill the player
+    
     enemy.slayPlayer();
-
-    // Control and customize cursor for the game
     cursorControl();
     calculateFps(timestamp);
 }
 
-function calculateFps(timestamp){
+function calculateFps(timestamp) {
     frameCount++;
     const deltaTime = timestamp - lastTime;
     
@@ -266,13 +398,11 @@ function calculateFps(timestamp){
 // }
 
 function cursorControl() {
-    // Confine mouse within canvas boundaries
     if (mouseX < 0) mouseX = 0;
     if (mouseX > canvas.width) mouseX = canvas.width;
     if (mouseY < 0) mouseY = 0;
     if (mouseY > canvas.height) mouseY = canvas.height;
 
-    // Draw a small circle at the mouse position
     c.beginPath();
     c.arc(mouseX, mouseY, 5, 0, Math.PI * 2);
     c.fillStyle = 'black';
@@ -293,33 +423,23 @@ function drawMap() {
 }
 
 function displayFPS() {
-    console.log('FPS:', fps);  // Display the FPS every second
+    console.log('FPS:', fps);
 }
 
-// Function to draw the path on the grid
-// function drawPath() {
+// Initialize the game
+function initGame() {
+    resizeCanvas();
+    generateNewMaze();
+    animate();
+}
 
-//     if(!isEnemyTurn){
-//         // Set the stroke color for the path
-//         c.fillStyle = '#93CBDF';
-//         c.strokeStyle = '#93CBDF';
-//         c.beginPath();
+// Event listeners
+window.addEventListener('resize', () => {
+    ({ cols, rows } = resizeCanvas());
+    generateNewMaze();
+});
 
-//         // Loop through each point in the path
+setInterval(displayFPS, 1000); // Update FPS display every second
 
-//         for (let i = 0; i < path.length; i++) {
-//             const point = path[i];
-            
-//             // Render the path on the canvas
-//             c.fillRect((point.x/tileSize) * tileSize, (point.y/tileSize) * tileSize, tileSize, tileSize)
-
-//         }
-//     }
-// }
-
-
-setInterval(displayFPS, 1000);  // Update FPS display every second
-
-// resizeCanvas(); // Initial canvas size setup
-
-animate() // Function calling
+// Start the game
+initGame();
