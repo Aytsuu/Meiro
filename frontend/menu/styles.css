@@ -1,0 +1,59 @@
+/* General Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Body Styling */
+body {
+    background-color: #1a1a1a;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center; /* Ensures everything is vertically centered */
+    overflow: hidden; /* Prevents scrolling */
+}
+
+/* Title Section */
+.title {
+    margin-bottom: 20vh; /* Adjust spacing between title and menu */
+}
+
+.title-image {
+    width: 400px;
+    height: auto;
+}
+
+/* Menu Styling */
+.menu {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 40px; /* Adjusted spacing between menu items */
+}
+
+/* Menu Item Styling */
+.menu-item {
+    font-family: 'Orbitron', sans-serif;
+    color: #808080;
+    font-size: 1.2rem;
+    text-align: center;
+    padding: 10px 0;
+    cursor: pointer;
+    transition: color 0.2s ease, transform 0.2s ease;
+    user-select: none;
+    letter-spacing: 2px; /* Adds some spacing for a polished look */
+    font-weight: 700; /* Bold for readability */
+}
+
+/* Hover and Selected States */
+.menu-item:hover, .menu-item.selected {
+    color: #ffffff;
+    transform: scale(1.1); /* Slight zoom effect on hover */
+}
+
+.menu-item:not(.selected):hover {
+    color: #a0a0a0;
+}
