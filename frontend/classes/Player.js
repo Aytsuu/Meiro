@@ -1,82 +1,3 @@
-
-// class Player extends Sprite{
-//     constructor({ imgSrc, frameRate }) {
-//         super({imgSrc, frameRate})
-        
-//         // Initial position
-//         this.position = { 
-//             x: 0, 
-//             y: 0 
-//         }; 
-
-//         this.currentTargetIndex = 0; // Index of the current target in the path
-
-//     }
-
-
-//     movementUpdate() {
-
-//         if (setMove && !isEnemyTurn && path.length > this.currentTargetIndex) {
-
-//             const target = path[this.currentTargetIndex];
-//             const lerpSpeed = 0.2; // Speed for smooth movement
-
-//             // Target point
-//             const targetPointX = (target.x - this.position.x)
-//             const targePointY = (target.y - this.position.y)
-
-
-//             // Object collision detection
-            
-//             if (obstacles.some(obstacle => this.position.x + targetPointX === obstacle.x && this.position.y + targePointY === obstacle.y)){
-
-//                 console.log('object detected')
-//                 setMove = false;
-//                 this.currentTargetIndex = 0;
-//                 path = []; // Clear the path
-//                 isEnemyTurn = true
-
-//             }else{
-
-//                 // Move toward the target point
-//                 this.position.x += targetPointX * lerpSpeed;
-//                 this.position.y += targePointY * lerpSpeed;
-        
-//                 // Check if the entity reached the target point
-//                 if (
-//                     Math.abs(this.position.x - target.x) < 1 &&
-//                     Math.abs(this.position.y - target.y) < 1
-//                 ) {
-
-//                     this.position.x = target.x;
-//                     this.position.y = target.y;
-        
-//                     // Move to the next target point
-//                     this.currentTargetIndex++;
-        
-//                     // If the end of the path is reached, stop moving and clear the path
-//                     if (this.currentTargetIndex >= path.length) {
-//                         setMove = false;
-//                         this.currentTargetIndex = 0;
-//                         path = []; // Clear the path
-//                         isEnemyTurn = true
-//                     }
-//                 }
-//             }
-
-//         }
-//     }
-
-//     // Highlight turns
-//     isTurn(){
-        
-//         const borderWidth = 3;
-//         c.strokeStyle = 'green';
-//         c.lineWidth = borderWidth;
-//         c.strokeRect(this.position.x + borderWidth / 2,this.position.y + borderWidth / 2, this.imgSize - borderWidth, this.imgSize - borderWidth);
-//     }
-// }
-
 class Player extends Sprite {
     constructor({ imgSrc, frameRate, imgSize, animations}) {
         super({ imgSrc, frameRate, imgSize, animations });
@@ -106,18 +27,19 @@ class Player extends Sprite {
 
         // Create radial gradient for light
         const gradient = c.createRadialGradient(
-            lightX, lightY, 0,
-            lightX, lightY, 200
+            lightX, lightY, 150,
+            lightX, lightY, 0
         );
-        gradient.addColorStop(0, 'rgba(255, 255, 200, 0.6)');
-        gradient.addColorStop(1, 'rgba(255, 255, 200, 0)');
+
+        gradient.addColorStop(0, 'rgba(0, 0, 0, 1)');
+        gradient.addColorStop(1, 'rgba(100, 100, 100, 0)');
         
         // Draw light
         c.save();
-        c.globalCompositeOperation = 'lighter';
+        c.globalCompositeOperation = 'darker';
         c.fillStyle = gradient;
         c.beginPath();
-        c.arc(lightX, lightY, 200, 0, Math.PI * 2);
+        c.arc(lightX, lightY, 2000, 0, Math.PI * 2);
         c.fill();
         c.restore();
     }
@@ -147,6 +69,58 @@ class Player extends Sprite {
         this.frameRate = this.animations[name].frameRate
         this.frameBuffer = this.animations[name].frameBuffer
     } 
+
+    checkMazeCollision(currentPosition, newPosition, maze) {
+        let size = canvas.height / maze.height;
+        size = Math.round(size);
+        let wallWidth = Math.ceil(size / 15); // Line width (wall thickness)
+    
+        // For each wall (each direction in maze), check if the character's movement intersects the wall
+        for (let y = 0; y < maze.height; y++) {
+            for (let x = 0; x < maze.width; x++) {
+                let node = maze.map[y][x];
+                let xPos = x * size + size / 2;
+                let yPos = y * size + size / 2;
+    
+                // Get the line segment representing the wall
+                let wallX = xPos + node.direction.x * size;
+                let wallY = yPos + node.direction.y * size;
+    
+                // Calculate bounding box for the wall (rectangle with width equal to line width)
+                let wallBoundingBox = {
+                    x: Math.min(xPos, wallX) - wallWidth / 2,
+                    y: Math.min(yPos, wallY) - wallWidth / 2,
+                    width: Math.abs(wallX - xPos) + wallWidth,
+                    height: Math.abs(wallY - yPos) + wallWidth
+                };
+    
+                // Calculate bounding box for the player
+                let playerBoundingBox = {
+                    x: Math.min(currentPosition.x, newPosition.x),
+                    y: Math.min(currentPosition.y, newPosition.y),
+                    width: Math.abs(newPosition.x - currentPosition.x) + this.hitbox.w,
+                    height: Math.abs(newPosition.y - currentPosition.y) + this.hitbox.h
+                };
+    
+                // Check if the player's bounding box intersects with the wall's bounding box
+                if (this.checkBoundingBoxCollision(playerBoundingBox, wallBoundingBox)) {
+                    return true; // Collision
+                }
+    
+            }
+        }
+        return false; // No collision
+    }
+
+    // Function to check if two bounding boxes intersect
+    checkBoundingBoxCollision(box1, box2) {
+        return (
+            box1.x <= box2.x + box2.width &&
+            box1.x + box1.width >= box2.x &&
+            box1.y <= box2.y + box2.height &&
+            box1.y + box1.height >= box2.y
+        );
+    }
 }
 
 class AttackState extends State {
@@ -205,8 +179,20 @@ class MoveLeftState extends State {
     }
 
     update() {
+
+        const currentPosition = {
+            x: this.entity.position.x + ((this.entity.imgSize - this.entity.hitbox.w) / 2), 
+            y: this.entity.position.y + ((this.entity.imgSize - this.entity.hitbox.h) / 2)
+        }
+
+        const newPosition = {
+            x: this.entity.position.x + ((this.entity.imgSize - this.entity.hitbox.w) / 2) + this.entity.velocity.x - 5, 
+            y: this.entity.position.y + ((this.entity.imgSize - this.entity.hitbox.h) / 2)
+        }
+
+        if(this.entity.checkMazeCollision(currentPosition, newPosition, maze)) return;
         
-        if(this.entity.position.x + ((this.entity.imgSize - this.entity.hitbox.w) / 2) + this.entity.velocity.x > 8){
+        if(newPosition.x > 8){
             this.entity.position.x += this.entity.velocity.x;
         }
     }
@@ -228,6 +214,18 @@ class MoveRightState extends State {
 
     update() {
 
+        const currentPosition = {
+            x: this.entity.position.x + ((this.entity.imgSize - this.entity.hitbox.w) / 2), 
+            y: this.entity.position.y + ((this.entity.imgSize - this.entity.hitbox.h) / 2) 
+        }
+
+        const newPosition = {
+            x: this.entity.position.x + ((this.entity.imgSize - this.entity.hitbox.w) / 2) + this.entity.velocity.x + 5, 
+            y: this.entity.position.y + ((this.entity.imgSize - this.entity.hitbox.h) / 2)
+        }
+
+        if(this.entity.checkMazeCollision(currentPosition, newPosition, maze)) return;
+
         if(this.entity.position.x - ((this.entity.imgSize - this.entity.hitbox.w) / 2) + this.entity.velocity.x < canvas.width - this.entity.imgSize - 5){
             this.entity.position.x += this.entity.velocity.x;
         }
@@ -248,8 +246,20 @@ class MoveUpState extends State {
     }
 
     update() {
+
+        const currentPosition = {
+            x: this.entity.position.x + ((this.entity.imgSize - this.entity.hitbox.w) / 2), 
+            y: this.entity.position.y + ((this.entity.imgSize - this.entity.hitbox.h) / 2)
+        }
+
+        const newPosition = {
+            x: this.entity.position.x + ((this.entity.imgSize - this.entity.hitbox.w) / 2), 
+            y: this.entity.position.y + ((this.entity.imgSize - this.entity.hitbox.h) / 2) + this.entity.velocity.y
+        }
+
+        if(this.entity.checkMazeCollision(currentPosition, newPosition, maze)) return;
         
-        if(this.entity.position.y + ((this.entity.imgSize - this.entity.hitbox.h) / 2) + this.entity.velocity.y > 0){
+        if(newPosition.y > 0){
             this.entity.position.y += this.entity.velocity.y;
         }
     }
@@ -269,6 +279,18 @@ class MoveDownState extends State {
     }
 
     update() {
+
+        const currentPosition = {
+            x: this.entity.position.x + ((this.entity.imgSize - this.entity.hitbox.w) / 2), 
+            y: this.entity.position.y + ((this.entity.imgSize - this.entity.hitbox.h) / 2)
+        }
+
+        const newPosition = {
+            x: this.entity.position.x + ((this.entity.imgSize - this.entity.hitbox.w) / 2), 
+            y: this.entity.position.y + ((this.entity.imgSize - this.entity.hitbox.h) / 2) + this.entity.velocity.y + 10
+        }
+
+        if(this.entity.checkMazeCollision(currentPosition, newPosition, maze)) return;
 
         if(this.entity.position.y - ((this.entity.imgSize - this.entity.hitbox.h) / 2) + this.entity.velocity.y < canvas.height - this.entity.imgSize - 15){
             this.entity.position.y += this.entity.velocity.y;

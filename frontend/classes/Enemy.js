@@ -1,12 +1,12 @@
 class Enemy extends Sprite{
-    constructor({ imgSrc, frameRate, imgSize, animations }) {
+    constructor({ imgSrc, frameRate, imgSize, position, animations }) {
         super({imgSrc, frameRate, animations})
         
         this.imgSize = imgSize;
         // Initial position
         this.position = { 
-            x: canvas.width - (this.imgSize), 
-            y: canvas.height - (this.imgSize)
+            x: position.x, 
+            y: position.y
         }; 
         this.speed = 6
         this.velocity = {x: 0, y: 0}
@@ -318,7 +318,7 @@ class EnemyMoveUpState extends State {
 
     update() {
         
-        if(this.entity.position.y + ((this.entity.imgSize - this.entity.hitbox.h) / 2) - this.entity.speed < 5) reward = -10;
+        if(this.entity.position.y + ((this.entity.imgSize - this.entity.hitbox.h) / 2) - this.entity.speed < -20) reward = -10;
         else {
             this.entity.position.y -= this.entity.speed;
         }
@@ -336,7 +336,7 @@ class EnemyMoveDownState extends State {
 
     update() {
 
-        if(this.entity.position.y - ((this.entity.imgSize - this.entity.hitbox.h) / 2) + this.entity.speed > canvas.height - (this.entity.imgSize) - 30) reward = -10;
+        if(this.entity.position.y - ((this.entity.imgSize - this.entity.hitbox.h) / 2) + this.entity.speed > canvas.height - (this.entity.imgSize) - 20) reward = -10;
         else{
             this.entity.position.y += this.entity.speed;
 
