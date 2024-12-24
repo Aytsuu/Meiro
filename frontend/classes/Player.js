@@ -6,14 +6,14 @@ class Player extends Sprite {
         // Initial position
         this.position = { x: 0, y: 0};
         this.currentState = new IdleState(this); // Start with the idle state
-        this.speed = 15; // Movement speed
+        this.speed = 4; // Movement speed
 
         // Velocity to track movement direction
         this.velocity = { x: 0, y: 0 };
 
         // Initialize Hitbox
         this.hitbox = {
-            w: this.imgSize - (this.imgSize - 27),
+            w: this.imgSize - (this.imgSize - 30),
             h: this.imgSize - (this.imgSize - 50)
         }
 
@@ -190,8 +190,10 @@ class MoveLeftState extends State {
             y: this.entity.position.y + ((this.entity.imgSize - this.entity.hitbox.h) / 2)
         }
 
+        // Check collision on walls
         if(this.entity.checkMazeCollision(currentPosition, newPosition, maze)) return;
         
+        // Check collision on canvas boundary
         if(newPosition.x > 8){
             this.entity.position.x += this.entity.velocity.x;
         }
@@ -224,8 +226,10 @@ class MoveRightState extends State {
             y: this.entity.position.y + ((this.entity.imgSize - this.entity.hitbox.h) / 2)
         }
 
+        // Check collision on walls
         if(this.entity.checkMazeCollision(currentPosition, newPosition, maze)) return;
 
+        // Check collision on canvas boundary
         if(this.entity.position.x - ((this.entity.imgSize - this.entity.hitbox.w) / 2) + this.entity.velocity.x < canvas.width - this.entity.imgSize - 5){
             this.entity.position.x += this.entity.velocity.x;
         }
@@ -257,8 +261,10 @@ class MoveUpState extends State {
             y: this.entity.position.y + ((this.entity.imgSize - this.entity.hitbox.h) / 2) + this.entity.velocity.y
         }
 
+        // Check collision on walls
         if(this.entity.checkMazeCollision(currentPosition, newPosition, maze)) return;
         
+        // Check collision on canvas boundary
         if(newPosition.y > 0){
             this.entity.position.y += this.entity.velocity.y;
         }
@@ -279,7 +285,7 @@ class MoveDownState extends State {
     }
 
     update() {
-
+        
         const currentPosition = {
             x: this.entity.position.x + ((this.entity.imgSize - this.entity.hitbox.w) / 2), 
             y: this.entity.position.y + ((this.entity.imgSize - this.entity.hitbox.h) / 2)
@@ -290,8 +296,10 @@ class MoveDownState extends State {
             y: this.entity.position.y + ((this.entity.imgSize - this.entity.hitbox.h) / 2) + this.entity.velocity.y + 10
         }
 
+        // Check collision on walls
         if(this.entity.checkMazeCollision(currentPosition, newPosition, maze)) return;
 
+        // Check collision on canvas boundary
         if(this.entity.position.y - ((this.entity.imgSize - this.entity.hitbox.h) / 2) + this.entity.velocity.y < canvas.height - this.entity.imgSize - 15){
             this.entity.position.y += this.entity.velocity.y;
         }

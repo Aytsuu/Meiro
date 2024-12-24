@@ -4,11 +4,6 @@ class View {
         c.strokeStyle = 'white'
         c.fillStyle = "rgb(50, 50, 50)";
         c.fillRect(0, 0, canvas.width, canvas.height);
-        // for(let i = 0; i < canvas.height; i += tileSize){
-        //     for(let j = 0; j < canvas.width; j += tileSize){
-        //         c.strokeRect(j, i, tileSize, tileSize)
-        //     }
-        // }
     }
   
     drawMaze(maze) {
@@ -20,8 +15,8 @@ class View {
   
         this.drawBackground();
   
-        c.fillStyle = "rgb(0, 255, 255)";
-        c.strokeStyle = "rgb(0, 255, 255)";
+        c.fillStyle = "rgb(120, 120, 120)";
+        c.strokeStyle = "rgb(120, 120, 120)";
         for (let y = 0; y < maze.height; y++) {
             for (let x = 0; x < maze.width; x++) {
                 let node = maze.map[y][x];
@@ -124,7 +119,6 @@ class View {
             maze.iterate();
           }
           updateFlag = true;
-          console.log(maze)
         }
         view.drawMaze(maze);
   

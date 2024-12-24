@@ -1,5 +1,5 @@
 class Enemy extends Sprite{
-    constructor({ imgSrc, frameRate, imgSize, position, animations }) {
+    constructor({ imgSrc, frameRate, imgSize, position, hitbox, animations }) {
         super({imgSrc, frameRate, animations})
         
         this.imgSize = imgSize;
@@ -15,15 +15,15 @@ class Enemy extends Sprite{
 
         //Initialize Hitbox
         this.hitbox = {
-            w: (this.imgSize) - ((this.imgSize) - 100),
-            h: (this.imgSize) - ((this.imgSize) - 120)
+            w: this.imgSize - (this.imgSize - hitbox.x),
+            h: this.imgSize - (this.imgSize - hitbox.y)
         }
     }
 
     drawHitbox(){
 
-        const newEnemyPosX = this.position.x + ((this.imgSize) - this.hitbox.w) / 2
-        const newEnemyPosY = this.position.y + ((this.imgSize) - this.hitbox.h) / 2
+        const newEnemyPosX = this.position.x + (this.imgSize - this.hitbox.w) / 2
+        const newEnemyPosY = this.position.y + (this.imgSize - this.hitbox.h) / 2
         
         c.fillStyle = 'rgba(255,0,0,30%)';
         c.fillRect(newEnemyPosX, newEnemyPosY, this.hitbox.w, this.hitbox.h);
@@ -149,8 +149,6 @@ class Enemy extends Sprite{
         // Reset and give reward
         isGameOver = true;
         reward = 10;
-        this.position.x = canvas.width - (this.imgSize);
-        this.position.y = canvas.height - (this.imgSize);
         player.position.x = player.position.y = 0;
 
         if(steps > 100) score = 250;
@@ -222,11 +220,11 @@ class EnemyFazedState extends State{
     update(){
 
         if( this.entity.currentFrame >= this.entity.frameRate - 1){
-            isParried = false
 
             isEnemyAttack = false;
             enemyAttackFlag = 0     
             this.entity.setState(this.entity.getStateFromAction(action));
+            shadowEssence.setState(new PickObject(shadowEssence))
         }
     }
 }

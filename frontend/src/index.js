@@ -38,7 +38,7 @@ let isParried = false
 let action=[0,0,0,0];
 let prev_action = [];
 
-// Initializing maze variables
+// Maze variables
 let mazeWidth = Math.round(canvas.width / (tileSize * 2) + 1);
 let mazeHeight = Math.round(canvas.height / (tileSize * 2));
 let updateFlag = false;
@@ -47,7 +47,7 @@ let updateFlag = false;
 let maze = new Maze(mazeWidth, mazeHeight);
 let view = new View();
 
-//
+// Object variables
 let essencePicked = false
 
 // Player object initialization
@@ -136,6 +136,7 @@ const enemy = new Enemy({
     frameRate: 12, // Number of actions in the image
     imgSize: 256,
     position: {x: canvas.width - 256, y: canvas.height - 256},
+    hitbox: {x: 100, y: 120},
     animations: {
         moveRight: {
             imgSrc: '/frontend/assets/animations/enemy/Enemy-Melee-Idle-E.png',
@@ -201,6 +202,7 @@ const shadowEssence = new Object({
     frameRate: 30, // Number of actions in the image
     imgSize: 128,
     position: {x: enemy.position.x, y: enemy.position.y},
+    hitbox: {x: 50, y: 50}
 });
 
 // Keyboard input handling for player movement
@@ -238,13 +240,14 @@ function animate(timestamp) {
 
     // Draw the shadow essence object
     if(isParried) {
+        shadowEssence.draw();
+        shadowEssence.pickObject();
+    }else{
         shadowEssence.position.x = enemy.position.x + enemy.hitbox.w / 2;
         shadowEssence.position.y = enemy.position.y + enemy.hitbox.h / 2;
-        shadowEssence.draw();
-
     }
 
-    // player.focus();
+    player.focus();
     // player.drawHitbox();
 
 
@@ -288,19 +291,6 @@ function cursorControl() {
     c.fillStyle = 'red';
     c.fill();
 }
-
-// Function to draw the map/grid
-// function drawMap() {
-//     // Loop through each row and column of tiles
-//     for (let i = 0; i < canvas.height / tileSize; i++) {
-//         for (let j = 0; j < canvas.width / tileSize; j++) {
-//             c.fillStyle = 'rgb(1,1,1)'
-//             // c.strokeStyle = 'white'
-//             // c.strokeRect(j * tileSize, i * tileSize, tileSize, tileSize)
-//             c.fillRect(j * tileSize, i * tileSize, tileSize, tileSize)
-//         }
-//     }
-// }
 
 function displayFPS() {
     console.log('FPS:', fps);
