@@ -22,11 +22,6 @@ train = None
 # Set up a thread pool executor with a maximum of 4 threads
 executor = ThreadPoolExecutor(max_workers=4)
 
-# Route to serve the HTML page with JavaScript
-@app.route('/')
-def home():
-    return 'Hello World!'
-
 def train_in_background(game_data): 
 
     try:

@@ -91,9 +91,7 @@ class Agent:
     def get_action(self, state):
 
         # random moves: tradeoff exploration / exploitation
-        # self.epsilon = max(0.1, 80 - self.n_games)
-
-        self.epsilon = 80 - self.n_games
+        self.epsilon = 0.9
         final_move = [0,0,0,0]
         rand = random.randint(0,200)
 
@@ -111,11 +109,15 @@ class Agent:
 class Train:
 
     def __init__(self):
+
+        self.agent = Agent()
+
+        # Loading previously trained model to continue the training
+        self.agent.model.load()
         
         self.plot_scores = []
         self.plot_mean_scores = []
         self.record = 0
-        self.agent = Agent()
 
         self.state_old = None
         self.final_move = None
@@ -170,7 +172,6 @@ class Train:
                 self.trainer.update_target()
 
             print('Game', self.agent.n_games, 'Score', self.score, 'Record:', self.record)
-        
             # self.plot_scores.append(self.score)
             # self.total_score += self.score
             # mean_score = self.total_score / self.agent.n_games

@@ -5,18 +5,19 @@ import torch.nn.functional as F
 import numpy as np
 import os
 
+# Neural Network
 class Linear_QNet(nn.Module):
     def __init__(self, input_size, hidden_size, output_size):
         super().__init__()
-        self.linear1 = nn.Linear(input_size, hidden_size)
-        self.linear2 = nn.Linear(hidden_size, output_size)
+        self.linear1 = nn.Linear(input_size, hidden_size) # input -> hidden layer
+        self.linear2 = nn.Linear(hidden_size, output_size) # hidden layer -> output
 
-    def forward(self, x):
+    def forward(self, x): # Executes the network
         x = F.relu(self.linear1(x))
         x = self.linear2(x)
         return x
 
-    def save(self, file_name='model.pth'):
+    def save(self, file_name='model.pth'): # Save trained model
         model_folder_path = './model'
         if not os.path.exists(model_folder_path):
             os.makedirs(model_folder_path)
@@ -24,17 +25,17 @@ class Linear_QNet(nn.Module):
         file_name = os.path.join(model_folder_path, file_name)
         th.save(self.state_dict(), file_name)
 
-    # def load(self, file_name='model.pth'):
-    #     model_folder_path = './model'
-    #     file_name = os.path.join(model_folder_path, file_name)
+    def load(self, file_name='model.pth'):
+        model_folder_path = './model'
+        file_name = os.path.join(model_folder_path, file_name)
 
-    #     # Load the model state_dict from the file
-    #     if os.path.exists(file_name):
-    #         self.model.load_state_dict(th.load(file_name))
-    #         self.model.eval()
-    #         print(f"Model loaded from {file_name}")
-    #     else:
-    #         print(f"No model found at {file_name}")
+        # Load the model state_dict from the file
+        if os.path.exists(file_name):
+            self.load_state_dict(th.load(file_name, weights_only=True))
+            self.eval()
+            print(f"Model loaded from {file_name}")
+        else:
+            print(f"No model found at {file_name}")
 
 
 class QTrainer:

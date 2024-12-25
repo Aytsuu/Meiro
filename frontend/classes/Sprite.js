@@ -1,14 +1,15 @@
 class Sprite{
-    constructor({position, imgSrc, frameRate = 1, role, animations}){
+    constructor({position, imgSrc, frameRate = 1, imgSize, animations}){
         
         this.img = new Image(); // Creates new image in memory
+        this.imgSize = imgSize
         this.img.onload = () => { // Waits till the image is loaded to the browser
             imageLoaded = true;
 
             // Takes the size of the image per frame
             this.size = {
                 width: this.img.width/frameRate,
-                height: role == 'player' ? 128 : 256
+                height: this.imgSize
             }
         }
         this.position = position;
@@ -34,25 +35,27 @@ class Sprite{
     draw(){
 
         // Checks If image has been loaded to the browser
-        if(!imageLoaded) return
+        if(imageLoaded){
 
-        // Crop position and size, to display only one frame on the screen
+            // Crop position and size, to display only one frame on the screen
         
-        const cropbox = {
-            position: {
-                x: this.size.width * this.currentFrame, // Creates the illusion of motion by moving one frame to another
-                y: 0
-            },
-            size: {
-                width: this.size.width,
-                height: this.size.height
+            const cropbox = {
+                position: {
+                    x: this.size.width * this.currentFrame, // Creates the illusion of motion by moving one frame to another
+                    y: 0
+                },
+                size: {
+                    width: this.size.width,
+                    height: this.size.height
+                }
             }
-        }
-        
+            
 
-        // Drawing the image
-        c.drawImage(this.img, cropbox.position.x, cropbox.position.y, cropbox.size.width, cropbox.size.height, this.position.x, this.position.y, this.size.width, this.size.height);
-        this.updateFrame(); // Updates the frame 
+            // Drawing the image
+            c.drawImage(this.img, cropbox.position.x, cropbox.position.y, cropbox.size.width, cropbox.size.height, this.position.x, this.position.y, this.size.width, this.size.height);
+            this.updateFrame(); // Updates the frame 
+
+        }
     }
 
     updateFrame(){

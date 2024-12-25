@@ -1,13 +1,13 @@
 class Enemy extends Sprite{
-    constructor({ imgSrc, frameRate, role, animations }) {
-        super({imgSrc, frameRate, role, animations})
+    constructor({ imgSrc, frameRate, imgSize, position, hitbox, animations }) {
+        super({imgSrc, frameRate, animations})
         
+        this.imgSize = imgSize;
         // Initial position
         this.position = { 
-            x: canvas.width - (tileSize * 2), 
-            y: canvas.height - (tileSize * 2)
+            x: position.x, 
+            y: position.y
         }; 
-
         this.speed = 6
         this.velocity = {x: 0, y: 0}
         this.data = {}
@@ -15,9 +15,18 @@ class Enemy extends Sprite{
 
         //Initialize Hitbox
         this.hitbox = {
-            w: (tileSize * 2) - ((tileSize * 2) - 100),
-            h: (tileSize * 2) - ((tileSize * 2) - 120)
+            w: this.imgSize - (this.imgSize - hitbox.x),
+            h: this.imgSize - (this.imgSize - hitbox.y)
         }
+    }
+
+    drawHitbox(){
+
+        const newEnemyPosX = this.position.x + (this.imgSize - this.hitbox.w) / 2
+        const newEnemyPosY = this.position.y + (this.imgSize - this.hitbox.h) / 2
+        
+        c.fillStyle = 'rgba(255,0,0,30%)';
+        c.fillRect(newEnemyPosX, newEnemyPosY, this.hitbox.w, this.hitbox.h);
     }
 
     spriteAnimation(name){
@@ -91,13 +100,34 @@ class Enemy extends Sprite{
 
     slayPlayer(){
 
-        const newEnemyPosX = this.position.x + ((tileSize * 2) - this.hitbox.w) / 2
-        const newEnemyPosY = this.position.y + ((tileSize * 2) - this.hitbox.h) / 2
+        const isPlayerInRange = this.playerInRange();
+
+        if(isPlayerInRange){
+            isEnemyAttack = true
+
+            if(enemyAttackFlag == 0) {
+                this.setState(new EnemyAttackState(this));
+                enemyAttackFlag = 1
+            }
+        }
+    }
+
+    playerInRange(){
+
+        // New position x and y axis with consideration to the hitbox
+        const newEnemyPosX = this.position.x + ((this.imgSize) - this.hitbox.w) / 2
+        const newEnemyPosY = this.position.y + ((this.imgSize) - this.hitbox.h) / 2
         const newPlayerPosX = player.position.x + (tileSize - player.hitbox.w) / 2
         const newPlayerPosY = player.position.y + (tileSize - player.hitbox.h) / 2
 
-        if(
-            // If enemey position x is greater than player position x
+        // Attack at the direction of the player
+        if(newPlayerPosX >= newEnemyPosX + (this.hitbox.w / 2) && newPlayerPosX <= newEnemyPosX + this.hitbox.w) direction = 0;
+        if(newPlayerPosX + player.hitbox.w >= newEnemyPosX && newPlayerPosX + player.hitbox.w <= newEnemyPosX + (this.hitbox.w / 2)) direction = 1;
+        if(newPlayerPosY + player.hitbox.h >= newEnemyPosY && newPlayerPosY + player.hitbox.h <= newEnemyPosY + (this.hitbox.h / 2)) direction = 2;
+        if(newPlayerPosY >= newEnemyPosY + (this.hitbox.h / 2) && newPlayerPosY <= newEnemyPosY + this.hitbox.h) direction = 3;
+
+        return(
+            // If enemy position x is greater than player position x
             // Check if enemy hit box collides with player hitbox
             (newEnemyPosX + this.hitbox.w >= newPlayerPosX && newEnemyPosX + this.hitbox.w <= newPlayerPosX + player.hitbox.w &&
             (newEnemyPosY + this.hitbox.h >= newPlayerPosY && newEnemyPosY + this.hitbox.h <= newPlayerPosY + player.hitbox.h ||
@@ -110,27 +140,27 @@ class Enemy extends Sprite{
             (newPlayerPosX + player.hitbox.w >= newEnemyPosX && newPlayerPosX + player.hitbox.w <= newEnemyPosX + this.hitbox.w &&
             (newPlayerPosY + player.hitbox.h >= newEnemyPosY && newPlayerPosY + player.hitbox.h <= newEnemyPosY + this.hitbox.h ||
             newPlayerPosY >= newEnemyPosY && newPlayerPosY <= newEnemyPosY + this.hitbox.h))
+        )
 
-        ) {
+    }
 
-            // Reset and give reward
-            isGameOver = true;
-            reward = 10;
-            this.position.x = canvas.width - (tileSize * 2);
-            this.position.y = canvas.height - (tileSize * 2);
-            player.position.x = player.position.y = 0;
+    reset(){
+        
+        // Reset and give reward
+        isGameOver = true;
+        reward = 10;
+        player.position.x = player.position.y = 0;
 
-            if(steps > 100) score = 250;
-            if(steps > 1000) score = 200;
-            if(steps > 2000) score = 150;
-            if(steps > 3000) score = 100;
-            if(steps > 7000) score = 50;
-            if(steps > 13000) score = 30;
-            if(steps > 17000) score = 20;
-            if(steps > 20000) score = 5;
+        if(steps > 100) score = 250;
+        if(steps > 1000) score = 200;
+        if(steps > 2000) score = 150;
+        if(steps > 3000) score = 100;
+        if(steps > 7000) score = 50;
+        if(steps > 13000) score = 30;
+        if(steps > 17000) score = 20;
+        if(steps > 20000) score = 5;
 
-            steps = 0; 
-        }
+        steps = 0; 
     }
 
     checkPassability() {
@@ -138,32 +168,22 @@ class Enemy extends Sprite{
         passability = [];
 
         // Movement points 
-        const point_right = {x: this.position.x + (tileSize * 2), y: this.position.y};
-        const point_left = {x: this.position.x - (tileSize * 2), u: this.position.y};
-        const point_up = {x: this.position.x, y: this.position.y - (tileSize * 2)};
-        const point_down = {x: this.position.x, y: this.position.y + (tileSize * 2)};
+        const point_right = {x: this.position.x - ((this.imgSize - this.hitbox.w) / 2) + this.speed, y: this.position.y};
+        const point_left = {x: this.position.x + ((this.imgSize - this.hitbox.w) / 2) - this.speed, u: this.position.y};
+        const point_up = {x: this.position.x, y: this.position.y + ((this.imgSize - this.hitbox.h) / 2) - this.speed};
+        const point_down = {x: this.position.x, y: this.position.y - ((this.imgSize - this.hitbox.h) / 2) + this.speed};
     
         // right
-        passability.push(this.collisionDetection(point_right));
+        passability.push(point_right.x > canvas.width - (this.imgSize));
         
         // left
-        passability.push(this.collisionDetection(point_left));
+        passability.push(point_left.x < 0);
 
         // up
-        passability.push(this.collisionDetection(point_up));
+        passability.push(point_up.y < 5) ;    
 
         //down
-        passability.push(this.collisionDetection(point_down));
-
-    }
-
-    collisionDetection(position) { // Check collision
-
-        return (obstacles.some(obstacle => position.x == obstacle.x && position.y == obstacle.y) || 
-                position.x < 0 ||
-                position.x > canvas.width - (tileSize * 2)||
-                position.y < 0 ||
-                position.y > canvas.height - (tileSize * 2))
+        passability.push(point_down.y > canvas.height - (this.imgSize) - 30);
 
     }
 
@@ -181,23 +201,69 @@ class Enemy extends Sprite{
         return new EnemyIdleState()
     }
 
-    action(){
-        // this.currentState.handleInput();
+    movementUpdate(){
         this.currentState.update();
         steps++
-        console.log(steps)
     }
 }
 
 
 // FINITE STATE MACHINE (FSM) IMPLEMENTATION
 
+class EnemyFazedState extends State{
+    enter(){
+        
+        this.entity.spriteAnimation('fazed')
+
+    }
+    
+    update(){
+
+        if( this.entity.currentFrame >= this.entity.frameRate - 1){
+
+            isEnemyAttack = false;
+            enemyAttackFlag = 0     
+            this.entity.setState(this.entity.getStateFromAction(action));
+            shadowEssence.setState(new PickObject(shadowEssence))
+        }
+    }
+}
+
+class EnemyAttackState extends State{
+    enter(){
+
+        const attack = ['attackRight', 'attackLeft', 'attackUp', 'attackDown']
+        this.entity.spriteAnimation(attack[direction]);
+
+    }
+    update(){
+
+        isParried && console.log('Parried Successfully')
+
+        if(isParried){
+            this.entity.setState(new EnemyFazedState(this.entity))
+        }
+
+        // Check if the attack animation is completed
+        if (this.entity.currentFrame >= this.entity.frameRate - 1) {
+
+            const isPlayerInRange = this.entity.playerInRange() 
+            if(isPlayerInRange) this.entity.reset();
+
+            isEnemyAttack = false;
+            enemyAttackFlag = 0     
+            this.entity.setState(this.entity.getStateFromAction(action));
+        }
+    }
+
+}
+
 class EnemyIdleState extends State {
     enter() {
 
         const idle = ['moveRight', 'moveLeft', 'moveUp', 'moveDown']
         this.entity.spriteAnimation(idle[direction])
-        this.entity.velocity = { x: 0, y: 0 }; // Stop movement
+        
     }
 
     update() {
@@ -216,7 +282,7 @@ class EnemyMoveRightState extends State {
 
     update() {
         
-        if(this.entity.position.x - ((tileSize * 2 - this.entity.hitbox.w) / 2) + this.entity.speed > canvas.width - (tileSize * 2)) reward = -10;
+        if(this.entity.position.x - ((this.entity.imgSize - this.entity.hitbox.w) / 2) + this.entity.speed > canvas.width - (this.entity.imgSize)) reward = -10;
         else this.entity.position.x += this.entity.speed;
     }
 }
@@ -232,7 +298,7 @@ class EnemyMoveLeftState extends State {
 
     update() {
 
-        if(this.entity.position.x + ((tileSize * 2 - this.entity.hitbox.w) / 2) - this.entity.speed < 0) reward = -10;
+        if(this.entity.position.x + ((this.entity.imgSize - this.entity.hitbox.w) / 2) - this.entity.speed < 0) reward = -10;
         else {
             this.entity.position.x -= this.entity.speed;
         }
@@ -250,7 +316,7 @@ class EnemyMoveUpState extends State {
 
     update() {
         
-        if(this.entity.position.y + ((tileSize * 2 - this.entity.hitbox.h) / 2) - this.entity.speed < 5) reward = -10;
+        if(this.entity.position.y + ((this.entity.imgSize - this.entity.hitbox.h) / 2) - this.entity.speed < -20) reward = -10;
         else {
             this.entity.position.y -= this.entity.speed;
         }
@@ -268,7 +334,7 @@ class EnemyMoveDownState extends State {
 
     update() {
 
-        if(this.entity.position.y - ((tileSize * 2 - this.entity.hitbox.h) / 2) + this.entity.speed > canvas.height - (tileSize * 2) - 30) reward = -10;
+        if(this.entity.position.y - ((this.entity.imgSize - this.entity.hitbox.h) / 2) + this.entity.speed > canvas.height - (this.entity.imgSize) - 20) reward = -10;
         else{
             this.entity.position.y += this.entity.speed;
 
