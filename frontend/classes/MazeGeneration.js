@@ -2,7 +2,7 @@ class View {
 
     drawBackground() {
         c.strokeStyle = 'white'
-        c.fillStyle = "rgb(50, 50, 50)";
+        c.fillStyle = "rgb(20, 20, 20)";
         c.fillRect(0, 0, canvas.width, canvas.height);
     }
   

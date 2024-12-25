@@ -1,3 +1,4 @@
+// ---------------------------------------------------------------- INITIALIZATIONS ---------------------------------------------------------------- //
 
 // Creating canvas
 const canvas = document.querySelector('canvas');
@@ -19,7 +20,6 @@ let direction = 0;
 let reward = 0;
 let score = 0;
 let steps = 0; 
-let phase = 1; // Training Phase
 let n_games = 0;
 let isNearPlayer = false;
 let lastPlayerDirection = 3 // Default facing front
@@ -34,10 +34,6 @@ let enemyAttackFlag = 0;
 let isEnemyAttack = false;
 let isParried = false
 
-// NPC Action
-let action=[0,0,0,0];
-let prev_action = [];
-
 // Maze variables
 let mazeWidth = Math.round(canvas.width / (tileSize * 2) + 1);
 let mazeHeight = Math.round(canvas.height / (tileSize * 2));
@@ -47,13 +43,15 @@ let updateFlag = false;
 let maze = new Maze(mazeWidth, mazeHeight);
 let view = new View();
 
-// Object variables
-let essencePicked = false
+// Objective
+let essenceCollected = false;
+let totalEssence = 0;
+
 
 // Player object initialization
 const player = new Player({
     imgSrc: '/frontend/assets/animations/player/idle_down.png',
-    frameRate: 11, // Number of actions in the image
+    frameRate: 11, // Number of frames in the image
     imgSize: 128,
     animations: {
         idleRight: {
@@ -131,9 +129,10 @@ const player = new Player({
 });
 
 // Enemy object initialization 
-const enemy = new Enemy({
+const shadow = new Enemy({
+    aiId: 0,
     imgSrc: '/frontend/assets/animations/enemy/Enemy-Melee-Idle-S.png',
-    frameRate: 12, // Number of actions in the image
+    frameRate: 12, // Number of frames in the image
     imgSize: 256,
     position: {x: canvas.width - 256, y: canvas.height - 256},
     hitbox: {x: 100, y: 120},
@@ -192,18 +191,136 @@ const enemy = new Enemy({
             frameBuffer: 3,
             imgSize: 256,
         }
-
     }
 });
 
-// Crown object initialization
-const shadowEssence = new Object({
-    imgSrc: '/frontend/assets/animations/object/shadow_essence.png',
-    frameRate: 30, // Number of actions in the image
+const shade = new Enemy({
+    aiId: 1,
+    imgSrc: '/frontend/assets/animations/enemy/Shade_Idle_S.png',
+    frameRate: 12, // Number of frames in the image
     imgSize: 128,
-    position: {x: enemy.position.x, y: enemy.position.y},
+    position: {x: canvas.width / 2, y: canvas.height / 2},
+    hitbox: {x: 100, y: 120},
+    animations: {
+        moveRight: {
+            imgSrc: '/frontend/assets/animations/enemy/Shade_Idle_E.png',
+            frameRate: 12,
+            frameBuffer: 4,
+            imgSize: 128,
+        },
+        moveLeft: {
+            imgSrc: '/frontend/assets/animations/enemy/Shade_Idle_W.png',
+            frameRate: 12,
+            frameBuffer: 4,
+            imgSize: 128,
+        },
+        moveUp: {
+            imgSrc: '/frontend/assets/animations/enemy/Shade_Idle_N.png',
+            frameRate: 12,
+            frameBuffer: 4,
+            imgSize: 128,
+        },
+        moveDown: {
+            imgSrc: '/frontend/assets/animations/enemy/Shade_Idle_S.png',
+            frameRate: 12,
+            frameBuffer: 4,
+            imgSize: 128,
+        },
+        attackRight: {
+            imgSrc: '/frontend/assets/animations/enemy/Shade_Attack_EL.png',
+            frameRate: 12,
+            frameBuffer: 2,
+            imgSize: 128,
+        },
+        attackLeft: {
+            imgSrc: '/frontend/assets/animations/enemy/Shade_Attack_WL.png',
+            frameRate: 12,
+            frameBuffer: 2,
+            imgSize: 128,
+        },
+        attackUp: {
+            imgSrc: '/frontend/assets/animations/enemy/Shade_Attack_NL.png',
+            frameRate: 12,  
+            frameBuffer: 2,
+            imgSize: 128,
+        },
+        attackDown: {
+            imgSrc: '/frontend/assets/animations/enemy/Shade_Attack_SL.png',
+            frameRate: 12,
+            frameBuffer: 2,
+            imgSize: 128,
+        },
+    }
+})
+
+// Essence object initialization
+const shadowEssence = new Essence({
+    imgSrc: '/frontend/assets/animations/object/shadow_essence.png',
+    frameRate: 30, // Number of frames in the image
+    imgSize: 128,
+    position: {x: shadow.position.x, y: shadow.position.y},
     hitbox: {x: 50, y: 50}
 });
+
+const shrine = new Shrine({
+    imgSrc: '/frontend/assets/animations/object/no_essence.png',
+    frameRate: 12, // Number of frames in the image
+    imgSize: 32,
+    position: {x: shadow.position.x, y: shadow.position.y},
+    animations: {
+        noEssence:{
+            imgSrc: '/frontend/assets/animations/object/no_essence.png',
+            frameRate: 12,
+            frameBuffer: 4,
+            imgSize: 32,
+        },
+        oneEssence: {
+            imgSrc: '/frontend/assets/animations/object/one_essence.png',
+            frameRate: 24,
+            frameBuffer: 4,
+            imgSize: 64,
+        },
+        twoEssence: {
+            imgSrc: '/frontend/assets/animations/object/two_essence.png',
+            frameRate: 24,
+            frameBuffer: 4,
+            imgSize: 64,
+            
+        },
+        completeEssence: {
+            imgSrc: '/frontend/assets/animations/object/complete_essence.png',
+            frameRate: 24,
+            frameBuffer: 3,
+            imgSize: 64,
+        }
+    }
+})
+
+const interactPrompt = new Interaction({
+    imgSrc: '/frontend/assets/gui/e.svg',
+    frameRate: 1,
+    imgSize: 64,
+    position: {x: shrine.position.x - (shrine.imgSize / 2), y: shrine.position.y - (shrine.imgSize / 2)},
+    animations: {
+        noAction:{
+            imgSrc: '/frontend/assets/gui/e.svg',
+            frameRate: 1,
+            imgSize: 64,
+        },
+        interacting: {
+            imgSrc: '/frontend/assets/gui/interacting.svg',
+            frameRate: 9,
+            frameBuffer: 4,
+            imgSize: 64,
+        }
+    }
+})
+
+const enemy = {
+    0: shadow,
+    1: shade
+}
+
 
 // Keyboard input handling for player movement
 const keys = {
@@ -212,11 +329,13 @@ const keys = {
     s: { pressed: false },
     d: { pressed: false },
     sp: { pressed: false },
+    e: {pressed: false},
 };
+
+// ---------------------------------------------------------------- FUNCTIONS ---------------------------------------------------------------- //
 
 // This function renders all objects infinitely
 function animate(timestamp) {
-    window.requestAnimationFrame(animate);
 
     // Clear the canvas
     c.clearRect(0, 0, canvas.width, canvas.height);
@@ -224,39 +343,55 @@ function animate(timestamp) {
     // Draw the map
     maze.update();
 
-
-    // Draw the enemy and handle its turn
-    enemy.checkPassability();
-    enemy.decision();
-    enemy.movementUpdate();
-    enemy.train();
-    // enemy.drawHitbox();
-
-    // Update and draw the player
+    // Player
     player.movementUpdate();
     player.draw();
 
-    enemy.draw();
+    // Enemy 
+    enemyInstances();
+
+    // Shrine
+    // shrine.update();
+    shrine.draw();
 
     // Draw the shadow essence object
     if(isParried) {
         shadowEssence.draw();
-        shadowEssence.pickObject();
+        shadowEssence.update();
     }else{
-        shadowEssence.position.x = enemy.position.x + enemy.hitbox.w / 2;
-        shadowEssence.position.y = enemy.position.y + enemy.hitbox.h / 2;
+        shadowEssence.position.x = shadow.position.x + shadow.hitbox.w / 2;
+        shadowEssence.position.y = shadow.position.y + shadow.hitbox.h / 2;
     }
 
-    player.focus();
+    if(interactPrompt.canInteract(shrine)) {
+        interactPrompt.draw();
+        interactPrompt.update();
+    }
+
+    player.focus(); // Player fov
+
+    // View hitboxes
+    // shadow.drawHitbox();
     // player.drawHitbox();
-
-
-    // Kill the player
-    enemy.slayPlayer();
+    // shrine.drawHitbox();
 
     // Control and customize cursor for the game
     cursorControl();
     calculateFps(timestamp);
+
+    window.requestAnimationFrame(animate);
+}
+
+function enemyInstances(){
+    for(let i in enemy){
+        enemy[i].checkPassability();
+        enemy[i].decision();
+        enemy[i].movementUpdate();
+        enemy[i].slayPlayer(); // Attack the player
+        enemy[i].train();
+        enemy[i].draw();
+        // enemy[i].drawHitbox();
+    }
 }
 
 function shiftMap(){

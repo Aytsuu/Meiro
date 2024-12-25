@@ -25,6 +25,9 @@ window.addEventListener('keydown', (e) => {
         case ' ':
             keys.sp.pressed = true;
             break;
+        case 'e':
+            keys.e.pressed = true;
+            break;
     }
 });
 
@@ -46,12 +49,15 @@ window.addEventListener('keyup', (e) => {
         case ' ':
             keys.sp.pressed = false;
             break;
+        case 'e':
+            keys.e.pressed = false;
+            break;
     }
 });
 
-// Shifting the maze every 4 seconds
+// Shifting the maze every 3 seconds
 setInterval(() => {
 
     updateFlag = false
 
-}, 4000)
+}, 3000)

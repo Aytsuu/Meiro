@@ -1,9 +1,9 @@
-class Object extends Sprite{     
-    constructor({ imgSrc, frameRate, imgSize, position, hitbox, animations }) {
+class Essence extends Sprite{     
+    constructor({ imgSrc, frameRate, imgSize, position, animations }) {
         super({imgSrc, frameRate, animations})
 
         this.imgSize = imgSize
-        this.currentState = new PickObject(this)
+        this.currentState = new PickEssence(this)
 
         this.position = {             
             x: position.x,
@@ -11,12 +11,41 @@ class Object extends Sprite{
         };         
 
         this.hitbox = {
-            w: this.imgSize - (this.imgSize - hitbox.x),
-            y: this.imgSize - (this.imgSize - hitbox.y)
+            w: this.imgSize,
+            h: this.imgSize
         }
 
-        this.speed = 2;
+        this.speed = 3;
     }    
+
+    drawHitbox(){
+        
+        c.fillStyle = 'rgba(255,0,0,30%)';
+        c.fillRect(this.position.x, this.position.y, this.hitbox.w, this.hitbox.h);
+    }
+
+
+    spriteAnimation(name){
+        // Switch animation
+        this.currentFrame = 0;
+        const animation = this.animations[name];
+
+        this.img = animation.img;
+        this.frameRate = animation.frameRate;
+        this.frameBuffer = animation.frameBuffer;
+
+        // Recalculate size after changing the image
+        if(this.img.complete) {
+            this.size.width = this.img.width / this.frameRate;
+            this.size.height = this.img.height;
+        } else {
+            this.img.onload = () => {
+                this.size.width = this.img.width / this.frameRate;
+                this.size.height = this.img.height;
+            }
+        }
+
+    }
     
     setState(newState) {
         this.currentState.exit();  // Exit the current state
@@ -24,23 +53,25 @@ class Object extends Sprite{
         this.currentState.enter(); // Enter the new state
     }
 
-    pickObject(){
+    update(){
         this.currentState.update();
     }
 }
 
-class PickObject extends State{
+// FINITE STATE MACHINE (FSM)
+class PickEssence extends State{
     
     update(){
 
-        // Center x and y-axis  of the player's position
+        // Center x and y-axis  of the player's  position
         const playerCenterPositionX = player.position.x + player.hitbox.w / 2;
         const playerCenterPositionY = player.position.y + player.hitbox.h / 2; 
         
         // Check if object reached the target position
         if(Math.floor(this.entity.position.x / this.entity.position.x) == Math.floor(playerCenterPositionX / this.entity.position.x) && 
             Math.floor(this.entity.position.y / this.entity.position.y) == Math.floor(playerCenterPositionY / this.entity.position.y)) {
-            
+                
+                essenceCollected = true;
                 isParried = false;
         } 
 

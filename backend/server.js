@@ -24,25 +24,35 @@ socket.on('disconnect', () => {
 socket.on('receive_from_flask', (response) => {
 
     if(response){
-        action = response.action
-        phase = response.phase
 
-        if((!isEnemyAttack) && JSON.stringify(action) != JSON.stringify(prev_action))  {
-            enemy.setState(enemy.getStateFromAction(action));
-            prev_action = action;
+        const action = response.action
+        const phase = response.phase
+        const aiId = response.aiId
+
+        enemy[aiId].action = action
+        enemy[aiId].phase = phase
+
+        if((!isEnemyAttack) && JSON.stringify(enemy[aiId].action) != JSON.stringify(enemy[aiId].prevAction))  {
+            enemy[aiId].setState(enemy[aiId].getStateFromAction());
+            enemy[aiId].prevAction = action;
         }
+        
     }
 
 });
 
-function sendData(data){
+function sendData(data, aiId){
+
+    data.aiId = aiId
 
     // Emit an event to Flask (server) with the data
     if(!isEnemyAttack) socket.emit('send_to_flask', data);
 
 }
 
-function sendResponse(data){
+function sendResponse(data, aiId){
+
+    data.aiId = aiId
 
     // Emit an event to Flask (server) with the data
     if(!isEnemyAttack) socket.emit('send_to_flask', data);
