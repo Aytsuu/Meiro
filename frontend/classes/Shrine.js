@@ -58,6 +58,9 @@ class ChangeAnimationState extends State{
 
         const shrineState = ['noEssence', 'oneEssence', 'twoEssence', 'completeEssence'];
         this.entity.spriteAnimation(shrineState[totalEssence]);
+        if(totalEssence == 3){
+            isGameEnd = true;
+        }
 
     }
 }

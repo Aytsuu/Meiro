@@ -61,10 +61,10 @@ class Agent:
 
 
             # Crown Position (Primary Objective)
-            player_x > position_x, # right
-            player_x < position_x, # left
-            player_y < position_y, # up
-            player_y > position_y  # down
+            player_x >= position_x, # right
+            player_x <= position_x, # left
+            player_y <= position_y, # up
+            player_y >= position_y  # down
 
         ]
         

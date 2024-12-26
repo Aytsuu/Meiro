@@ -33,34 +33,39 @@ class Interaction extends Sprite{
 
     canInteract(object){
 
-        const objectPosX = object.position.x
-        const objectPosY = object.position.y
-        const playerPosX = player.position.x + (player.imgSize - player.hitbox.w) / 2
-        const playerPosY = player.position.y + (player.imgSize - player.hitbox.h) / 2
+        if(!isGameEnd){
 
-        // Calculate bounding box for the object
-        let objectBoundingBox = {
-            x: Math.min(objectPosX, objectPosX + this.imgSize) - object.imgSize / 2,
-            y: Math.min(objectPosY, objectPosY + this.imgSize) - object.imgSize / 2,
-            width: Math.abs(objectPosX + this.imgSize - objectPosX) + object.imgSize,
-            height: Math.abs(objectPosY + this.imgSize - objectPosY) + object.imgSize
-        };
+            const objectPosX = object.position.x
+            const objectPosY = object.position.y
+            const playerPosX = player.position.x + (player.imgSize - player.hitbox.w) / 2
+            const playerPosY = player.position.y + (player.imgSize - player.hitbox.h) / 2
 
-        // Calculate bounding box for the player
-        let playerBoundingBox = {
-            x: Math.min(playerPosX, playerPosX + player.hitbox.w),
-            y: Math.min(playerPosY, playerPosY + player.hitbox.h),
-            width: Math.abs(playerPosX + player.hitbox.w - playerPosX) + player.hitbox.w,
-            height: Math.abs(playerPosY + player.hitbox.h - playerPosY) + player.hitbox.h
-        };
+            // Calculate bounding box for the object
+            let objectBoundingBox = {
+                x: Math.min(objectPosX, objectPosX + this.imgSize) - object.imgSize / 2,
+                y: Math.min(objectPosY, objectPosY + this.imgSize) - object.imgSize / 2,
+                width: Math.abs(objectPosX + this.imgSize - objectPosX) + object.imgSize,
+                height: Math.abs(objectPosY + this.imgSize - objectPosY) + object.imgSize
+            };
 
-        // Check if both bounding boxes intersect
-        return (
-            playerBoundingBox.x <= objectBoundingBox.x + objectBoundingBox.width &&
-            playerBoundingBox.x + playerBoundingBox.width >= objectBoundingBox.x &&
-            playerBoundingBox.y <= objectBoundingBox.y + objectBoundingBox.height &&
-            playerBoundingBox.y + playerBoundingBox.height >= objectBoundingBox.y
-        );
+            // Calculate bounding box for the player
+            let playerBoundingBox = {
+                x: Math.min(playerPosX, playerPosX + player.hitbox.w),
+                y: Math.min(playerPosY, playerPosY + player.hitbox.h),
+                width: Math.abs(playerPosX + player.hitbox.w - playerPosX) + player.hitbox.w,
+                height: Math.abs(playerPosY + player.hitbox.h - playerPosY) + player.hitbox.h
+            };
+
+            // Check if both bounding boxes intersect
+            return (
+                playerBoundingBox.x <= objectBoundingBox.x + objectBoundingBox.width &&
+                playerBoundingBox.x + playerBoundingBox.width >= objectBoundingBox.x &&
+                playerBoundingBox.y <= objectBoundingBox.y + objectBoundingBox.height &&
+                playerBoundingBox.y + playerBoundingBox.height >= objectBoundingBox.y
+            );
+
+        }
+
     }
 
     setState(newState){
