@@ -146,7 +146,11 @@ class AttackState extends State {
 
     update() {
 
-        if(isEnemyAttack && this.entity.currentFrame == 4 && shadow.currentFrame == 14) isParried = true;
+        for(let i in enemy){
+            if(enemy[i].isAttack && this.entity.currentFrame == 4 && enemy[i].currentFrame == enemy[i].parryFrame) enemy[i].isParried = true;
+        }
+
+        // if(isEnemyAttack && this.entity.currentFrame == 4 && shadow.currentFrame == 14) isParried = true;
 
         if(this.entity.currentFrame >= this.entity.frameRate - 1) this.entity.setState(new IdleState(this.entity));
 

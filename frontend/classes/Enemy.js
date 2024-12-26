@@ -1,5 +1,5 @@
 class Enemy extends Sprite{
-    constructor({ aiId, imgSrc, frameRate, imgSize, position, hitbox, animations }) {
+    constructor({ aiId, imgSrc, frameRate, imgSize, position, hitbox, speed, parryFrame, animations }) {
         super({imgSrc, frameRate, animations})
 
         this.imgSize = imgSize
@@ -9,7 +9,7 @@ class Enemy extends Sprite{
             x: position.x, 
             y: position.y
         }; 
-        this.speed = 6
+        this.speed = speed
         this.velocity = {x: 0, y: 0}
         this.data = {}
         this.currentState = new EnemyIdleState(this);
@@ -25,6 +25,12 @@ class Enemy extends Sprite{
         this.action = [0,0,0,0];
         this.prevAction = [];
         this.phase = 1; // Training Phase
+        this.isAttack = false;
+        this.attackFlag = 0;
+
+        // Frame where parry is applicable
+        this.parryFrame = parryFrame
+        this.isParried = false;
     }
 
     drawHitbox(){
@@ -81,7 +87,7 @@ class Enemy extends Sprite{
             
             reward: reward,
             score: score,
-            gameOver: isGameOver
+            gameOver: done
         }
 
     }
@@ -109,9 +115,9 @@ class Enemy extends Sprite{
 
         this.phase = 1;
 
-        // New game
-        if(isGameOver){
-            isGameOver = !isGameOver;
+        // New training
+        if(done){
+            done = !done;
             score = 0
             direction = 0;
             lastPlayerDirection = 3
@@ -124,11 +130,11 @@ class Enemy extends Sprite{
         const isPlayerInRange = this.playerInRange();
 
         if(isPlayerInRange){
-            isEnemyAttack = true
+            this.isAttack = true
 
-            if(enemyAttackFlag == 0) {
+            if(this.attackFlag == 0) {
                 this.setState(new EnemyAttackState(this));
-                enemyAttackFlag = 1
+                this.attackFlag = 1
             }
         }
     }
@@ -168,7 +174,7 @@ class Enemy extends Sprite{
     reset(){
         
         // Reset and give reward
-        isGameOver = true;
+        done = true;
         reward = 10;
         player.position.x = player.position.y = 0;
 
@@ -215,6 +221,12 @@ class Enemy extends Sprite{
     }
 
     getStateFromAction(){
+
+        if(totalEssence >= 2){
+            const random = Math.floor(Math.random() * 100);
+            if(random >= 97) return new WarpState(this);
+        }
+
         if (JSON.stringify(this.action) == JSON.stringify([1,0,0,0])) return new EnemyMoveRightState(this);
         if (JSON.stringify(this.action)  == JSON.stringify([0,1,0,0])) return new EnemyMoveLeftState(this);
         if (JSON.stringify(this.action)  == JSON.stringify([0,0,1,0])) return new EnemyMoveUpState(this);
@@ -231,6 +243,25 @@ class Enemy extends Sprite{
 
 // FINITE STATE MACHINE (FSM) IMPLEMENTATION
 
+class WarpState extends State{
+    enter(){
+        this.entity.spriteAnimation('warp');
+        this.entity.isAttack = true;
+        this.entity.attackFlag = 1;
+        this.entity.position.x = player.position.x - player.hitbox.w
+        this.entity.position.y = player.position.y;
+    }
+    update(){
+
+        if(this.entity.currentFrame >= this.entity.frameRate - 1){
+
+            this.entity.isAttack = false;
+            this.entity.attackFlag = 0;
+            this.entity.setState(this.entity.getStateFromAction(this.entity.action));
+        }
+    }
+}
+
 class EnemyFazedState extends State{
     enter(){
         
@@ -242,8 +273,9 @@ class EnemyFazedState extends State{
 
         if( this.entity.currentFrame >= this.entity.frameRate - 1){
 
-            isEnemyAttack = false;
-            enemyAttackFlag = 0     
+            this.entity.isParried = false;
+            this.entity.isAttack = false;
+            this.entity.attackFlag = 0     
             this.entity.setState(this.entity.getStateFromAction(this.entity.action));
             shadowEssence.setState(new PickEssence(shadowEssence))
         }
@@ -259,20 +291,20 @@ class EnemyAttackState extends State{
     }
     update(){
 
-        isParried && console.log('Parried Successfully')
+        this.entity.isParried && console.log('Parried Successfully')
 
-        if(isParried){
+        if(this.entity.isParried){
             this.entity.setState(new EnemyFazedState(this.entity))
         }
 
         // Check if the attack animation is completed
-        if (this.entity.currentFrame >= this.entity.frameRate - 1 && (!isParried)) {
+        if (this.entity.currentFrame >= this.entity.frameRate - 1 && (!this.entity.isParried)) {
 
             const isPlayerInRange = this.entity.playerInRange() 
             if(isPlayerInRange) this.entity.reset();
 
-            isEnemyAttack = false;
-            enemyAttackFlag = 0     
+            this.entity.isAttack = false;
+            this.entity.attackFlag = 0;
             this.entity.setState(this.entity.getStateFromAction(this.entity.action));
         }
     }

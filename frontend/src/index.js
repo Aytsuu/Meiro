@@ -15,7 +15,7 @@ let passability = []; // Store the passability of next action point (right, left
 let mouseX = 0;
 let mouseY = 0;
 let imageLoaded = false;
-let isGameOver = false;
+let done = false;
 let direction = 0;
 let reward = 0;
 let score = 0;
@@ -29,11 +29,6 @@ let lastTime = 0;
 let frameCount = 0;
 let fps = 0;
 
-// Attacking
-let enemyAttackFlag = 0;
-let isEnemyAttack = false;
-let isParried = false
-
 // Maze variables
 let mazeWidth = Math.round(canvas.width / (tileSize * 2) + 1);
 let mazeHeight = Math.round(canvas.height / (tileSize * 2));
@@ -46,6 +41,7 @@ let view = new View();
 // Objective
 let essenceCollected = false;
 let totalEssence = 0;
+let isGameEnd = false;
 
 
 // Player object initialization
@@ -136,6 +132,8 @@ const shadow = new Enemy({
     imgSize: 256,
     position: {x: canvas.width - 256, y: canvas.height - 256},
     hitbox: {x: 100, y: 120},
+    speed: 6,
+    parryFrame: 14,
     animations: {
         moveRight: {
             imgSrc: '/frontend/assets/animations/enemy/Enemy-Melee-Idle-E.png',
@@ -190,6 +188,12 @@ const shadow = new Enemy({
             frameRate: 48,
             frameBuffer: 3,
             imgSize: 256,
+        },
+        warp: {
+            imgSrc: '/frontend/assets/animations/enemy/Enemy-Melee-Warp.png',
+            frameRate: 24,
+            frameBuffer: 1,
+            imgSize: 256,
         }
     }
 });
@@ -201,29 +205,31 @@ const shade = new Enemy({
     imgSize: 128,
     position: {x: canvas.width / 2, y: canvas.height / 2},
     hitbox: {x: 100, y: 120},
+    speed: 4,
+    parryFrame: 8,
     animations: {
         moveRight: {
             imgSrc: '/frontend/assets/animations/enemy/Shade_Idle_E.png',
             frameRate: 12,
-            frameBuffer: 4,
+            frameBuffer: 5,
             imgSize: 128,
         },
         moveLeft: {
             imgSrc: '/frontend/assets/animations/enemy/Shade_Idle_W.png',
             frameRate: 12,
-            frameBuffer: 4,
+            frameBuffer: 5,
             imgSize: 128,
         },
         moveUp: {
             imgSrc: '/frontend/assets/animations/enemy/Shade_Idle_N.png',
             frameRate: 12,
-            frameBuffer: 4,
+            frameBuffer: 5,
             imgSize: 128,
         },
         moveDown: {
             imgSrc: '/frontend/assets/animations/enemy/Shade_Idle_S.png',
             frameRate: 12,
-            frameBuffer: 4,
+            frameBuffer: 5,
             imgSize: 128,
         },
         attackRight: {
@@ -250,6 +256,18 @@ const shade = new Enemy({
             frameBuffer: 2,
             imgSize: 128,
         },
+        fazed: {
+            imgSrc: '/frontend/assets/animations/enemy/Shade_Metamorphosis.png',
+            frameRate: 20,
+            frameBuffer: 5,
+            imgSize: 128,
+        },
+        warp: {
+            imgSrc: '/frontend/assets/animations/enemy/Shade_Metamorphosis.png',
+            frameRate: 20,
+            frameBuffer: 2,
+            imgSize: 128,
+        }
     }
 })
 
@@ -321,6 +339,10 @@ const enemy = {
     1: shade
 }
 
+const essence = {
+    0: shadowEssence
+}
+
 
 // Keyboard input handling for player movement
 const keys = {
@@ -339,12 +361,14 @@ function animate(timestamp) {
 
     // Clear the canvas
     c.clearRect(0, 0, canvas.width, canvas.height);
+
+    if(isGameEnd) gameStop();
     
     // Draw the map
     maze.update();
 
     // Player
-    player.movementUpdate();
+    if(!isGameEnd) player.movementUpdate();
     player.draw();
 
     // Enemy 
@@ -354,21 +378,15 @@ function animate(timestamp) {
     // shrine.update();
     shrine.draw();
 
-    // Draw the shadow essence object
-    if(isParried) {
-        shadowEssence.draw();
-        shadowEssence.update();
-    }else{
-        shadowEssence.position.x = shadow.position.x + shadow.hitbox.w / 2;
-        shadowEssence.position.y = shadow.position.y + shadow.hitbox.h / 2;
-    }
+    // Draw the essence
+    drawEssence();
 
     if(interactPrompt.canInteract(shrine)) {
         interactPrompt.draw();
         interactPrompt.update();
     }
 
-    player.focus(); // Player fov
+    // player.focus(); // Player fov
 
     // View hitboxes
     // shadow.drawHitbox();
@@ -376,21 +394,49 @@ function animate(timestamp) {
     // shrine.drawHitbox();
 
     // Control and customize cursor for the game
-    cursorControl();
+    cursorControl(); 
     calculateFps(timestamp);
 
     window.requestAnimationFrame(animate);
 }
 
+// If game is on ending animation
+function gameStop(){
+    for(let i in enemy){
+        enemy[i].frameRate = enemy[i].currentFrame;
+    }
+
+    player.frameRate = player.currentFrame;
+    updateFlag = true;
+}
+
 function enemyInstances(){
     for(let i in enemy){
-        enemy[i].checkPassability();
-        enemy[i].decision();
-        enemy[i].movementUpdate();
-        enemy[i].slayPlayer(); // Attack the player
-        enemy[i].train();
+        if(!isGameEnd) {
+            enemy[i].checkPassability();
+            enemy[i].decision();
+            enemy[i].movementUpdate();
+            enemy[i].slayPlayer(); // Attack the player
+            enemy[i].train();
+        }
         enemy[i].draw();
         // enemy[i].drawHitbox();
+    }
+}
+
+function drawEssence(){
+
+    for(let i in enemy){
+
+        try{
+            if(enemy[i].isParried) {
+                essence[i].draw();
+                essence[i].update(enemy[i]);
+            }else{
+                essence[i].position.x = enemy[i].position.x + enemy[i].hitbox.w / 2;
+                essence[i].position.y = enemy[i].position.y + enemy[i].hitbox.h / 2;
+            }
+        }catch(e){}
     }
 }
 

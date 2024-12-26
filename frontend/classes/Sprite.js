@@ -56,11 +56,17 @@ class Sprite{
     }
 
     updateFrame(){
-        this.elapsedFrame++;
-        if(this.elapsedFrame % this.frameBuffer === 0){ // If true, moves the current frame to another
-            if(this.currentFrame < this.frameRate - 1) this.currentFrame++; // Increment if current frame is less than to the number of frames in an image
-            else this.currentFrame = 0; // Otherwise, reset current frame to the initial frame
+        
+        if(!isGameEnd){
+
+            this.elapsedFrame++;
+            if(this.elapsedFrame % this.frameBuffer === 0){ // If true, moves the current frame to another
+                if(this.currentFrame < this.frameRate - 1) this.currentFrame++; // Increment if current frame is less than to the number of frames in an image
+                else this.currentFrame = 0; // Otherwise, reset current frame to the initial frame
+            }
+
         }
+
     }
 
 }

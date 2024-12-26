@@ -53,8 +53,8 @@ class Essence extends Sprite{
         this.currentState.enter(); // Enter the new state
     }
 
-    update(){
-        this.currentState.update();
+    update(enemy){
+        this.currentState.update(enemy);
     }
 }
 
@@ -72,7 +72,6 @@ class PickEssence extends State{
             Math.floor(this.entity.position.y / this.entity.position.y) == Math.floor(playerCenterPositionY / this.entity.position.y)) {
                 
                 essenceCollected = true;
-                isParried = false;
         } 
 
         // Update object position
