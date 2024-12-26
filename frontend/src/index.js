@@ -386,7 +386,7 @@ function animate(timestamp) {
         interactPrompt.update();
     }
 
-    // player.focus(); // Player fov
+    player.focus(); // Player fov
 
     // View hitboxes
     // shadow.drawHitbox();
