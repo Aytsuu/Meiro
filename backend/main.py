@@ -18,24 +18,27 @@ socketio = SocketIO(app, cors_allowed_origins="*", async_mode='eventlet')
 Payload.max_decode_packets = 500
 
 train = None
+ai_id = None
+train_instances = {i: Train() for i in range(2)}
 
 # Set up a thread pool executor with a maximum of 4 threads
 executor = ThreadPoolExecutor(max_workers=4)
 
-def train_in_background(game_data): 
+def train_in_background(game_data, train_instance, ai_id): 
 
     try:
         if game_data['phase'] == 1:
-            final_move, phase = train.first_training(game_data)
+            final_move, phase = train_instance.first_training(game_data)
 
             data = {
                 'action': final_move,
-                'phase': phase
+                'phase': phase,
+                'aiId': ai_id
             }
 
             socketio.emit('receive_from_flask', data)
         else:
-            train.second_training(game_data)
+            train_instance.second_training(game_data)
 
     except Exception as e:
         print(f"Error during training: {e}")
@@ -45,11 +48,16 @@ def train_in_background(game_data):
 @socketio.on('send_to_flask')
 def handle_send_to_flask(data):
 
+    # Training multiple AI using multi-training instances
+    ai_id = data.get('aiId')
+
+    if ai_id is not None and ai_id in train_instances:
+        train_instance = train_instances[ai_id]
+
     # Use the thread pool to manage background tasks
-    executor.submit(train_in_background, data)
+    executor.submit(train_in_background, data, train_instance, ai_id)
 
 if __name__ == '__main__':
-    train = Train()
     socketio.run(app, debug=True, host='0.0.0.0', port=5000, allow_unsafe_werkzeug=True)
  
 

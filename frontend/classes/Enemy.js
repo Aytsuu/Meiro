@@ -1,8 +1,9 @@
 class Enemy extends Sprite{
-    constructor({ imgSrc, frameRate, imgSize, position, hitbox, animations }) {
+    constructor({ aiId, imgSrc, frameRate, imgSize, position, hitbox, animations }) {
         super({imgSrc, frameRate, animations})
+
+        this.imgSize = imgSize
         
-        this.imgSize = imgSize;
         // Initial position
         this.position = { 
             x: position.x, 
@@ -15,9 +16,15 @@ class Enemy extends Sprite{
 
         //Initialize Hitbox
         this.hitbox = {
-            w: this.imgSize - (this.imgSize - hitbox.x),
-            h: this.imgSize - (this.imgSize - hitbox.y)
+            w: hitbox.x,
+            h: hitbox.y
         }
+
+        // Training and action
+        this.aiId = aiId
+        this.action = [0,0,0,0];
+        this.prevAction = [];
+        this.phase = 1; // Training Phase
     }
 
     drawHitbox(){
@@ -30,10 +37,24 @@ class Enemy extends Sprite{
     }
 
     spriteAnimation(name){
-        this.currentFrame = 0
-        this.img = this.animations[name].img
-        this.frameRate = this.animations[name].frameRate
-        this.frameBuffer = this.animations[name].frameBuffer
+        // Switch animation
+        this.currentFrame = 0;
+        const animation = this.animations[name];
+
+        this.img = animation.img;
+        this.frameRate = animation.frameRate;
+        this.frameBuffer = animation.frameBuffer;
+
+        // Recalculate size after changing the image
+        if(this.img.complete) {
+            this.size.width = this.img.width / this.frameRate;
+            this.size.height = this.img.height;
+        } else {
+            this.img.onload = () => {
+                this.size.width = this.img.width / this.frameRate;
+                this.size.height = this.img.height;
+            }
+        }
     } 
 
     getData(){
@@ -41,7 +62,7 @@ class Enemy extends Sprite{
         // Initializing JSON to be sent to backend
         this.data = {
 
-            phase: phase,
+            phase: this.phase,
 
             // Tile Passability
             collision: {
@@ -71,7 +92,7 @@ class Enemy extends Sprite{
         this.getData()
 
         // Sends data to python flask with web socket
-        sendData(this.data);
+        sendData(this.data, this.aiId);
 
     }
 
@@ -84,9 +105,9 @@ class Enemy extends Sprite{
         this.getData();
 
         // Send another data to flask
-        sendResponse(this.data);
+        sendResponse(this.data, this.aiId);
 
-        phase = 1;
+        this.phase = 1;
 
         // New game
         if(isGameOver){
@@ -115,10 +136,10 @@ class Enemy extends Sprite{
     playerInRange(){
 
         // New position x and y axis with consideration to the hitbox
-        const newEnemyPosX = this.position.x + ((this.imgSize) - this.hitbox.w) / 2
-        const newEnemyPosY = this.position.y + ((this.imgSize) - this.hitbox.h) / 2
-        const newPlayerPosX = player.position.x + (tileSize - player.hitbox.w) / 2
-        const newPlayerPosY = player.position.y + (tileSize - player.hitbox.h) / 2
+        const newEnemyPosX = this.position.x + (this.imgSize- this.hitbox.w) / 2
+        const newEnemyPosY = this.position.y + (this.imgSize - this.hitbox.h) / 2
+        const newPlayerPosX = player.position.x + (player.imgSize - player.hitbox.w) / 2
+        const newPlayerPosY = player.position.y + (player.imgSize - player.hitbox.h) / 2
 
         // Attack at the direction of the player
         if(newPlayerPosX >= newEnemyPosX + (this.hitbox.w / 2) && newPlayerPosX <= newEnemyPosX + this.hitbox.w) direction = 0;
@@ -193,11 +214,11 @@ class Enemy extends Sprite{
         this.currentState.enter(); // Enter the new state
     }
 
-    getStateFromAction(action){
-        if (JSON.stringify(action) == JSON.stringify([1,0,0,0])) return new EnemyMoveRightState(this);
-        if (JSON.stringify(action)  == JSON.stringify([0,1,0,0])) return new EnemyMoveLeftState(this);
-        if (JSON.stringify(action)  == JSON.stringify([0,0,1,0])) return new EnemyMoveUpState(this);
-        if (JSON.stringify(action)  == JSON.stringify([0,0,0,1])) return new EnemyMoveDownState(this);
+    getStateFromAction(){
+        if (JSON.stringify(this.action) == JSON.stringify([1,0,0,0])) return new EnemyMoveRightState(this);
+        if (JSON.stringify(this.action)  == JSON.stringify([0,1,0,0])) return new EnemyMoveLeftState(this);
+        if (JSON.stringify(this.action)  == JSON.stringify([0,0,1,0])) return new EnemyMoveUpState(this);
+        if (JSON.stringify(this.action)  == JSON.stringify([0,0,0,1])) return new EnemyMoveDownState(this);
         return new EnemyIdleState()
     }
 
@@ -223,8 +244,8 @@ class EnemyFazedState extends State{
 
             isEnemyAttack = false;
             enemyAttackFlag = 0     
-            this.entity.setState(this.entity.getStateFromAction(action));
-            shadowEssence.setState(new PickObject(shadowEssence))
+            this.entity.setState(this.entity.getStateFromAction(this.entity.action));
+            shadowEssence.setState(new PickEssence(shadowEssence))
         }
     }
 }
@@ -245,14 +266,14 @@ class EnemyAttackState extends State{
         }
 
         // Check if the attack animation is completed
-        if (this.entity.currentFrame >= this.entity.frameRate - 1) {
+        if (this.entity.currentFrame >= this.entity.frameRate - 1 && (!isParried)) {
 
             const isPlayerInRange = this.entity.playerInRange() 
             if(isPlayerInRange) this.entity.reset();
 
             isEnemyAttack = false;
             enemyAttackFlag = 0     
-            this.entity.setState(this.entity.getStateFromAction(action));
+            this.entity.setState(this.entity.getStateFromAction(this.entity.action));
         }
     }
 

@@ -48,8 +48,8 @@ class QTrainer:
         self.criterion = nn.MSELoss()
 
     def train_step(self, state, action, reward, next_state, done):
-        state = th.tensor(state, dtype=th.float)
-        next_state = th.tensor(next_state, dtype=th.float)
+        state = th.tensor(np.array(state), dtype=th.float)
+        next_state = th.tensor(np.array(next_state), dtype=th.float)
         action = th.tensor(np.array(action), dtype=th.long)
         reward = th.tensor(np.array(reward), dtype=th.float)
 

@@ -1,18 +1,15 @@
 class Sprite{
-    constructor({position, imgSrc, frameRate = 1, imgSize, animations}){
+    constructor({ imgSrc, frameRate = 1, animations }){
         
         this.img = new Image(); // Creates new image in memory
-        this.imgSize = imgSize
         this.img.onload = () => { // Waits till the image is loaded to the browser
-            imageLoaded = true;
-
             // Takes the size of the image per frame
             this.size = {
                 width: this.img.width/frameRate,
-                height: this.imgSize
+                height: this.img.height
             }
         }
-        this.position = position;
+
         this.img.src = imgSrc; // Image source
         this.frameRate = frameRate; // Number of frames in an image
 
@@ -35,7 +32,7 @@ class Sprite{
     draw(){
 
         // Checks If image has been loaded to the browser
-        if(imageLoaded){
+        if(this.img.complete){
 
             // Crop position and size, to display only one frame on the screen
         

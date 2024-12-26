@@ -1,27 +1,26 @@
 class Player extends Sprite {
     constructor({ imgSrc, frameRate, imgSize, animations}) {
-        super({ imgSrc, frameRate, imgSize, animations });
+        super({ imgSrc, frameRate, animations });
 
         this.imgSize = imgSize
         // Initial position
         this.position = { x: 0, y: 0};
         this.currentState = new IdleState(this); // Start with the idle state
-        this.speed = 4; // Movement speed
+        this.speed = 15; // Movement speed
 
         // Velocity to track movement direction
         this.velocity = { x: 0, y: 0 };
 
         // Initialize Hitbox
         this.hitbox = {
-            w: this.imgSize - (this.imgSize - 30),
-            h: this.imgSize - (this.imgSize - 50)
+            w: 30,
+            h: 50
         }
 
     }
 
     focus(){ // Shadow casting
 
-        const rect = canvas.getBoundingClientRect();
         let lightX = this.position.x + (this.imgSize / 2);
         let lightY = this.position.y + (this.imgSize / 2);
 
@@ -32,7 +31,7 @@ class Player extends Sprite {
         );
 
         gradient.addColorStop(0, 'rgba(0, 0, 0, 1)');
-        gradient.addColorStop(1, 'rgba(100, 100, 100, 0)');
+        gradient.addColorStop(1, 'rgba(50, 50, 50, 0)');
         
         // Draw light
         c.save();
@@ -64,10 +63,24 @@ class Player extends Sprite {
     }
 
     spriteAnimation(name){
-        this.currentFrame = 0
-        this.img = this.animations[name].img
-        this.frameRate = this.animations[name].frameRate
-        this.frameBuffer = this.animations[name].frameBuffer
+        // Switch animation
+        this.currentFrame = 0;
+        const animation = this.animations[name];
+
+        this.img = animation.img;
+        this.frameRate = animation.frameRate;
+        this.frameBuffer = animation.frameBuffer;
+
+        // Recalculate size after changing the image
+        if(this.img.complete) {
+            this.size.width = this.img.width / this.frameRate;
+            this.size.height = this.img.height;
+        } else {
+            this.img.onload = () => {
+                this.size.width = this.img.width / this.frameRate;
+                this.size.height = this.img.height;
+            }
+        }
     } 
 
     checkMazeCollision(currentPosition, newPosition, maze) {
@@ -133,7 +146,7 @@ class AttackState extends State {
 
     update() {
 
-        if(isEnemyAttack && this.entity.currentFrame == 4 && enemy.currentFrame == 14) isParried = true;
+        if(isEnemyAttack && this.entity.currentFrame == 4 && shadow.currentFrame == 14) isParried = true;
 
         if(this.entity.currentFrame >= this.entity.frameRate - 1) this.entity.setState(new IdleState(this.entity));
 
