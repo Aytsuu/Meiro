@@ -115,10 +115,11 @@ class View {
       update(){ // Shift maze
   
         if(!updateFlag){
-          for(let i = 0; i < this.algorithmIterations; i++){
-            maze.iterate();
-          }
-          updateFlag = true;
+            mazeShiftAudio.play()
+            for(let i = 0; i < this.algorithmIterations; i++){
+                maze.iterate();
+            }
+            updateFlag = true;
         }
         view.drawMaze(maze);
   

@@ -14,14 +14,11 @@ let obstacles = []; // Store obstacles positions
 let passability = []; // Store the passability of next action point (right, left, up, down)
 let mouseX = 0;
 let mouseY = 0;
-let imageLoaded = false;
 let done = false;
 let direction = 0;
 let reward = 0;
 let score = 0;
 let steps = 0; 
-let n_games = 0;
-let isNearPlayer = false;
 let lastPlayerDirection = 3 // Default facing front
 
 // Fps tracking
@@ -41,8 +38,14 @@ let view = new View();
 // Objective
 let essenceCollected = false;
 let totalEssence = 0;
-let isGameEnd = false;
 
+// Game State
+let isGameEnd = true;
+let isGameStart = false;
+let isGamePaused = false;
+
+
+const menu =  new Menu()
 
 // Player object initialization
 const player = new Player({
@@ -134,6 +137,7 @@ const shadow = new Enemy({
     hitbox: {x: 100, y: 120},
     speed: 6,
     parryFrame: 14,
+    audio: {attack: shadowAttackAudio, fazed: shadowFazed, warp: shadowWarpAudio},
     animations: {
         moveRight: {
             imgSrc: '/frontend/assets/animations/enemy/Enemy-Melee-Idle-E.png',
@@ -207,6 +211,7 @@ const shade = new Enemy({
     hitbox: {x: 100, y: 120},
     speed: 4,
     parryFrame: 8,
+    audio: {attack: shadeAttackAudio, fazed: shadeFazed, warp: shadeWarpAudio},
     animations: {
         moveRight: {
             imgSrc: '/frontend/assets/animations/enemy/Shade_Idle_E.png',
@@ -362,8 +367,26 @@ function animate(timestamp) {
     // Clear the canvas
     c.clearRect(0, 0, canvas.width, canvas.height);
 
-    if(isGameEnd) gameStop();
-    
+    if(isGameEnd) gameEnd();
+
+    if(!isGameStart) {
+        menu.draw();
+    }
+    else {
+        isGameEnd = false;
+        gameStart();
+    }
+
+    // Control and customize cursor for the game
+    cursorControl(); 
+    calculateFps(timestamp);
+
+    window.requestAnimationFrame(animate);
+}
+
+// If start game is clicked
+function gameStart(){
+
     // Draw the map
     maze.update();
 
@@ -386,22 +409,16 @@ function animate(timestamp) {
         interactPrompt.update();
     }
 
-    player.focus(); // Player fov
+    // player.focus(); // Player fov
 
     // View hitboxes
     // shadow.drawHitbox();
     // player.drawHitbox();
     // shrine.drawHitbox();
-
-    // Control and customize cursor for the game
-    cursorControl(); 
-    calculateFps(timestamp);
-
-    window.requestAnimationFrame(animate);
 }
 
 // If game is on ending animation
-function gameStop(){
+function gameEnd(){
     for(let i in enemy){
         enemy[i].frameRate = enemy[i].currentFrame;
     }

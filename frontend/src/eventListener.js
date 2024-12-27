@@ -59,5 +59,4 @@ window.addEventListener('keyup', (e) => {
 setInterval(() => {
 
     updateFlag = false
-
 }, 3000)

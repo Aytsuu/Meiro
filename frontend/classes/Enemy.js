@@ -1,5 +1,5 @@
 class Enemy extends Sprite{
-    constructor({ aiId, imgSrc, frameRate, imgSize, position, hitbox, speed, parryFrame, animations }) {
+    constructor({ aiId, imgSrc, frameRate, imgSize, position, hitbox, speed, parryFrame, audio, animations }) {
         super({imgSrc, frameRate, animations})
 
         this.imgSize = imgSize
@@ -14,7 +14,7 @@ class Enemy extends Sprite{
         this.data = {}
         this.currentState = new EnemyIdleState(this);
 
-        //Initialize Hitbox
+        // Initialize Hitbox
         this.hitbox = {
             w: hitbox.x,
             h: hitbox.y
@@ -31,6 +31,9 @@ class Enemy extends Sprite{
         // Frame where parry is applicable
         this.parryFrame = parryFrame
         this.isParried = false;
+
+        // Sound effects
+        this.audio = audio
     }
 
     drawHitbox(){
@@ -176,16 +179,22 @@ class Enemy extends Sprite{
         // Reset and give reward
         done = true;
         reward = 10;
-        player.position.x = player.position.y = 0;
+        // player.position.x = Math.floor(Math.random() * (canvas.width - tileSize));
+        // player.position.y = Math.floor(Math.random() * (canvas.height - tileSize));
+        
+        player.position.x = 0;
+        player.position.y = 0;
 
-        if(steps > 100) score = 250;
-        if(steps > 1000) score = 200;
-        if(steps > 2000) score = 150;
-        if(steps > 3000) score = 100;
-        if(steps > 7000) score = 50;
-        if(steps > 13000) score = 30;
-        if(steps > 17000) score = 20;
-        if(steps > 20000) score = 5;
+
+        if(steps >= 100) score = 300;
+        if(steps >= 500) score = 250;
+        if(steps >= 1000) score = 200;
+        if(steps >= 2000) score = 150;
+        if(steps >= 3000) score = 100;
+        if(steps >= 7000) score = 50;
+        if(steps >= 13000) score = 30;
+        if(steps >= 17000) score = 20;
+        if(steps >= 20000) score = 5;
 
         steps = 0; 
     }
@@ -223,8 +232,8 @@ class Enemy extends Sprite{
     getStateFromAction(){
 
         if(totalEssence >= 2){
-            const random = Math.floor(Math.random() * 100);
-            if(random >= 97) return new WarpState(this);
+            const random = Math.floor(Math.random() * 200);
+            if(random >= 199) return new WarpState(this);
         }
 
         if (JSON.stringify(this.action) == JSON.stringify([1,0,0,0])) return new EnemyMoveRightState(this);
@@ -250,6 +259,7 @@ class WarpState extends State{
         this.entity.attackFlag = 1;
         this.entity.position.x = player.position.x - player.hitbox.w
         this.entity.position.y = player.position.y;
+        this.entity.audio.warp.play();
     }
     update(){
 
@@ -266,6 +276,7 @@ class EnemyFazedState extends State{
     enter(){
         
         this.entity.spriteAnimation('fazed')
+        this.entity.audio.fazed.play();
 
     }
     
@@ -290,6 +301,8 @@ class EnemyAttackState extends State{
 
     }
     update(){
+
+        this.entity.audio.attack.play()
 
         this.entity.isParried && console.log('Parried Successfully')
 

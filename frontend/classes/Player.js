@@ -6,7 +6,7 @@ class Player extends Sprite {
         // Initial position
         this.position = { x: 0, y: 0};
         this.currentState = new IdleState(this); // Start with the idle state
-        this.speed = 15; // Movement speed
+        this.speed = 4; // Movement speed
 
         // Velocity to track movement direction
         this.velocity = { x: 0, y: 0 };
@@ -136,27 +136,6 @@ class Player extends Sprite {
     }
 }
 
-class AttackState extends State {
-    enter() {
-
-        const attack = ['attackRight', 'attackLeft', 'attackUp', 'attackDown']
-        this.entity.spriteAnimation(attack[lastPlayerDirection])
-
-    }
-
-    update() {
-
-        for(let i in enemy){
-            if(enemy[i].isAttack && this.entity.currentFrame == 4 && enemy[i].currentFrame == enemy[i].parryFrame) enemy[i].isParried = true;
-        }
-
-        // if(isEnemyAttack && this.entity.currentFrame == 4 && shadow.currentFrame == 14) isParried = true;
-
-        if(this.entity.currentFrame >= this.entity.frameRate - 1) this.entity.setState(new IdleState(this.entity));
-
-    }
-}
-
 // Idle State
 class IdleState extends State {
     enter() {
@@ -179,8 +158,34 @@ class IdleState extends State {
     }
 }
 
-
 // FINITE STATE MACHINE (FSM) IMPLEMENTATION
+class AttackState extends State {
+    enter() {
+
+        const attack = ['attackRight', 'attackLeft', 'attackUp', 'attackDown']
+        this.entity.spriteAnimation(attack[lastPlayerDirection])
+        playerAttackAudio.play();
+
+    }
+
+    update() {
+
+        if(playerAttackAudio.currentTime == playerAttackAudio.duration - 0.01) playerAttackAudio.currentTime = 0;
+
+        for(let i in enemy){
+            if(enemy[i].isAttack && this.entity.currentFrame == 4 && enemy[i].currentFrame == enemy[i].parryFrame) {
+                parryAudio.play();
+                enemy[i].audio.attack.pause();
+                enemy[i].isParried = true;
+            }
+        }
+
+        // if(isEnemyAttack && this.entity.currentFrame == 4 && shadow.currentFrame == 14) isParried = true;
+
+        if(this.entity.currentFrame >= this.entity.frameRate - 1) this.entity.setState(new IdleState(this.entity));
+
+    }
+}
 
 // Moving Left State
 class MoveLeftState extends State {
@@ -189,13 +194,22 @@ class MoveLeftState extends State {
         lastPlayerDirection = 1
         this.entity.spriteAnimation('moveLeft');
         this.entity.velocity = { x: -this.entity.speed, y: 0 };
+        playerRunAudio.play();
     }
 
     handleInput() {
-        if (!keys.a.pressed) this.entity.setState(new IdleState(this.entity));
+        if (!keys.a.pressed) {
+            playerRunAudio.pause();
+            playerRunAudio.currentTime = 0.02;
+            this.entity.setState(new IdleState(this.entity));
+        }
+
     }
 
     update() {
+
+        playerRunAudio.play();
+        if(playerRunAudio.currentTime  == playerRunAudio.duration) playerRunAudio.currentTime = 0.02;
 
         const currentPosition = {
             x: this.entity.position.x + ((this.entity.imgSize - this.entity.hitbox.w) / 2), 
@@ -228,10 +242,18 @@ class MoveRightState extends State {
     }
 
     handleInput() {
-        if (!keys.d.pressed) this.entity.setState(new IdleState(this.entity));
+        if (!keys.d.pressed) {
+            playerRunAudio.pause();
+            playerRunAudio.currentTime = 0.02;
+            this.entity.setState(new IdleState(this.entity));
+        }
+        
     }
 
     update() {
+
+        playerRunAudio.play();
+        if(playerRunAudio.currentTime  == playerRunAudio.duration) playerRunAudio.currentTime = 0.02;
 
         const currentPosition = {
             x: this.entity.position.x + ((this.entity.imgSize - this.entity.hitbox.w) / 2), 
@@ -260,13 +282,21 @@ class MoveUpState extends State {
         lastPlayerDirection = 2
         this.entity.spriteAnimation('moveUp');
         this.entity.velocity = { x: 0, y: -this.entity.speed };
+
     }
 
     handleInput() {
-        if (!keys.w.pressed) this.entity.setState(new IdleState(this.entity));
+        if (!keys.w.pressed) {
+            playerRunAudio.pause();
+            playerRunAudio.currentTime = 0.02;
+            this.entity.setState(new IdleState(this.entity));
+        }
     }
 
     update() {
+
+        playerRunAudio.play();
+        if(playerRunAudio.currentTime  == playerRunAudio.duration) playerRunAudio.currentTime = 0.02;
 
         const currentPosition = {
             x: this.entity.position.x + ((this.entity.imgSize - this.entity.hitbox.w) / 2), 
@@ -295,14 +325,22 @@ class MoveDownState extends State {
         lastPlayerDirection = 3
         this.entity.spriteAnimation('moveDown');
         this.entity.velocity = { x: 0, y: this.entity.speed };
+        playerRunAudio.play();
     }
 
     handleInput() {
-        if (!keys.s.pressed) this.entity.setState(new IdleState(this.entity));
+        if (!keys.s.pressed) {
+            playerRunAudio.pause();
+            playerRunAudio.currentTime = 0.02;
+            this.entity.setState(new IdleState(this.entity));
+        }
     }
 
     update() {
         
+        playerRunAudio.play();
+        if(playerRunAudio.currentTime  == playerRunAudio.duration) playerRunAudio.currentTime = 0.02;
+
         const currentPosition = {
             x: this.entity.position.x + ((this.entity.imgSize - this.entity.hitbox.w) / 2), 
             y: this.entity.position.y + ((this.entity.imgSize - this.entity.hitbox.h) / 2)

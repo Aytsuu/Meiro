@@ -18,7 +18,6 @@ socketio = SocketIO(app, cors_allowed_origins="*", async_mode='eventlet')
 Payload.max_decode_packets = 500
 
 train = None
-ai_id = None
 train_instances = {i: Train() for i in range(2)}
 
 # Set up a thread pool executor with a maximum of 4 threads
