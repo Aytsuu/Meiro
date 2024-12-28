@@ -33,7 +33,7 @@ class Interaction extends Sprite{
 
     canInteract(object){
 
-        if(!isGameEnd){
+        if(!isGamePaused){
 
             const objectPosX = object.position.x
             const objectPosY = object.position.y
@@ -111,7 +111,7 @@ class InteractingShrineState extends State{
 
     update() {
 
-            if(this.entity.currentFrame >= this.entity.frameRate - 1){
+            if(this.entity.currentFrame > this.entity.frameRate){
                 if(essenceCollected){
                     essenceCollected = false;
                     totalEssence ++;

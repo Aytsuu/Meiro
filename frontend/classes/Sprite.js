@@ -57,7 +57,7 @@ class Sprite{
 
     updateFrame(){
         
-        if(!isGameEnd){
+        if(!isGamePaused){
 
             this.elapsedFrame++;
             if(this.elapsedFrame % this.frameBuffer === 0){ // If true, moves the current frame to another

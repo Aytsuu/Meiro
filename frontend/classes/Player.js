@@ -6,7 +6,7 @@ class Player extends Sprite {
         // Initial position
         this.position = { x: 0, y: 0};
         this.currentState = new IdleState(this); // Start with the idle state
-        this.speed = 4; // Movement speed
+        this.speed = 15; // Movement speed
 
         // Velocity to track movement direction
         this.velocity = { x: 0, y: 0 };
@@ -58,8 +58,10 @@ class Player extends Sprite {
     }
 
     movementUpdate() {
-        this.currentState.handleInput();
-        this.currentState.update();
+        if(!isGamePaused){
+            this.currentState.handleInput();
+            this.currentState.update();
+        }
     }
 
     spriteAnimation(name){

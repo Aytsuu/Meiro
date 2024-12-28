@@ -7,6 +7,7 @@ canvas.addEventListener('mousemove', (e) => {
     
 });
 
+
 // Listens to keypress
 window.addEventListener('keydown', (e) => {
     switch (e.key.toLowerCase()) {
@@ -28,6 +29,9 @@ window.addEventListener('keydown', (e) => {
         case 'e':
             keys.e.pressed = true;
             break;
+        case 'escape': 
+            isGamePaused = !isGamePaused
+            break
     }
 });
 

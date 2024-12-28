@@ -40,7 +40,6 @@ let essenceCollected = false;
 let totalEssence = 0;
 
 // Game State
-let isGameEnd = true;
 let isGameStart = false;
 let isGamePaused = false;
 
@@ -367,14 +366,14 @@ function animate(timestamp) {
     // Clear the canvas
     c.clearRect(0, 0, canvas.width, canvas.height);
 
-    if(isGameEnd) gameEnd();
+    console.log(isGamePaused && 'Game is Paused')
 
     if(!isGameStart) {
         menu.draw();
     }
     else {
-        isGameEnd = false;
         gameStart();
+        gamePause();
     }
 
     // Control and customize cursor for the game
@@ -391,7 +390,7 @@ function gameStart(){
     maze.update();
 
     // Player
-    if(!isGameEnd) player.movementUpdate();
+    player.movementUpdate();
     player.draw();
 
     // Enemy 
@@ -418,18 +417,22 @@ function gameStart(){
 }
 
 // If game is on ending animation
-function gameEnd(){
-    for(let i in enemy){
-        enemy[i].frameRate = enemy[i].currentFrame;
-    }
+function gamePause(){
 
-    player.frameRate = player.currentFrame;
-    updateFlag = true;
+    if(isGamePaused){
+        for(let i in enemy){
+            enemy[i].frameRate = enemy[i].currentFrame;
+        }
+    
+        player.frameRate = player.currentFrame;
+        updateFlag = true;
+        
+    }
 }
 
 function enemyInstances(){
     for(let i in enemy){
-        if(!isGameEnd) {
+        if(!isGamePaused) {
             enemy[i].checkPassability();
             enemy[i].decision();
             enemy[i].movementUpdate();

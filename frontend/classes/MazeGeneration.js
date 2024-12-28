@@ -114,7 +114,7 @@ class View {
   
       update(){ // Shift maze
   
-        if(!updateFlag){
+        if(!updateFlag && !isGamePaused){
             mazeShiftAudio.play()
             for(let i = 0; i < this.algorithmIterations; i++){
                 maze.iterate();

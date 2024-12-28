@@ -32,7 +32,7 @@ socket.on('receive_from_flask', (response) => {
         enemy[aiId].action = action
         enemy[aiId].phase = phase
 
-        if((!enemy[aiId].isAttack && !isGameEnd) && JSON.stringify(enemy[aiId].action) != JSON.stringify(enemy[aiId].prevAction))  {
+        if((!enemy[aiId].isAttack && !isGamePaused) && JSON.stringify(enemy[aiId].action) != JSON.stringify(enemy[aiId].prevAction))  {
             enemy[aiId].setState(enemy[aiId].getStateFromAction());
             enemy[aiId].prevAction = action;
         }
@@ -46,7 +46,7 @@ function sendData(data, aiId){
     data.aiId = aiId
 
     // Emit an event to Flask (server) with the data
-    if(!enemy[aiId].isAttack && !isGameEnd) socket.emit('send_to_flask', data);
+    if(!enemy[aiId].isAttack && !isGamePaused) socket.emit('send_to_flask', data);
 
 }
 
@@ -55,6 +55,6 @@ function sendResponse(data, aiId){
     data.aiId = aiId
 
     // Emit an event to Flask (server) with the data
-    if(!enemy[aiId].isAttack && !isGameEnd) socket.emit('send_to_flask', data);
+    if(!enemy[aiId].isAttack && !isGamePaused) socket.emit('send_to_flask', data);
 
 }

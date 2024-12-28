@@ -1,7 +1,7 @@
 class Menu {
     constructor() {
         
-        this.menuItems = ['Start Game', 'Settings', 'Exit'];
+        this.menuItems = ['Start Game'];
         this.selectedIndex = 0;
         this.titleImage = new Image();
         this.titleImage.src = '/frontend/menu/title.png';
@@ -54,9 +54,9 @@ class Menu {
     handleMenuSelection(index) {
         console.log(`Selected: ${this.menuItems[index]}`);
         if(index === 0){
+            isGamePaused = false;
             isGameStart = true;
         }
-        // Add your menu action handling here
     }
     
     draw() {
