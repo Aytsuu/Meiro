@@ -9,17 +9,24 @@ const tileSize = 128;
 canvas.width = tileSize * 14;
 canvas.height = tileSize * 7;
 
-// Initializing global variables
+// AI training
 let obstacles = []; // Store obstacles positions
 let passability = []; // Store the passability of next action point (right, left, up, down)
-let mouseX = 0;
-let mouseY = 0;
 let done = false;
 let direction = 0;
 let reward = 0;
 let score = 0;
 let steps = 0; 
-let lastPlayerDirection = 3 // Default facing front
+
+// Mouse tracking
+let mouseX = 0;
+let mouseY = 0;
+
+// Player
+let lastPlayerDirection = 3; // Default facing front
+let totalParries = 0;
+let totalDeath = 0;
+
 
 // Fps tracking
 let lastTime = 0;
@@ -40,11 +47,14 @@ let essenceCollected = false;
 let totalEssence = 0;
 
 // Game State
+let isGameOver = false;
 let isGameStart = false;
 let isGamePaused = false;
 
-
-const menu =  new Menu()
+// Menu
+const menu =  new Menu();
+const scoring = new Score();
+const pause = new Pause();
 
 // Player object initialization
 const player = new Player({
@@ -288,7 +298,7 @@ const shrine = new Shrine({
     imgSrc: '/frontend/assets/animations/object/no_essence.png',
     frameRate: 12, // Number of frames in the image
     imgSize: 32,
-    position: {x: shadow.position.x, y: shadow.position.y},
+    position: {x: canvas.width / 2 - 30, y: canvas.height / 2},
     animations: {
         noEssence:{
             imgSrc: '/frontend/assets/animations/object/no_essence.png',
@@ -366,9 +376,8 @@ function animate(timestamp) {
     // Clear the canvas
     c.clearRect(0, 0, canvas.width, canvas.height);
 
-    console.log(isGamePaused && 'Game is Paused')
-
     if(!isGameStart) {
+        menu.setupEventListeners();
         menu.draw();
     }
     else {
@@ -390,30 +399,25 @@ function gameStart(){
     maze.update();
 
     // Player
-    player.movementUpdate();
-    player.draw();
+    playerInstance();
 
     // Enemy 
     enemyInstances();
 
-    // Shrine
-    // shrine.update();
-    shrine.draw();
-
     // Draw the essence
-    drawEssence();
+    essenceInstance();
+
+    // Shrine
+    shrineInstance();
+
 
     if(interactPrompt.canInteract(shrine)) {
         interactPrompt.draw();
         interactPrompt.update();
     }
 
-    // player.focus(); // Player fov
-
-    // View hitboxes
-    // shadow.drawHitbox();
-    // player.drawHitbox();
-    // shrine.drawHitbox();
+    player.focus(); // Player fov
+    
 }
 
 // If game is on ending animation
@@ -426,8 +430,25 @@ function gamePause(){
     
         player.frameRate = player.currentFrame;
         updateFlag = true;
-        
+        pause.draw();
     }
+}
+
+function shrineInstance(){
+    if(isGameOver){
+        shrine.focus()
+        shrine.drawBackgroundOutro();
+        shrine.update();
+    }
+    shrine.draw();
+    // shrine.drawHitbox();
+}
+
+function playerInstance(){
+    // Player
+    player.movementUpdate();
+    player.draw();
+    // player.drawHitbox();
 }
 
 function enemyInstances(){
@@ -444,12 +465,12 @@ function enemyInstances(){
     }
 }
 
-function drawEssence(){
+function essenceInstance(){
 
     for(let i in enemy){
 
         try{
-            if(enemy[i].isParried) {
+            if(enemy[i].essenceDropped) {
                 essence[i].draw();
                 essence[i].update(enemy[i]);
             }else{

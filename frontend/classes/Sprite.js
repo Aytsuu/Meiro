@@ -27,6 +27,7 @@ class Sprite{
                 this.animations[key].img = img
             }
         }
+
     }
 
     draw(){
@@ -56,15 +57,11 @@ class Sprite{
     }
 
     updateFrame(){
-        
-        if(!isGamePaused){
-
-            this.elapsedFrame++;
-            if(this.elapsedFrame % this.frameBuffer === 0){ // If true, moves the current frame to another
-                if(this.currentFrame < this.frameRate - 1) this.currentFrame++; // Increment if current frame is less than to the number of frames in an image
-                else this.currentFrame = 0; // Otherwise, reset current frame to the initial frame
-            }
-
+    
+        this.elapsedFrame++;
+        if(this.elapsedFrame % this.frameBuffer === 0){ // If true, moves the current frame to another
+            if(this.currentFrame < this.frameRate - 1) this.currentFrame++; // Increment if current frame is less than to the number of frames in an image
+            else this.currentFrame = 0; // Otherwise, reset current frame to the initial frame
         }
 
     }

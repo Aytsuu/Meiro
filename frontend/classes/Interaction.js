@@ -42,10 +42,10 @@ class Interaction extends Sprite{
 
             // Calculate bounding box for the object
             let objectBoundingBox = {
-                x: Math.min(objectPosX, objectPosX + this.imgSize) - object.imgSize / 2,
-                y: Math.min(objectPosY, objectPosY + this.imgSize) - object.imgSize / 2,
-                width: Math.abs(objectPosX + this.imgSize - objectPosX) + object.imgSize,
-                height: Math.abs(objectPosY + this.imgSize - objectPosY) + object.imgSize
+                x: Math.min(objectPosX, objectPosX + object.imgSize) - object.imgSize / 2,
+                y: Math.min(objectPosY, objectPosY + object.imgSize) - object.imgSize / 2,
+                width: Math.abs(objectPosX + object.imgSize - objectPosX) + object.imgSize,
+                height: Math.abs(objectPosY + object.imgSize - objectPosY) + object.imgSize
             };
 
             // Calculate bounding box for the player
@@ -111,13 +111,13 @@ class InteractingShrineState extends State{
 
     update() {
 
-            if(this.entity.currentFrame > this.entity.frameRate){
-                if(essenceCollected){
-                    essenceCollected = false;
-                    totalEssence ++;
-                    shrine.setState(new ChangeAnimationState(shrine))
-                }
-                keys.e.pressed = false;
+        if(this.entity.currentFrame >= this.entity.frameRate - 1){
+            if(essenceCollected){
+                essenceCollected = false;
+                totalEssence ++;
+                shrine.setState(new ChangeAnimationState(shrine))
             }
+            keys.e.pressed = false;
+        }
     }
 }

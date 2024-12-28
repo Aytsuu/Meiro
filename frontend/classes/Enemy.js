@@ -32,6 +32,8 @@ class Enemy extends Sprite{
         this.parryFrame = parryFrame
         this.isParried = false;
 
+        this.essenceDropped = false;
+
         // Sound effects
         this.audio = audio
     }
@@ -184,6 +186,8 @@ class Enemy extends Sprite{
         
         player.position.x = 0;
         player.position.y = 0;
+        totalDeath++;
+        essenceCollected = false;
 
 
         if(steps >= 100) score = 300;

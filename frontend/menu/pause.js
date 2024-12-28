@@ -1,7 +1,7 @@
-class Menu {
+class Pause {
     constructor() {
         
-        this.menuItems = ['Start Game'];
+        this.menuItems = ['Resume', 'Exit'];
         this.selectedIndex = 0;
         this.titleImage = new Image();
         this.titleImage.src = '/frontend/assets/gui/title.png';
@@ -53,15 +53,20 @@ class Menu {
     
     handleMenuSelection(index) {
         console.log(`Selected: ${this.menuItems[index]}`);
-        if(this.menuItems[index] === 'Start Game'){
+        if(this.menuItems[index] === 'Resume'){
             isGamePaused = false;
-            isGameStart = true;
+        }
+        else if(this.menuItems[index] === 'Exit'){
+            isGamePaused = false;
+            isGameOver = false;
+            isGameStart = false;
+            reset();
         }
     }
     
     draw() {
         // Clear canvas
-        c.fillStyle = '#1a1a1a';
+        c.fillStyle = 'rgba(0,0,0,90%)';
         c.fillRect(0, 0, canvas.width, canvas.height);
         
         // Draw title

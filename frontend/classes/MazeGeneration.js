@@ -113,7 +113,11 @@ class View {
       }
   
       update(){ // Shift maze
-  
+
+        // Background audio
+        mazeBGAudio.play();
+        if(Math.abs(mazeBGAudio.currentTime - mazeBGAudio.duration) < 0.5) mazeBGAudio.currentTime = 0;
+
         if(!updateFlag && !isGamePaused){
             mazeShiftAudio.play()
             for(let i = 0; i < this.algorithmIterations; i++){
