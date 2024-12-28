@@ -377,7 +377,8 @@ function animate(timestamp) {
     c.clearRect(0, 0, canvas.width, canvas.height);
 
     if(!isGameStart) {
-        menu.setupEventListeners();
+        maze.update();
+        menu.focus();
         menu.draw();
     }
     else {
