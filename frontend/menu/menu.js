@@ -20,6 +20,30 @@ class Menu {
   
     }
 
+    focus(){ // Shadow casting
+
+        let lightX = mouseX;
+        let lightY = mouseY;
+
+        // Create radial gradient for light
+        const gradient = c.createRadialGradient(
+            lightX, lightY, 150,
+            lightX, lightY, 0
+        );
+
+        gradient.addColorStop(0, 'rgba(0, 0, 0, 1)');
+        gradient.addColorStop(1, 'rgba(50, 50, 50, 0)');
+        
+        // Draw light
+        c.save();
+        c.globalCompositeOperation = 'darker';
+        c.fillStyle = gradient;
+        c.beginPath();
+        c.arc(lightX, lightY, 2000, 0, Math.PI * 2);
+        c.fill();
+        c.restore();
+    }
+
     setupEventListeners() {
         
         canvas.addEventListener('mousemove', (e) => {
@@ -60,9 +84,7 @@ class Menu {
     }
     
     draw() {
-        // Clear canvas
-        c.fillStyle = '#1a1a1a';
-        c.fillRect(0, 0, canvas.width, canvas.height);
+        
         
         // Draw title
         const titleWidth = canvas.width * 0.2;
