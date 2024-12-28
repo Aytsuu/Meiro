@@ -61,7 +61,7 @@ class Essence extends Sprite{
 // FINITE STATE MACHINE (FSM)
 class PickEssence extends State{
     
-    update(){
+    update(enemy){
 
         // Center x and y-axis  of the player's  position
         const playerCenterPositionX = player.position.x + player.hitbox.w / 2;
@@ -72,6 +72,7 @@ class PickEssence extends State{
             Math.floor(this.entity.position.y / this.entity.position.y) == Math.floor(playerCenterPositionY / this.entity.position.y)) {
                 
                 essenceCollected = true;
+                enemy.essenceDropped = false;
         } 
 
         // Update object position
@@ -87,7 +88,6 @@ class PickEssence extends State{
         if(this.entity.position.y > playerCenterPositionY){
             this.entity.position.y -= this.entity.speed;
         }
-        
         
     }
 }
