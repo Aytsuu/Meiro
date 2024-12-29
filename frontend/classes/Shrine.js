@@ -31,6 +31,17 @@ class Shrine extends Sprite{
 
     }
 
+    drawProgress(){
+
+        if(!isGameOver){
+            c.font = `20px Orbitron`;
+            c.fillStyle = '#FFFFFF';
+            c.textAlign = 'center';
+            c.textBaseline = 'middle';
+            c.fillText(`${totalEssence} / 3`, this.position.x + this.imgSize / 2, this.position.y - 15);
+        }
+    }
+
     focus(){ // Shadow casting
 
         let lightX = this.position.x + (this.imgSize / 2);
@@ -95,7 +106,7 @@ class ChangeAnimationState extends State{
 
         const shrineState = ['noEssence', 'oneEssence', 'twoEssence', 'completeEssence'];
         this.entity.spriteAnimation(shrineState[totalEssence]);
-        if(totalEssence == 3){
+        if(totalEssence == 3){  
             isGamePaused = true;
             isGameOver = true;
             shrine.setState(new EndingState(shrine));
@@ -114,9 +125,18 @@ class EndingState extends State{
 
     update(){
 
+        // Pause all audio in use
+        mazeBGAudio.pause();
+        shadowAttackAudio.pause();
+        shadowWarpAudio.pause();
+        shadeAttackAudio.pause();
+        shadeWarpAudio.pause();
+
         if(this.entity.position.y > canvas.height / 4){
             this.entity.position.y -= 2;
+
         }else{
+            scoring.setupEventListeners();
             scoring.draw();
         }
     }

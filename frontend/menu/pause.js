@@ -16,43 +16,49 @@ class Pause {
         this.menuSpacing = 80; // Increased spacing between menu items
         this.menuStartY = window.innerHeight * 0.65; // Moved menu below half of screen
 
-        this.setupEventListeners();
+        // Bind methods to instance
+        this.mouseMove = this.mouseMove.bind(this);
+        this.mouseClick = this.mouseClick.bind(this);
   
     }
 
+    mouseMove(e){ 
+            
+        const rect = canvas.getBoundingClientRect();
+        const scale = canvas.width / rect.width;
+        const mouseY = (e.clientY - rect.top) * scale;
+        
+        this.menuItems.forEach((item, index) => {
+            const itemY = this.menuStartY + (index * this.menuSpacing);
+            if (Math.abs(mouseY - itemY) < this.fontSize) {
+                this.selectedIndex = index;
+            }
+        });
+    };
+
+    mouseClick(e){
+
+        const rect = canvas.getBoundingClientRect();
+        const scale = canvas.width / rect.width;
+        const mouseY = (e.clientY - rect.top) * scale;
+        this.menuItems.forEach((item, index) => {
+            const itemY = this.menuStartY + (index * this.menuSpacing);
+            if (Math.abs(mouseY - itemY) < this.fontSize) {
+                menuClickAudio.play()
+                this.handleMenuSelection(index);
+            }
+        });
+    };
+
     setupEventListeners() {
-        
-        canvas.addEventListener('mousemove', (e) => {
-            const rect = canvas.getBoundingClientRect();
-            const scale = canvas.width / rect.width;
-            const mouseY = (e.clientY - rect.top) * scale;
-            
-            this.menuItems.forEach((item, index) => {
-                const itemY = this.menuStartY + (index * this.menuSpacing);
-                if (Math.abs(mouseY - itemY) < this.fontSize) {
-                    this.selectedIndex = index;
-                }
-            });
-        });
-        
-        canvas.addEventListener('click', (e) => {
-            const rect = canvas.getBoundingClientRect();
-            const scale = canvas.width / rect.width;
-            const mouseY = (e.clientY - rect.top) * scale;
-            
-            this.menuItems.forEach((item, index) => {
-                const itemY = this.menuStartY + (index * this.menuSpacing);
-                if (Math.abs(mouseY - itemY) < this.fontSize) {
-                    menuClickAudio.play()
-                    this.handleMenuSelection(index);
-                }
-            });
-        });
-        
+
+        canvas.addEventListener('mousemove', this.mouseMove);
+        canvas.addEventListener('click', this.mouseClick);
     }
     
     handleMenuSelection(index) {
         console.log(`Selected: ${this.menuItems[index]}`);
+        this.removeEventListener();
         if(this.menuItems[index] === 'Resume'){
             isGamePaused = false;
         }
@@ -66,7 +72,7 @@ class Pause {
     
     draw() {
         // Clear canvas
-        c.fillStyle = 'rgba(0,0,0,90%)';
+        c.fillStyle = 'rgba(0,0,0,70%)';
         c.fillRect(0, 0, canvas.width, canvas.height);
         
         // Draw title
@@ -111,5 +117,10 @@ class Pause {
             
             c.restore();
         });
+    }
+
+    removeEventListener(){
+        canvas.removeEventListener('mousemove', this.mouseMove);
+        canvas.removeEventListener('click', this.mouseClick);
     }
 }

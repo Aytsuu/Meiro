@@ -30,7 +30,7 @@ window.addEventListener('keydown', (e) => {
             keys.e.pressed = true;
             break;
         case 'escape': 
-            isGamePaused = !isGamePaused
+            isGamePaused = true;
             break
     }
 });

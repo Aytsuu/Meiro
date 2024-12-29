@@ -32,24 +32,14 @@ const assets = [
     '/frontend/assets/animations/enemy/Shade_Attack_SL.png',
     '/frontend/assets/animations/enemy/Shade_Metamorphosis.png',
     '/frontend/assets/animations/object/shadow_essence.png',
+    '/frontend/assets/animations/object/collected_essence.png',
     '/frontend/assets/animations/object/no_essence.png',
     '/frontend/assets/animations/object/one_essence.png',
     '/frontend/assets/animations/object/two_essence.png',
     '/frontend/assets/animations/object/complete_essence.png',
     '/frontend/assets/gui/e.svg',
     '/frontend/assets/gui/interacting.svg',
-    '/frontend/assets/sounds/main menu/click.wav',
-    '/frontend/assets/sounds/maze/shift2.wav',
-    '/frontend/assets/sounds/player/running.wav',
-    '/frontend/assets/sounds/player/attack.wav',
-    '/frontend/assets/sounds/player/parry3.wav',
-    '/frontend/assets/sounds/ghost/Ghost_Attack.wav',
-    '/frontend/assets/sounds/ghost/Ghost_Damage.wav',
-    '/frontend/assets/sounds/ghost/Ghost_Emerge.wav',
-    '/frontend/assets/sounds/redenemy/redattack.wav',
-    '/frontend/assets/sounds/redenemy/reddamage.wav',
-    '/frontend/assets/sounds/redenemy/redemerge.wav',
-    '/frontend/menu/title.png',
-    '/frontend/menu/cursor.png'
+    '/frontend/assets/gui/title.png',
+    '/frontend/assets/gui/cursor.png'
     
 ]

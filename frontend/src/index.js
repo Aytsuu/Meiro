@@ -294,6 +294,13 @@ const shadowEssence = new Essence({
     hitbox: {x: 50, y: 50}
 });
 
+const collectedEssence = new CollectedEssence({
+    imgSrc: '/frontend/assets/animations/object/collected_essence.png',
+    frameRate: 30, // Number of frames in the image
+    imgSize: 32,
+    position: {x: 0, y: 0},
+});
+
 const shrine = new Shrine({
     imgSrc: '/frontend/assets/animations/object/no_essence.png',
     frameRate: 12, // Number of frames in the image
@@ -370,156 +377,165 @@ const keys = {
 
 // ---------------------------------------------------------------- FUNCTIONS ---------------------------------------------------------------- //
 
-// This function renders all objects infinitely
-function animate(timestamp) {
 
-    // Clear the canvas
-    c.clearRect(0, 0, canvas.width, canvas.height);
+function game(){
+    
+    // This function renders all objects infinitely
+    function animate(timestamp) {
 
-    if(!isGameStart) {
+        // Clear the canvas
+        c.clearRect(0, 0, canvas.width, canvas.height);
+
+        if(!isGameStart) {
+            maze.update();
+            menu.setupEventListeners();
+            menu.focus();
+            menu.draw();
+        }
+        else {
+            gameStart();
+            gamePause();
+        }
+
+        // Control and customize cursor for the game
+        cursorControl(); 
+
+        // Calculate game fps
+        calculateFps(timestamp);
+
+        window.requestAnimationFrame(animate);
+    }
+
+    // If start game is clicked
+    function gameStart(){
+
+        // Draw the map
         maze.update();
-        menu.focus();
-        menu.draw();
-    }
-    else {
-        gameStart();
-        gamePause();
-    }
 
-    // Control and customize cursor for the game
-    cursorControl(); 
-    calculateFps(timestamp);
+        // Player
+        playerInstance();
 
-    window.requestAnimationFrame(animate);
-}
+        // Enemy 
+        enemyInstances();
 
-// If start game is clicked
-function gameStart(){
+        // Draw the essence
+        essenceInstance();
 
-    // Draw the map
-    maze.update();
+        // Shrine
+        shrineInstance();
 
-    // Player
-    playerInstance();
+        shrineInteraction();
 
-    // Enemy 
-    enemyInstances();
-
-    // Draw the essence
-    essenceInstance();
-
-    // Shrine
-    shrineInstance();
-
-
-    if(interactPrompt.canInteract(shrine)) {
-        interactPrompt.draw();
-        interactPrompt.update();
+        if(!isGameOver) player.focus(); // Player fov
+        
     }
 
-    player.focus(); // Player fov
-    
-}
+    function gamePause(){
 
-// If game is on ending animation
-function gamePause(){
-
-    if(isGamePaused){
-        for(let i in enemy){
-            enemy[i].frameRate = enemy[i].currentFrame;
-        }
-    
-        player.frameRate = player.currentFrame;
-        updateFlag = true;
-        pause.draw();
-    }
-}
-
-function shrineInstance(){
-    if(isGameOver){
-        shrine.focus()
-        shrine.drawBackgroundOutro();
-        shrine.update();
-    }
-    shrine.draw();
-    // shrine.drawHitbox();
-}
-
-function playerInstance(){
-    // Player
-    player.movementUpdate();
-    player.draw();
-    // player.drawHitbox();
-}
-
-function enemyInstances(){
-    for(let i in enemy){
-        if(!isGamePaused) {
-            enemy[i].checkPassability();
-            enemy[i].decision();
-            enemy[i].movementUpdate();
-            enemy[i].slayPlayer(); // Attack the player
-            enemy[i].train();
-        }
-        enemy[i].draw();
-        // enemy[i].drawHitbox();
-    }
-}
-
-function essenceInstance(){
-
-    for(let i in enemy){
-
-        try{
-            if(enemy[i].essenceDropped) {
-                essence[i].draw();
-                essence[i].update(enemy[i]);
-            }else{
-                essence[i].position.x = enemy[i].position.x + enemy[i].hitbox.w / 2;
-                essence[i].position.y = enemy[i].position.y + enemy[i].hitbox.h / 2;
+        if(isGamePaused && !isGameOver){ // Check if game paused
+            pause.setupEventListeners();
+            for(let i in enemy){
+                enemy[i].frameRate = enemy[i].currentFrame;
             }
-        }catch(e){}
+        
+            player.frameRate = player.currentFrame;
+            updateFlag = true;
+            pause.draw();
+        }
     }
-}
 
-function shiftMap(){
-    for(let i = 0; i < algorithmIterations; i++){
-        maze.iterate();
+    function shrineInteraction(){
+        if(interactPrompt.canInteract(shrine)) {
+            interactPrompt.draw();
+            interactPrompt.update();
+        }
     }
-    view.drawMaze(maze);
-}
 
-function calculateFps(timestamp) { // Fps tracker
-    frameCount++;
-    const deltaTime = timestamp - lastTime;
-    
-    if (deltaTime >= 1000) {
-        fps = frameCount;
-        frameCount = 0;
-        lastTime = timestamp;
+    function shrineInstance(){
+        if(isGameOver){
+            shrine.focus()
+            shrine.drawBackgroundOutro();
+            shrine.update();
+        }
+        shrine.drawProgress();
+        shrine.draw();
+        // shrine.drawHitbox();
     }
+
+    function playerInstance(){
+        // Player
+        if(essenceCollected) {
+            collectedEssence.position.x = player.position.x + player.imgSize / 2 - 15;
+            collectedEssence.position.y = player.position.y + ((player.imgSize - player.hitbox.h) / 2) - 25;
+            collectedEssence.draw();
+        }
+        player.movementUpdate();
+        player.draw();
+        // player.drawHitbox();
+    }
+
+    function enemyInstances(){
+        for(let i in enemy){
+            if(!isGamePaused) {
+                enemy[i].checkPassability();
+                enemy[i].decision();
+                enemy[i].movementUpdate();
+                enemy[i].slayPlayer(); // Attack the player
+                enemy[i].train();
+            }
+            enemy[i].draw();
+            // enemy[i].drawHitbox();
+        }
+    }
+
+    function essenceInstance(){
+
+        for(let i in enemy){
+
+            try{
+                if(enemy[i].essenceDropped) {
+                    essence[i].draw();
+                    essence[i].update(enemy[i]);
+                }else{
+                    essence[i].position.x = enemy[i].position.x + enemy[i].hitbox.w / 2;
+                    essence[i].position.y = enemy[i].position.y + enemy[i].hitbox.h / 2;
+                }
+            }catch(e){}
+        }
+    }
+
+    function calculateFps(timestamp) { // Fps tracker
+        frameCount++;
+        const deltaTime = timestamp - lastTime;
+        
+        if (deltaTime >= 1000) {
+            fps = frameCount;
+            frameCount = 0;
+            lastTime = timestamp;
+        }
+    }
+
+    function cursorControl() {
+        // Confine mouse within canvas boundaries
+        if (mouseX < 0) mouseX = 0;
+        if (mouseX > canvas.width) mouseX = canvas.width;
+        if (mouseY < 0) mouseY = 0;
+        if (mouseY > canvas.height) mouseY = canvas.height;
+
+        // Create cursor image
+        const cursorImg = new Image();
+        cursorImg.src = '/frontend/assets/gui/cursor.png';
+        
+        // Draw cursor
+        c.drawImage(cursorImg, mouseX - cursorImg.width/2, mouseY - cursorImg.height/2);
+    }
+
+    function displayFPS() {
+        console.log('FPS:', fps);
+    }
+
+    setInterval(displayFPS, 1000); // Update FPS display every second
+
+    // Start the game
+    animate();
 }
-
-function cursorControl() {
-    // Confine mouse within canvas boundaries
-    if (mouseX < 0) mouseX = 0;
-    if (mouseX > canvas.width) mouseX = canvas.width;
-    if (mouseY < 0) mouseY = 0;
-    if (mouseY > canvas.height) mouseY = canvas.height;
-
-    // Create cursor image
-    const cursorImg = new Image();
-    cursorImg.src = '/frontend/menu/cursor.png';
-    
-    // Draw cursor
-    c.drawImage(cursorImg, mouseX - cursorImg.width/2, mouseY - cursorImg.height/2);
-}
-
-function displayFPS() {
-    console.log('FPS:', fps);
-}
-
-setInterval(displayFPS, 1000); // Update FPS display every second
-
-// Start the game
-animate();
