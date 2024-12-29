@@ -501,18 +501,18 @@ function calculateFps(timestamp) { // Fps tracker
 }
 
 function cursorControl() {
-
     // Confine mouse within canvas boundaries
     if (mouseX < 0) mouseX = 0;
     if (mouseX > canvas.width) mouseX = canvas.width;
     if (mouseY < 0) mouseY = 0;
     if (mouseY > canvas.height) mouseY = canvas.height;
 
-    // Draw a small circle at the mouse position
-    c.beginPath();
-    c.arc(mouseX, mouseY, 5, 0, Math.PI * 2);
-    c.fillStyle = 'red';
-    c.fill();
+    // Create cursor image
+    const cursorImg = new Image();
+    cursorImg.src = '/frontend/menu/cursor.png';
+    
+    // Draw cursor
+    c.drawImage(cursorImg, mouseX - cursorImg.width/2, mouseY - cursorImg.height/2);
 }
 
 function displayFPS() {

@@ -1,6 +1,11 @@
 class Menu {
     constructor() {
+        // Loading screen state
+        this.isLoading = true;
+        this.loadingState = 'click'; // 'click' or 'loading'
+        this.loadingProgress = 0;
         
+        // Menu properties
         this.menuItems = ['Start Game'];
         this.selectedIndex = 0;
         this.titleImage = new Image();
@@ -13,15 +18,35 @@ class Menu {
         // Menu item styling
         this.fontSize = Math.floor(window.innerHeight * 0.025);
         this.fontFamily = 'Orbitron';
-        this.menuSpacing = 80; // Increased spacing between menu items
-        this.menuStartY = window.innerHeight * 0.65; // Moved menu below half of screen
+        this.menuSpacing = 80;
+        this.menuStartY = window.innerHeight * 0.65;
 
-        this.setupEventListeners();
-  
+        // Setup loading screen click handler
+        this.handleLoadingClick = this.handleLoadingClick.bind(this);
+        canvas.addEventListener('click', this.handleLoadingClick);
     }
 
-    focus(){ // Shadow casting
+    handleLoadingClick() {
+        if (this.isLoading && this.loadingState === 'click') {
+            this.loadingState = 'loading';
+            this.startLoading();
+        }
+    }
 
+    startLoading() {
+        const loadingInterval = setInterval(() => {
+            this.loadingProgress += 1;
+            
+            if (this.loadingProgress >= 100) {
+                clearInterval(loadingInterval);
+                this.isLoading = false;
+                canvas.removeEventListener('click', this.handleLoadingClick);
+                this.setupEventListeners();
+            }
+        }, 30);
+    }
+
+    focus() { // Shadow casting
         let lightX = mouseX;
         let lightY = mouseY;
 
@@ -45,7 +70,6 @@ class Menu {
     }
 
     setupEventListeners() {
-        
         canvas.addEventListener('mousemove', (e) => {
             const rect = canvas.getBoundingClientRect();
             const scale = canvas.width / rect.width;
@@ -72,7 +96,6 @@ class Menu {
                 }
             });
         });
-        
     }
     
     handleMenuSelection(index) {
@@ -84,7 +107,24 @@ class Menu {
     }
     
     draw() {
-        
+        // Only draw black background during loading screens
+        if (this.isLoading) {
+            // Black background
+            c.fillStyle = '#000000';
+            c.fillRect(0, 0, canvas.width, canvas.height);
+
+            c.font = `${this.fontSize}px ${this.fontFamily}`;
+            c.fillStyle = '#FFFFFF';
+            c.textAlign = 'center';
+            c.textBaseline = 'middle';
+            
+            if (this.loadingState === 'click') {
+                c.fillText('Click to load assets', canvas.width / 2, canvas.height / 2);
+            } else {
+                c.fillText(`Loading game... ${this.loadingProgress}%`, canvas.width / 2, canvas.height / 2);
+            }
+            return;
+        }
         
         // Draw title
         const titleWidth = canvas.width * 0.2;

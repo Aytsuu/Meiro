@@ -49,6 +49,7 @@ const assets = [
     '/frontend/assets/sounds/redenemy/redattack.wav',
     '/frontend/assets/sounds/redenemy/reddamage.wav',
     '/frontend/assets/sounds/redenemy/redemerge.wav',
-    '/frontend/menu/title.png'
+    '/frontend/menu/title.png',
+    '/frontend/menu/cursor.png'
     
 ]
