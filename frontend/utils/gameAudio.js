@@ -8,9 +8,8 @@ const menuClickAudio = new Audio('/frontend/assets/sounds/main menu/click.wav');
 const mazeShiftAudio = new Audio('/frontend/assets/sounds/maze/shift2.wav');
 mazeShiftAudio.volume = 0.6;
 
-const mazeBGAudio = new Audio('/frontend/assets/sounds/maze/bg_sound.wav')
+const mazeBGAudio = new Audio('/frontend/assets/sounds/main menu/menuaudio.wav')
 mazeBGAudio.volume = 0.6;
-mazeBGAudio.currentTime = 0.4
 
 //---------------------- PLAYER AUDIO ----------------------------//
 
