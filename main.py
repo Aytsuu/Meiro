@@ -8,6 +8,7 @@ from DQN_agent import Train
 import logging
 from concurrent.futures import ThreadPoolExecutor
 from engineio.payload import Payload
+import os
 
 # Setup logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -57,6 +58,7 @@ def handle_send_to_flask(data):
     executor.submit(train_in_background, data, train_instance, ai_id)
 
 if __name__ == '__main__':
-    socketio.run(app, debug=True, host='0.0.0.0', port=5000, allow_unsafe_werkzeug=True)
+    port = int(os.environ.get('PORT', 5000))  # Render-provided port, default to 5000
+    socketio.run(app, debug=True, host='0.0.0.0', port=port, allow_unsafe_werkzeug=True)
  
 

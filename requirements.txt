@@ -4,3 +4,4 @@ flask-socketio
 torch
 numpy
 eventlet
+gunicorn==20.1.0
