@@ -14,7 +14,7 @@ import os
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 app = Flask(__name__)
-CORS(app, origins="*")  # Enable CORS for all origins
+CORS(app, origins="https://meiro-1612b.web.app")  # Enable CORS for all origins
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode='eventlet')
 Payload.max_decode_packets = 500
 
