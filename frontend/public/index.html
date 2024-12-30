@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meiro</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="main.css">
+    <link rel="stylesheet" href="tloutput.css">
+    <!-- Ensure these class files are loaded before the websocket connection script -->
+    <script src="https://cdn.socket.io/4.7.1/socket.io.min.js"></script>
+</head>
+<body class>
+
+    <div class="w-full h-full flex justify-center items-center relative">
+        <canvas></canvas>
+    </div>
+
+    <!-- Scripts -->
+    <script src="classes/State.js"></script>
+    <script src="classes/Sprite.js"></script>
+    <script src="classes/CollectedEssence.js"></script>
+    <script src="classes/Essence.js"></script>
+    <script src="classes/Interaction.js"></script>
+    <script src="classes/Shrine.js"></script>
+    <script src="classes/Enemy.js"></script>
+    <script src="classes/Player.js"></script>
+    <script src="classes/MazeGeneration.js"></script>
+    <script src="utils/gameAudio.js"></script>
+    <script src="menu/pause.js"></script>
+    <script src="menu/scoring.js"></script>
+    <script src="menu/menu.js"></script>
+    <script src="menu/reset.js"></script>
+
+    <!-- Now the WebSocket connection script -->
+    <script src="websocketConnection.js"></script>
+
+    <!-- Main application logic -->
+    <script src="index.js"></script>
+    <script src="eventlistener/eventListener.js"></script>
+
+    <!-- Preload and event listener scripts -->
+    <script src="preload/loading.js"></script>
+    <script src="preload/assetlist.js"></script>
+</body>
+</html>

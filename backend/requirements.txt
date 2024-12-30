@@ -1,0 +1,8 @@
+flask
+flask-cors
+flask-socketio
+torch
+numpy
+eventlet
+matplotlib
+IPython
