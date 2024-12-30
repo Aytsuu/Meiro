@@ -3,4 +3,4 @@ services:
     name: meiro-server
     env: python
     buildCommand: "pip install -r requirements.txt"
-    startCommand: "gunicorn -k eventlet -w 1 app:app"
+    startCommand: "gunicorn -k eventlet -w 1 main:app"
