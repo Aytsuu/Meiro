@@ -44,8 +44,8 @@ let maze = new Maze(mazeWidth, mazeHeight);
 let view = new View();
 
 // Objective
-let essenceCollected = true;
-let totalEssence = 2;
+let essenceCollected = false;
+let totalEssence = 0;
 
 // Game State
 let isGameOver = false;
