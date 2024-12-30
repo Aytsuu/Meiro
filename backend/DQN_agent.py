@@ -3,7 +3,6 @@ import random
 import numpy as np
 from collections import deque
 from DQN_model import Linear_QNet, QTrainer
-from plot_helper import plot
 
 MAX_MEMORY = 100_000
 BATCH_SIZE = 1000
