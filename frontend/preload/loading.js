@@ -10,7 +10,7 @@ class Loading {
         this.fontFamily = 'Orbitron';
 
         // Warning message
-        this.warningTitle = "WARNING";
+        this.warningTitle = "[ CONTENT WARNING ]";
         this.warningText = "This game contains psychological horror elements, " +
         "and themes that some players may find unsettling. " +
         "Player discretion is advised. " +
@@ -67,12 +67,14 @@ class Loading {
 
         if (this.loadingState === 'click') {
             // Draw WARNING title
-            c.font = `bold ${this.warningFontSize}px ${this.fontFamily}`;
+            c.font = `bold ${this.warningFontSize}px Poppins`;
+            c.fillStyle = 'red'
             c.fillText(this.warningTitle, canvas.width / 2, canvas.height * 0.3);
 
             // Draw warning message
-            c.font = `${this.fontSize}px ${this.fontFamily}`;
-            
+            c.font = `${this.fontSize}px Poppins`;
+            c.fillStyle = 'white'
+
             // Split warning text into lines
             const maxWidth = canvas.width * 0.8;
             const words = this.warningText.split(' ');

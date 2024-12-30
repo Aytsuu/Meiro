@@ -71,6 +71,7 @@ class PickEssence extends State{
         if(Math.floor(this.entity.position.x / this.entity.position.x) == Math.floor(playerCenterPositionX / this.entity.position.x) && 
             Math.floor(this.entity.position.y / this.entity.position.y) == Math.floor(playerCenterPositionY / this.entity.position.y)) {
                 
+                collectEssenceAudio.play();
                 essenceCollected = true;
                 enemy.essenceDropped = false;
         } 

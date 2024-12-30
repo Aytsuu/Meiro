@@ -26,6 +26,7 @@ let mouseY = 0;
 let lastPlayerDirection = 3; // Default facing front
 let totalParries = 0;
 let totalDeath = 0;
+let isPlayerKilled = false;
 
 
 // Fps tracking
@@ -43,8 +44,8 @@ let maze = new Maze(mazeWidth, mazeHeight);
 let view = new View();
 
 // Objective
-let essenceCollected = false;
-let totalEssence = 0;
+let essenceCollected = true;
+let totalEssence = 2;
 
 // Game State
 let isGameOver = false;
@@ -427,6 +428,8 @@ function game(){
         shrineInteraction();
 
         if(!isGameOver) player.focus(); // Player fov
+
+        if(isPlayerKilled) player.drawDeathEffect();
         
     }
 
@@ -463,15 +466,18 @@ function game(){
     }
 
     function playerInstance(){
-        // Player
-        if(essenceCollected) {
-            collectedEssence.position.x = player.position.x + player.imgSize / 2 - 15;
-            collectedEssence.position.y = player.position.y + ((player.imgSize - player.hitbox.h) / 2) - 25;
-            collectedEssence.draw();
+
+        if(!isPlayerKilled){
+            // Player
+            if(essenceCollected) {
+                collectedEssence.position.x = player.position.x + player.imgSize / 2 - 15;
+                collectedEssence.position.y = player.position.y + ((player.imgSize - player.hitbox.h) / 2) - 25;
+                collectedEssence.draw();
+            }
+            player.movementUpdate();
+            player.draw();
+            // player.drawHitbox();
         }
-        player.movementUpdate();
-        player.draw();
-        // player.drawHitbox();
     }
 
     function enemyInstances(){

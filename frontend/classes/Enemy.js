@@ -184,8 +184,6 @@ class Enemy extends Sprite{
         // player.position.x = Math.floor(Math.random() * (canvas.width - tileSize));
         // player.position.y = Math.floor(Math.random() * (canvas.height - tileSize));
         
-        player.position.x = 0;
-        player.position.y = 0;
         totalDeath++;
         essenceCollected = false;
 
@@ -318,7 +316,11 @@ class EnemyAttackState extends State{
         if (this.entity.currentFrame >= this.entity.frameRate - 1 && (!this.entity.isParried)) {
 
             const isPlayerInRange = this.entity.playerInRange() 
-            if(isPlayerInRange) this.entity.reset();
+            if(isPlayerInRange) {
+                playerKilledAudio.play();
+                isPlayerKilled = true;
+                this.entity.reset();
+            }
 
             this.entity.isAttack = false;
             this.entity.attackFlag = 0;

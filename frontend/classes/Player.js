@@ -43,6 +43,37 @@ class Player extends Sprite {
         c.restore();
     }
 
+    drawDeathEffect(){
+
+        let lightX = canvas.width / 2;
+        let lightY = canvas.height / 2;
+
+        // Create radial gradient for light
+        const gradient = c.createRadialGradient(
+            lightX, lightY, 1300,
+            lightX, lightY, 0
+        );
+
+        gradient.addColorStop(0, 'rgba(255, 0, 0, 0.9)');
+        gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        
+        // Draw light
+        c.save();
+        c.globalCompositeOperation = 'darker';
+        c.fillStyle = gradient;
+        c.beginPath();
+        c.arc(lightX, lightY, 2000, 0, Math.PI * 2);
+        c.fill();
+        c.restore();
+
+        if(playerKilledAudio.currentTime >= playerAttackAudio.duration){
+            isPlayerKilled = false;
+            player.position.x = 0;
+            player.position.y = 0;
+        }
+
+    }
+
     drawHitbox(){
         const newPlayerPosX = this.position.x + (this.imgSize - this.hitbox.w) / 2
         const newPlayerPosY = this.position.y + (this.imgSize - this.hitbox.h) / 2
@@ -180,6 +211,7 @@ class AttackState extends State {
                 enemy[i].audio.attack.pause();
                 enemy[i].isParried = true;
                 if(!essenceCollected) enemy[i].essenceDropped = true;
+                collectEssenceAudio.play();
                 totalParries++;
             }
         }

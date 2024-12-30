@@ -104,6 +104,7 @@ class Shrine extends Sprite{
 class ChangeAnimationState extends State{
     enter(){
 
+        if(isGameStart) shrineFilledAudio.play();
         const shrineState = ['noEssence', 'oneEssence', 'twoEssence', 'completeEssence'];
         this.entity.spriteAnimation(shrineState[totalEssence]);
         if(totalEssence == 3){  

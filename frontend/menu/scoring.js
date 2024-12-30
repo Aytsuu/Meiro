@@ -21,6 +21,10 @@ class Score{
     }
 
     draw(){
+
+        // Play game over audio
+        gameOverAudio.play();
+
         // Update animations
         this.menuItems.forEach((item, index) => {
             const targetScale = index === this.selectedIndex ? 1.1 : 1;
@@ -104,6 +108,7 @@ class Score{
         console.log(`Selected: ${this.menuItems[index]}`);
         if(index === 0){
             this.removeEventListener();
+            gameOverAudio.pause();
             isGamePaused = false;
             isGameOver = false;
             isGameStart = false;
