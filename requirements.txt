@@ -3,5 +3,5 @@ flask-cors
 flask-socketio
 torch
 numpy
-eventlet
 gunicorn==20.1.0
+eventlet==0.33.0
