@@ -4,5 +4,3 @@ flask-socketio
 torch
 numpy
 eventlet
-matplotlib
-IPython
