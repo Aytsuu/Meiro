@@ -57,7 +57,6 @@ class Pause {
     }
     
     handleMenuSelection(index) {
-        console.log(`Selected: ${this.menuItems[index]}`);
         this.removeEventListener();
         if(this.menuItems[index] === 'Resume'){
             isGamePaused = false;

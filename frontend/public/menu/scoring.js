@@ -105,7 +105,6 @@ class Score{
     }
 
     handleMenuSelection(index) {
-        console.log(`Selected: ${this.menuItems[index]}`);
         if(index === 0){
             this.removeEventListener();
             gameOverAudio.pause();

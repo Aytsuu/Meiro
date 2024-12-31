@@ -81,7 +81,6 @@ class Menu {
     }
     
     handleMenuSelection(index) {
-        console.log(`Selected: ${this.menuItems[index]}`);
         if(this.menuItems[index] === 'Start Game'){
             isGamePaused = false;
             isGameStart = true;
