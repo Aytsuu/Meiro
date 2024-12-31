@@ -207,11 +207,16 @@ class AttackState extends State {
 
         for(let i in enemy){
             if(enemy[i].isAttack && this.entity.currentFrame == 4 && enemy[i].currentFrame == enemy[i].parryFrame) {
+                
                 parryAudio.play();
+
                 enemy[i].audio.attack.pause();
                 enemy[i].isParried = true;
-                if(!essenceCollected) enemy[i].essenceDropped = true;
-                collectEssenceAudio.play();
+
+                if(!essenceCollected && essence[i]) {
+                    enemy[i].essenceDropped = true;
+                    collectEssenceAudio.play();
+                }
                 totalParries++;
             }
         }

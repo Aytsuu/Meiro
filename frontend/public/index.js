@@ -539,3 +539,11 @@ function game(){
     // Start the game
     animate();
 }
+
+
+if (window.location.hostname !== '127.0.0.1') {
+    document.addEventListener('contextmenu', function(e) {
+        e.preventDefault(); // Prevent right-click
+    });
+}
+    
