@@ -536,12 +536,6 @@ function game(){
         c.drawImage(cursorImg, mouseX - cursorImg.width/2, mouseY - cursorImg.height/2);
     }
 
-    function displayFPS() {
-        console.log('FPS:', fps);
-    }
-
-    setInterval(displayFPS, 1000); // Update FPS display every second
-
     // Start the game
     animate();
 }
