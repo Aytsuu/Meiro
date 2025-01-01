@@ -5,13 +5,8 @@ from flask import Flask
 from flask_socketio import SocketIO
 from flask_cors import CORS
 from DQN_agent import Train
-import logging
-# from concurrent.futures import ThreadPoolExecutor
 from engineio.payload import Payload
 from eventlet import GreenPool
-
-# Setup logging
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all origins
