@@ -62,7 +62,7 @@ class Player extends Sprite {
         c.globalCompositeOperation = 'darker';
         c.fillStyle = gradient;
         c.beginPath();
-        c.arc(lightX, lightY, 2000, 0, Math.PI * 2);
+        c.arc(lightX, lightY, 3000, 0, Math.PI * 2);
         c.fill();
         c.restore();
 

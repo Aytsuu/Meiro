@@ -522,18 +522,15 @@ function game(){
     }
 
     function cursorControl() {
-        // Confine mouse within canvas boundaries
-        if (mouseX < 0) mouseX = 0;
-        if (mouseX > canvas.width) mouseX = canvas.width;
-        if (mouseY < 0) mouseY = 0;
-        if (mouseY > canvas.height) mouseY = canvas.height;
 
-        // Create cursor image
-        const cursorImg = new Image();
-        cursorImg.src = 'assets/gui/cursor.png';
-        
-        // Draw cursor
-        c.drawImage(cursorImg, mouseX - cursorImg.width/2, mouseY - cursorImg.height/2);
+        if(!isGameStart || isGamePaused || isGameOver){
+            // Create cursor image
+            const cursorImg = new Image();
+            cursorImg.src = 'assets/gui/cursor.png';
+            
+            // Draw cursor
+            c.drawImage(cursorImg, mouseX - cursorImg.width/2, mouseY - cursorImg.height/2);
+        }
     }
 
     // Start the game

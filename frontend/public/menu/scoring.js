@@ -18,7 +18,6 @@ class Score{
         this.mouseMove = this.mouseMove.bind(this);
         this.mouseClick = this.mouseClick.bind(this);
 
-
     }
 
     draw(){
@@ -69,12 +68,8 @@ class Score{
     mouseMove(e){ 
             
         const rect = canvas.getBoundingClientRect();
-
-        // Calculate the scale based on the canvas size and the window size
-        const scaleY = window.innerHeight / canvas.height;
-
-        // Adjust mouse coordinates based on scaling
-        const mouseY = (e.clientY - rect.top) * scaleY;
+        const scale = canvas.width / rect.width;
+        const mouseY = (e.clientY - rect.top) * scale;
         
         this.menuItems.forEach((item, index) => {
             const itemY = this.menuStartY + (index * this.menuSpacing);
@@ -87,13 +82,8 @@ class Score{
     mouseClick(e){
 
         const rect = canvas.getBoundingClientRect();
-
-        // Calculate the scale based on the canvas size and the window size
-        const scaleY = window.innerHeight / canvas.height;
-
-        // Adjust mouse coordinates based on scaling
-        const mouseY = (e.clientY - rect.top) * scaleY;
-
+        const scale = canvas.width / rect.width;
+        const mouseY = (e.clientY - rect.top) * scale;
         this.menuItems.forEach((item, index) => {
             const itemY = this.menuStartY + (index * this.menuSpacing);
             if (Math.abs(mouseY - itemY) < this.fontSize) {
