@@ -1,6 +1,5 @@
 class Pause {
     constructor() {
-        
         this.menuItems = ['Resume', 'Exit'];
         this.selectedIndex = 0;
         this.titleImage = new Image();
@@ -19,39 +18,47 @@ class Pause {
         // Bind methods to instance
         this.mouseMove = this.mouseMove.bind(this);
         this.mouseClick = this.mouseClick.bind(this);
-  
+
     }
 
-    mouseMove(e){ 
-            
+    mouseMove(e) {
         const rect = canvas.getBoundingClientRect();
-        const scale = canvas.width / rect.width;
-        const mouseY = (e.clientY - rect.top) * scale;
         
+        // Calculate the scale based on the canvas size and the window size
+        const scaleY = window.innerHeight / canvas.height;
+
+        // Adjust mouse coordinates based on scaling
+        const mouseY = (e.clientY - rect.top) * scaleY;
+
+        // Check if mouse is over any menu item
         this.menuItems.forEach((item, index) => {
             const itemY = this.menuStartY + (index * this.menuSpacing);
             if (Math.abs(mouseY - itemY) < this.fontSize) {
                 this.selectedIndex = index;
             }
         });
-    };
+    }
 
-    mouseClick(e){
-
+    mouseClick(e) {
         const rect = canvas.getBoundingClientRect();
-        const scale = canvas.width / rect.width;
-        const mouseY = (e.clientY - rect.top) * scale;
+
+        // Calculate the scale based on the canvas size and the window size
+        const scaleY = window.innerHeight / canvas.height;
+
+        // Adjust mouse coordinates based on scaling
+        const mouseY = (e.clientY - rect.top) * scaleY;
+
+        // Handle the click event for menu items
         this.menuItems.forEach((item, index) => {
             const itemY = this.menuStartY + (index * this.menuSpacing);
             if (Math.abs(mouseY - itemY) < this.fontSize) {
-                menuClickAudio.play()
+                menuClickAudio.play();
                 this.handleMenuSelection(index);
             }
         });
-    };
+    }
 
     setupEventListeners() {
-
         canvas.addEventListener('mousemove', this.mouseMove);
         canvas.addEventListener('click', this.mouseClick);
     }
@@ -118,7 +125,7 @@ class Pause {
         });
     }
 
-    removeEventListener(){
+    removeEventListener() {
         canvas.removeEventListener('mousemove', this.mouseMove);
         canvas.removeEventListener('click', this.mouseClick);
     }

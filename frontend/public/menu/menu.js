@@ -49,8 +49,12 @@ class Menu {
     mouseMove(e){ 
             
         const rect = canvas.getBoundingClientRect();
-        const scale = canvas.width / rect.width;
-        const mouseY = (e.clientY - rect.top) * scale;
+        
+        // Calculate the scale based on the canvas size and the window size
+        const scaleY = window.innerHeight / canvas.height;
+
+        // Adjust mouse coordinates based on scaling
+        const mouseY = (e.clientY - rect.top) * scaleY;
         
         this.menuItems.forEach((item, index) => {
             const itemY = this.menuStartY + (index * this.menuSpacing);
@@ -63,8 +67,13 @@ class Menu {
     mouseClick(e){
 
         const rect = canvas.getBoundingClientRect();
-        const scale = canvas.width / rect.width;
-        const mouseY = (e.clientY - rect.top) * scale;
+        
+        // Calculate the scale based on the canvas size and the window size
+        const scaleY = window.innerHeight / canvas.height;
+
+        // Adjust mouse coordinates based on scaling
+        const mouseY = (e.clientY - rect.top) * scaleY;
+
         this.menuItems.forEach((item, index) => {
             const itemY = this.menuStartY + (index * this.menuSpacing);
             if (Math.abs(mouseY - itemY) < this.fontSize) {
