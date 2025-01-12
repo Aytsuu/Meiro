@@ -8,7 +8,7 @@ from DQN_agent import Train
 import logging
 from engineio.payload import Payload
 import os
-from eventlet import GreenPool
+from concurrent.futures import ThreadPoolExecutor
 
 # Setup logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -21,8 +21,8 @@ Payload.max_decode_packets = 500
 train = None
 train_instances = {i: Train() for i in range(2)}
 
-# Set up a green pool 
-green_pool = GreenPool()
+# Set up a threadpoolexecutor 
+executor = ThreadPoolExecutor(max_workers=4)
 
 def train_in_background(game_data, train_instance, ai_id): 
 
@@ -55,7 +55,7 @@ def handle_send_to_flask(data):
         train_instance = train_instances[ai_id]
 
     # Use the thread pool to manage background tasks
-    green_pool.spawn(train_in_background, data, train_instance, ai_id)
+    executor.submit(train_in_background, data, train_instance, ai_id)
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))  # Render-provided port, default to 5000
