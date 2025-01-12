@@ -6,7 +6,7 @@ from flask_socketio import SocketIO
 from flask_cors import CORS
 from DQN_agent import Train
 from engineio.payload import Payload
-from eventlet import GreenPool
+from concurrent.futures import ThreadPoolExecutor
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all origins
@@ -16,8 +16,8 @@ Payload.max_decode_packets = 500
 train = None
 train_instances = {i: Train() for i in range(2)}
 
-# Set up a gree pool
-green_pool = GreenPool()
+# Set up a threadpoolexecutor
+executor = ThreadPoolExecutor()
 
 def train_in_background(game_data, train_instance, ai_id): 
 
@@ -50,7 +50,7 @@ def handle_send_to_flask(data):
         train_instance = train_instances[ai_id]
 
     # Use the green pool to manage background tasks
-    green_pool.spawn(train_in_background, data, train_instance, ai_id)
+    executor.submit(train_in_background, data, train_instance, ai_id)
 
 if __name__ == '__main__':
     socketio.run(app, debug=True, host='0.0.0.0', port=5000, allow_unsafe_werkzeug=True)
