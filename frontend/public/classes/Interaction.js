@@ -114,7 +114,8 @@ class InteractingShrineState extends State{
         if(this.entity.currentFrame >= this.entity.frameRate - 1){
             if(essenceCollected){
                 essenceCollected = false;
-                totalEssence ++;
+                totalEssence++;
+                player.currentHealthpoint = player.totalHealthpoint;
                 shrine.setState(new ChangeAnimationState(shrine))
             }
             keys.e.pressed = false;

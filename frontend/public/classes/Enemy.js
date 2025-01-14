@@ -26,7 +26,6 @@ class Enemy extends Sprite{
             h: 5
         }
 
-        this.color = 'red';
         this.currentHealthpoint = healthpoint;
         this.totalHealthpoint = healthpoint;
 
@@ -48,8 +47,9 @@ class Enemy extends Sprite{
         this.audio = audio
 
         // Wounding effect
-        this.playerWoundInterval = 0;
-        this.woundInterval = 0;
+        this.playerWoundInterval = 1;
+        this.playerWoundBuffer = 5;
+        this.woundInterval = 1;
         this.woundBuffer = 10;
     }
 
@@ -66,9 +66,12 @@ class Enemy extends Sprite{
         c.font = `8px Poppins`;
         c.fillStyle = '#FFFFFF'
         c.fillText(`${this.currentHealthpoint}/${this.totalHealthpoint}`, this.position.x + this.imgSize / 2 - 25 + this.barSize.w / 2, this.position.y + ((this.imgSize - this.hitbox.h) / 2) - this.barSize.h);
-
-        c.fillStyle = this.color;
+        
+        c.strokeStyle = 'black'
+        c.lineWidth = 2;
+        c.fillStyle = 'red';
         c.fillRect(this.position.x + this.imgSize / 2 - 25, this.position.y + ((this.imgSize - this.hitbox.h) / 2), this.barSize.w, this.barSize.h);
+        c.strokeRect(this.position.x + this.imgSize / 2 - 25, this.position.y + ((this.imgSize - this.hitbox.h) / 2), 50, this.barSize.h);
     }
 
     spriteAnimation(name){
@@ -155,28 +158,36 @@ class Enemy extends Sprite{
     }
 
     slayPlayer(){
+
+        if(isPlayerKilled){
+            return;
+        }
         
         const isPlayerInRange = this.playerInRange();
 
         if(isPlayerInRange){
-            this.playerWoundInterval++;
-            if(this.playerWoundInterval % this.woundBuffer === 0){
-                
-                this.playerWoundInterval = 0;
-                player.currentHealthpoint -= 2;
 
-                if(player.currentHealthpoint <= 0){
-                    playerKilledAudio.play();
-                    isPlayerKilled = true;
-                    this.reset();
-                }
-            }      
+            if(this.playerWoundInterval % this.playerWoundBuffer === 0){
+                
+                this.playerWoundInterval = 1;
+                player.currentHealthpoint -= 2;
+                player.barSize.w--;
+
+            }
+            
+            if(player.currentHealthpoint <= 0){
+                playerKilledAudio.play();
+                isPlayerKilled = true;
+                this.reset();
+            }
             
             this.isAttack = true;
             if(this.attackFlag == 0) {
                 this.setState(new EnemyAttackState(this));
                 this.attackFlag = 1;
             }
+
+            this.playerWoundInterval++;
         }
     }
 
@@ -218,11 +229,12 @@ class Enemy extends Sprite{
         done = true;
         reward = 10;
         player.currentHealthpoint = player.totalHealthpoint;
+        player.barSize.w = 50;
         
         totalDeath++;
         essenceCollected = false;
 
-
+ 
         if(steps >= 100) score = 300;
         if(steps >= 500) score = 250;
         if(steps >= 1000) score = 200;
@@ -268,11 +280,16 @@ class Enemy extends Sprite{
 
     wounding(){
 
-        this.woundInterval++;
         if(this.woundInterval % this.woundBuffer === 0){
             this.currentHealthpoint -= 2;
-            this.woundInterval = 0;
+            this.woundInterval = 1;
+
+            if((this.totalHealthpoint - this.currentHealthpoint) % (this.totalHealthpoint / 50) == 0){
+                this.barSize.w--;
+            }
         }
+
+        this.woundInterval++;
 
     }
 

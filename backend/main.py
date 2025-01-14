@@ -17,7 +17,7 @@ train = None
 train_instances = {i: Train() for i in range(2)}
 
 # Set up a threadpoolexecutor
-executor = ThreadPoolExecutor()
+executor = ThreadPoolExecutor(max_workers=4)
 
 def train_in_background(game_data, train_instance, ai_id): 
 

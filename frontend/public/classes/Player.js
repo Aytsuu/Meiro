@@ -9,17 +9,11 @@ class Player extends Sprite {
         this.speed = 15; // Movement speed
 
         // Healthbar
-        this.position = {
-            x: 0,
-            y: 0
-        };
-
         this.barSize = {
             w: 50,
             h: 5
         }
 
-        this.color = 'green';
         this.currentHealthpoint = healthpoint;
         this.totalHealthpoint = healthpoint;
 
@@ -103,8 +97,12 @@ class Player extends Sprite {
         c.fillStyle = '#FFFFFF'
         c.fillText(`${this.currentHealthpoint}/${this.totalHealthpoint}`, this.position.x + this.imgSize / 2 - 25 + this.barSize.w / 2, this.position.y + ((this.imgSize - this.hitbox.h) / 2) - this.barSize.h);
 
-        c.fillStyle = this.color;
+        c.strokeStyle = 'black'
+        c.lineWidth = 2;
+        c.fillStyle = 'green';
+        c.strokeRect(this.position.x + this.imgSize / 2 - 25, this.position.y + ((this.imgSize - this.hitbox.h) / 2), 50, this.barSize.h)
         c.fillRect(this.position.x + this.imgSize / 2 - 25, this.position.y + ((this.imgSize - this.hitbox.h) / 2), this.barSize.w, this.barSize.h);
+
 
     }
 

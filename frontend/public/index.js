@@ -220,7 +220,7 @@ const shade = new Enemy({
     frameRate: 12, // Number of frames in the image
     imgSize: 128,
     position: {x: canvas.width / 2, y: canvas.height / 2},
-    healthpoint: 500,
+    healthpoint: 1000,
     hitbox: {x: 100, y: 120},
     speed: 4,
     parryFrame: 8,
@@ -359,6 +359,11 @@ const interactPrompt = new Interaction({
     }
 })
 
+const enemyDetection = new Alert({
+    imgSrc: 'assets/gui/alert.png',
+    frameRate: 1
+});
+
 const enemy = {
     0: shadow,
     1: shade
@@ -366,6 +371,11 @@ const enemy = {
 
 const essence = {
     0: shadowEssence
+}
+
+const alert = {
+    0: enemyDetection,
+    1: enemyDetection
 }
 
 // Keyboard input handling for player movement
@@ -430,7 +440,7 @@ function game(){
 
         shrineInteraction();
 
-        // if(!isGameOver) player.focus(); // Player fov
+        // if(!isGameOver) player.focus();  // Player fov
 
         if(isPlayerKilled) player.drawDeathEffect();
         
@@ -483,6 +493,7 @@ function game(){
             // Healthbar
             player.drawHealthbar();
             // player.drawHitbox();
+
         }
     }
 
@@ -500,6 +511,21 @@ function game(){
             // Healthbar
             enemy[i].drawHealthbar();
 
+            // Calculate direction vector from player to enemy
+            const directionX = enemy[i].position.x + ((enemy[i].imgSize - enemy[i].hitbox.w) / 2) - player.position.x + ((player.imgSize - player.hitbox.w) / 2);
+            const directionY = enemy[i].position.y + ((enemy[i].imgSize - enemy[i].hitbox.h) / 2) - player.position.y + ((player.imgSize - player.hitbox.h) / 2);
+
+            // Normalize the direction vector
+            const magnitude = Math.sqrt(directionX * directionX + directionY * directionY);
+            const normalizedX = directionX / magnitude;
+            const normalizedY = directionY / magnitude;
+
+            // Position the alert icon at a fixed distance from the player
+            const alertDistance = 100;
+            alert[i].position.x = player.position.x + ((player.imgSize - player.hitbox.w) / 2) + normalizedX * alertDistance;
+            alert[i].position.y = player.position.y + ((player.imgSize - player.hitbox.h) / 2) + normalizedY * alertDistance;
+            alert[i].draw();
+ 
             // enemy[i].drawHitbox();
         }
     }
