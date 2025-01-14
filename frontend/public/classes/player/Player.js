@@ -1,12 +1,27 @@
 class Player extends Sprite {
-    constructor({ imgSrc, frameRate, imgSize, animations}) {
+    constructor({ imgSrc, frameRate, imgSize, healthpoint, animations}) {
         super({ imgSrc, frameRate, animations });
 
         this.imgSize = imgSize
         // Initial position
         this.position = { x: 0, y: 0};
         this.currentState = new IdleState(this); // Start with the idle state
-        this.speed = 4; // Movement speed
+        this.speed = 15; // Movement speed
+
+        // Healthbar
+        this.position = {
+            x: 0,
+            y: 0
+        };
+
+        this.barSize = {
+            w: 50,
+            h: 5
+        }
+
+        this.color = 'green';
+        this.currentHealthpoint = healthpoint;
+        this.totalHealthpoint = healthpoint;
 
         // Velocity to track movement direction
         this.velocity = { x: 0, y: 0 };
@@ -80,6 +95,17 @@ class Player extends Sprite {
         
         c.fillStyle = 'rgba(255,0,0,30%)';
         c.fillRect(newPlayerPosX, newPlayerPosY, this.hitbox.w, this.hitbox.h);
+    }
+
+    drawHealthbar(){
+
+        c.font = `8px Poppins`;
+        c.fillStyle = '#FFFFFF'
+        c.fillText(`${this.currentHealthpoint}/${this.totalHealthpoint}`, this.position.x + this.imgSize / 2 - 25 + this.barSize.w / 2, this.position.y + ((this.imgSize - this.hitbox.h) / 2) - this.barSize.h);
+
+        c.fillStyle = this.color;
+        c.fillRect(this.position.x + this.imgSize / 2 - 25, this.position.y + ((this.imgSize - this.hitbox.h) / 2), this.barSize.w, this.barSize.h);
+
     }
 
     setState(newState) {

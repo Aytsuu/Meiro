@@ -1,5 +1,5 @@
 class Enemy extends Sprite{
-    constructor({ aiId, imgSrc, frameRate, imgSize, position, hitbox, speed, parryFrame, audio, animations }) {
+    constructor({ aiId, imgSrc, frameRate, imgSize, position, healthpoint, hitbox, speed, parryFrame, audio, animations }) {
         super({imgSrc, frameRate, animations})
 
         this.imgSize = imgSize
@@ -20,6 +20,16 @@ class Enemy extends Sprite{
             h: hitbox.y
         }
 
+        // Healthbar
+        this.barSize = {
+            w: 50,
+            h: 5
+        }
+
+        this.color = 'red';
+        this.currentHealthpoint = healthpoint;
+        this.totalHealthpoint = healthpoint;
+
         // Training and action
         this.aiId = aiId
         this.action = [0,0,0,0];
@@ -36,6 +46,11 @@ class Enemy extends Sprite{
 
         // Sound effects
         this.audio = audio
+
+        // Wounding effect
+        this.playerWoundInterval = 0;
+        this.woundInterval = 0;
+        this.woundBuffer = 10;
     }
 
     drawHitbox(){
@@ -45,6 +60,15 @@ class Enemy extends Sprite{
         
         c.fillStyle = 'rgba(255,0,0,30%)';
         c.fillRect(newEnemyPosX, newEnemyPosY, this.hitbox.w, this.hitbox.h);
+    }
+
+    drawHealthbar(){
+        c.font = `8px Poppins`;
+        c.fillStyle = '#FFFFFF'
+        c.fillText(`${this.currentHealthpoint}/${this.totalHealthpoint}`, this.position.x + this.imgSize / 2 - 25 + this.barSize.w / 2, this.position.y + ((this.imgSize - this.hitbox.h) / 2) - this.barSize.h);
+
+        c.fillStyle = this.color;
+        c.fillRect(this.position.x + this.imgSize / 2 - 25, this.position.y + ((this.imgSize - this.hitbox.h) / 2), this.barSize.w, this.barSize.h);
     }
 
     spriteAnimation(name){
@@ -131,15 +155,27 @@ class Enemy extends Sprite{
     }
 
     slayPlayer(){
-
+        
         const isPlayerInRange = this.playerInRange();
 
         if(isPlayerInRange){
-            this.isAttack = true
+            this.playerWoundInterval++;
+            if(this.playerWoundInterval % this.woundBuffer === 0){
+                
+                this.playerWoundInterval = 0;
+                player.currentHealthpoint -= 2;
 
+                if(player.currentHealthpoint <= 0){
+                    playerKilledAudio.play();
+                    isPlayerKilled = true;
+                    this.reset();
+                }
+            }      
+            
+            this.isAttack = true;
             if(this.attackFlag == 0) {
                 this.setState(new EnemyAttackState(this));
-                this.attackFlag = 1
+                this.attackFlag = 1;
             }
         }
     }
@@ -181,8 +217,7 @@ class Enemy extends Sprite{
         // Reset and give reward
         done = true;
         reward = 10;
-        // player.position.x = Math.floor(Math.random() * (canvas.width - tileSize));
-        // player.position.y = Math.floor(Math.random() * (canvas.height - tileSize));
+        player.currentHealthpoint = player.totalHealthpoint;
         
         totalDeath++;
         essenceCollected = false;
@@ -229,6 +264,16 @@ class Enemy extends Sprite{
         this.currentState.exit();  // Exit the current state
         this.currentState = newState;
         this.currentState.enter(); // Enter the new state
+    }
+
+    wounding(){
+
+        this.woundInterval++;
+        if(this.woundInterval % this.woundBuffer === 0){
+            this.currentHealthpoint -= 2;
+            this.woundInterval = 0;
+        }
+
     }
 
     getStateFromAction(){
@@ -354,7 +399,11 @@ class EnemyMoveRightState extends State {
 
     update() {
         
-        if(this.entity.position.x - ((this.entity.imgSize - this.entity.hitbox.w) / 2) + this.entity.speed > canvas.width - (this.entity.imgSize)) reward = -10;
+        if(this.entity.position.x - ((this.entity.imgSize - this.entity.hitbox.w) / 2) + this.entity.speed > canvas.width - (this.entity.imgSize)) {
+
+            this.entity.wounding();
+            reward = -10;
+        }
         else this.entity.position.x += this.entity.speed;
     }
 }
@@ -370,7 +419,11 @@ class EnemyMoveLeftState extends State {
 
     update() {
 
-        if(this.entity.position.x + ((this.entity.imgSize - this.entity.hitbox.w) / 2) - this.entity.speed < 0) reward = -10;
+        if(this.entity.position.x + ((this.entity.imgSize - this.entity.hitbox.w) / 2) - this.entity.speed < 0){
+            
+            this.entity.wounding();
+            reward = -10;
+        }
         else {
             this.entity.position.x -= this.entity.speed;
         }
@@ -388,7 +441,11 @@ class EnemyMoveUpState extends State {
 
     update() {
         
-        if(this.entity.position.y + ((this.entity.imgSize - this.entity.hitbox.h) / 2) - this.entity.speed < -20) reward = -10;
+        if(this.entity.position.y + ((this.entity.imgSize - this.entity.hitbox.h) / 2) - this.entity.speed < -20){
+            
+            this.entity.wounding();
+            reward = -10;
+        }
         else {
             this.entity.position.y -= this.entity.speed;
         }
@@ -406,7 +463,11 @@ class EnemyMoveDownState extends State {
 
     update() {
 
-        if(this.entity.position.y - ((this.entity.imgSize - this.entity.hitbox.h) / 2) + this.entity.speed > canvas.height - (this.entity.imgSize) - 20) reward = -10;
+        if(this.entity.position.y - ((this.entity.imgSize - this.entity.hitbox.h) / 2) + this.entity.speed > canvas.height - (this.entity.imgSize) - 20){
+            
+            this.entity.wounding();
+            reward = -10;
+        }
         else{
             this.entity.position.y += this.entity.speed;
 

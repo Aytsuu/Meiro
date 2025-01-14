@@ -1,6 +1,6 @@
 // Function to send data from JavaScript to Flask (POST request)
 
-const socket = io.connect('https://meiro.onrender.com', {
+const socket = io.connect('http://127.0.0.1:5000', {
     reconnection: true, // Ensure it will reconnect on failure
     reconnectionAttempts: 3, // Reduce the number of reconnection attempts
     reconnectionDelay: 1000, // Increase the delay between reconnections

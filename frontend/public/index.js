@@ -49,7 +49,7 @@ let totalEssence = 0;
 
 // Game State
 let isGameOver = false;
-let isGameStart = false;
+let isGameStart = true;
 let isGamePaused = false;
 
 // Menu
@@ -62,6 +62,7 @@ const player = new Player({
     imgSrc: 'assets/animations/player/idle_down.png',
     frameRate: 11, // Number of frames in the image
     imgSize: 128,
+    healthpoint: 100,
     animations: {
         idleRight: {
             imgSrc: 'assets/animations/player/idle_right.png',
@@ -144,6 +145,7 @@ const shadow = new Enemy({
     frameRate: 12, // Number of frames in the image
     imgSize: 256,
     position: {x: canvas.width - 256, y: canvas.height - 256},
+    healthpoint: 1000,
     hitbox: {x: 100, y: 120},
     speed: 6,
     parryFrame: 14,
@@ -218,6 +220,7 @@ const shade = new Enemy({
     frameRate: 12, // Number of frames in the image
     imgSize: 128,
     position: {x: canvas.width / 2, y: canvas.height / 2},
+    healthpoint: 500,
     hitbox: {x: 100, y: 120},
     speed: 4,
     parryFrame: 8,
@@ -365,7 +368,6 @@ const essence = {
     0: shadowEssence
 }
 
-
 // Keyboard input handling for player movement
 const keys = {
     w: { pressed: false },
@@ -375,6 +377,7 @@ const keys = {
     sp: { pressed: false },
     e: {pressed: false},
 };
+
 
 // ---------------------------------------------------------------- FUNCTIONS ---------------------------------------------------------------- //
 
@@ -427,7 +430,7 @@ function game(){
 
         shrineInteraction();
 
-        if(!isGameOver) player.focus(); // Player fov
+        // if(!isGameOver) player.focus(); // Player fov
 
         if(isPlayerKilled) player.drawDeathEffect();
         
@@ -470,12 +473,15 @@ function game(){
         if(!isPlayerKilled){
             // Player
             if(essenceCollected) {
-                collectedEssence.position.x = player.position.x + player.imgSize / 2 - 15;
-                collectedEssence.position.y = player.position.y + ((player.imgSize - player.hitbox.h) / 2) - 25;
+                collectedEssence.position.x = player.position.x + player.imgSize / 2;
+                collectedEssence.position.y = player.position.y + ((player.imgSize - player.hitbox.h) / 2);
                 collectedEssence.draw();
             }
             player.movementUpdate();
             player.draw();
+
+            // Healthbar
+            player.drawHealthbar();
             // player.drawHitbox();
         }
     }
@@ -490,6 +496,10 @@ function game(){
                 enemy[i].train();
             }
             enemy[i].draw();
+            
+            // Healthbar
+            enemy[i].drawHealthbar();
+
             // enemy[i].drawHitbox();
         }
     }
@@ -508,7 +518,7 @@ function game(){
                 }
             }catch(e){}
         }
-    }
+    }   
 
     function calculateFps(timestamp) { // Fps tracker
         frameCount++;
@@ -543,4 +553,4 @@ if (window.location.hostname !== '127.0.0.1') {
         e.preventDefault(); // Prevent right-click
     });
 }
-    
+      
