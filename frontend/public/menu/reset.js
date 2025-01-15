@@ -24,15 +24,24 @@ function reset(){
     isGameStart = false;
     isGamePaused = false;
 
-    player.position = {x: 0, y: 0}
+
     shadow.position = {x: canvas.width - 256, y: canvas.height - 256}
+    shadow.currentHealthpoint = shadow.totalHealthpoint;
     shadow.setState(new EnemyIdleState(shadow))
+    shadow.barSize.w = 50;
 
     shade.position = {x: canvas.width / 2, y: canvas.height / 2}
+    shade.currentHealthpoint = shade.totalHealthpoint;
     shade.setState(new EnemyIdleState(shadow))
+    shade.barSize.w = 50;
 
     shrine.position = {x: canvas.width / 2 - 30, y: canvas.height / 2}
     shrine.setState(new ChangeAnimationState(shrine))
+
+    player.position = {x: 0, y: 0}
+    player.currentHealthpoint = player.totalHealthpoint;
+    player.barSize.w = 50;
+    
 
     
     

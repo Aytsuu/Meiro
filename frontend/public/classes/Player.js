@@ -6,7 +6,7 @@ class Player extends Sprite {
         // Initial position
         this.position = { x: 0, y: 0};
         this.currentState = new IdleState(this); // Start with the idle state
-        this.speed = 15; // Movement speed
+        this.speed = 4; // Movement speed
 
         // Healthbar
         this.barSize = {

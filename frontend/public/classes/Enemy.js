@@ -230,6 +230,8 @@ class Enemy extends Sprite{
         reward = 10;
         player.currentHealthpoint = player.totalHealthpoint;
         player.barSize.w = 50;
+        this.currentHealthpoint = this.totalHealthpoint;
+        this.barSize.w = 50;
         
         totalDeath++;
         essenceCollected = false;
@@ -280,12 +282,14 @@ class Enemy extends Sprite{
 
     wounding(){
 
-        if(this.woundInterval % this.woundBuffer === 0){
-            this.currentHealthpoint -= 2;
-            this.woundInterval = 1;
-
-            if((this.totalHealthpoint - this.currentHealthpoint) % (this.totalHealthpoint / 50) == 0){
-                this.barSize.w--;
+        if(this.currentHealthpoint > 0){
+            if(this.woundInterval % this.woundBuffer === 0){
+                this.currentHealthpoint -= 2;
+                this.woundInterval = 1;
+    
+                if((this.totalHealthpoint - this.currentHealthpoint) % (this.totalHealthpoint / 50) == 0){
+                    this.barSize.w--;
+                }
             }
         }
 
@@ -295,7 +299,7 @@ class Enemy extends Sprite{
 
     getStateFromAction(){
 
-        if(totalEssence >= 2){
+        if(totalEssence >= 2 && this.currentHealthpoint > 0){
             const random = Math.floor(Math.random() * 200);
             if(random >= 199) return new WarpState(this);
         }
@@ -324,6 +328,14 @@ class WarpState extends State{
         this.entity.position.x = player.position.x - player.hitbox.w
         this.entity.position.y = player.position.y;
         this.entity.audio.warp.play();
+
+        if(this.entity.currentHealthpoint - 20 >= 0) {
+            this.entity.currentHealthpoint -= 20;
+        }
+        else{
+            this.entity.currentHealthpoint = 0;
+            this.entity.barSize.w = 0;
+        }
     }
     update(){
 
@@ -371,6 +383,14 @@ class EnemyAttackState extends State{
         this.entity.isParried && console.log('Parried Successfully')
 
         if(this.entity.isParried){
+            if(this.entity.currentHealthpoint - 100 >= 0){
+                this.entity.currentHealthpoint -= 100;
+                this.entity.barSize.w -= 100 / (this.entity.totalHealthpoint / this.entity.barSize.w);
+            }
+            else{
+                this.entity.currentHealthpoint = 0;
+                this.entity.barSize.w = 0;
+            }
             this.entity.setState(new EnemyFazedState(this.entity))
         }
 

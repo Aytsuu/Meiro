@@ -46,16 +46,19 @@ let view = new View();
 // Objective
 let essenceCollected = false;
 let totalEssence = 0;
+let hintIndex = 0;
+let showHint = true;
 
 // Game State
 let isGameOver = false;
-let isGameStart = true;
+let isGameStart = false;
 let isGamePaused = false;
 
 // Menu
 const menu =  new Menu();
 const scoring = new Score();
 const pause = new Pause();
+
 
 // Player object initialization
 const player = new Player({
@@ -364,6 +367,21 @@ const enemyDetection = new Alert({
     frameRate: 1
 });
 
+
+const hints = {
+    0: new Hint({
+        imgSrc: 'assets/gui/hint1.png',
+        frameRate: 1 }),
+    1: new Hint({
+        imgSrc: 'assets/gui/hint2.png',
+        frameRate: 1 }),
+    2: new Hint({
+        imgSrc: 'assets/gui/hint3.png',
+        frameRate: 1 }),
+    3: new Hint({
+        imgSrc: 'assets/gui/hint4.png',
+        frameRate: 1 }),
+}
 const enemy = {
     0: shadow,
     1: shade
@@ -440,10 +458,30 @@ function game(){
 
         shrineInteraction();
 
-        // if(!isGameOver) player.focus();  // Player fov
+        if(!isGameOver) player.focus();  // Player fov
+
+        enemyNearby();
+
+        hint();
 
         if(isPlayerKilled) player.drawDeathEffect();
         
+    }
+
+    function hint(){
+
+        try{
+            if(!showHint) return;
+            
+            if(hintIndex > Object.keys(hints).length - 1) {
+                hintIndex = 0
+                showHint = false;
+            }else{
+                hints[hintIndex].draw();
+            }
+
+        }catch(e){}
+
     }
 
     function gamePause(){
@@ -458,6 +496,7 @@ function game(){
             updateFlag = true;
             pause.draw();
         }
+
     }
 
     function shrineInteraction(){
@@ -495,6 +534,7 @@ function game(){
             // player.drawHitbox();
 
         }
+
     }
 
     function enemyInstances(){
@@ -511,6 +551,15 @@ function game(){
             // Healthbar
             enemy[i].drawHealthbar();
 
+ 
+            // enemy[i].drawHitbox();
+        }
+
+    }
+
+    function enemyNearby(){
+        for(let i in enemy){
+            
             // Calculate direction vector from player to enemy
             const directionX = enemy[i].position.x + ((enemy[i].imgSize - enemy[i].hitbox.w) / 2) - player.position.x + ((player.imgSize - player.hitbox.w) / 2);
             const directionY = enemy[i].position.y + ((enemy[i].imgSize - enemy[i].hitbox.h) / 2) - player.position.y + ((player.imgSize - player.hitbox.h) / 2);
@@ -521,13 +570,20 @@ function game(){
             const normalizedY = directionY / magnitude;
 
             // Position the alert icon at a fixed distance from the player
-            const alertDistance = 100;
-            alert[i].position.x = player.position.x + ((player.imgSize - player.hitbox.w) / 2) + normalizedX * alertDistance;
-            alert[i].position.y = player.position.y + ((player.imgSize - player.hitbox.h) / 2) + normalizedY * alertDistance;
-            alert[i].draw();
- 
-            // enemy[i].drawHitbox();
+            const alertDistance = 120;
+
+            if(directionX >= -150 && directionX <= 150 && directionY >= -150 && directionY <= 150){
+                return;
+            }
+
+            if(directionX >= -350 && directionX <= 350 && directionY >= -350 && directionY <= 350){
+                alert[i].position.x = player.position.x + ((player.imgSize - player.hitbox.w) / 2) + normalizedX * alertDistance;
+                alert[i].position.y = player.position.y + ((player.imgSize - player.hitbox.h) / 2) + normalizedY * alertDistance;
+                alert[i].draw();
+            }
+            
         }
+
     }
 
     function essenceInstance(){
@@ -544,6 +600,7 @@ function game(){
                 }
             }catch(e){}
         }
+
     }   
 
     function calculateFps(timestamp) { // Fps tracker
@@ -555,6 +612,7 @@ function game(){
             frameCount = 0;
             lastTime = timestamp;
         }
+
     }
 
     function cursorControl() {

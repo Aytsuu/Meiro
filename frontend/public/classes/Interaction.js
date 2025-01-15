@@ -116,6 +116,7 @@ class InteractingShrineState extends State{
                 essenceCollected = false;
                 totalEssence++;
                 player.currentHealthpoint = player.totalHealthpoint;
+                player.barSize.w = 50;
                 shrine.setState(new ChangeAnimationState(shrine))
             }
             keys.e.pressed = false;

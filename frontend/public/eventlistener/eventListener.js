@@ -7,6 +7,12 @@ canvas.addEventListener('mousemove', (e) => {
     
 });
 
+canvas.addEventListener('click', (e) => {
+    if(showHint && isGameStart){
+        hintIndex++;
+    }
+})
+
 
 // Listens to keypress
 window.addEventListener('keydown', (e) => {

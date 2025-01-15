@@ -8,16 +8,16 @@ const socket = io.connect('http://127.0.0.1:5000', {
 });
 
 // Handle connection errors
-socket.on('connect_error', (error) => {
-    console.error('Connection error:', error);
-    alert('Unable to connect to the server. Please try again later.');
-});
+// socket.on('connect_error', (error) => {
+//     console.error('Connection error:', error);
+//     alert('Unable to connect to the server. Please try again later.');
+// });
 
-// Handle WebSocket disconnection
-socket.on('disconnect', () => {
-    console.log('Disconnected from WebSocket server.');
-    alert('Disconnected from the server. Reconnecting...');
-});
+// // Handle WebSocket disconnection
+// socket.on('disconnect', () => {
+//     console.log('Disconnected from WebSocket server.');
+//     alert('Disconnected from the server. Reconnecting...');
+// });
 
 // Listen for the response from Flask
 
